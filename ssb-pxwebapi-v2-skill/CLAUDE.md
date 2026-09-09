@@ -8,7 +8,7 @@ This is **not** an application codebase. It is a Claude Code **Skill** package t
 
 There *is* a build step and a test suite, but they are unusual: `scripts/build_zip.sh` packages the distributable, and the Python checkers under `scripts/` treat every example URL, POST body and table ID written in the markdown as an assertion to verify against the **live** SSB API. Prose is the fixture set; drift upstream at SSB fails the build.
 
-Upstream source of truth: https://github.com/janbrus/ssb-api-v2-examples/tree/main/ssb-pxwebapi-v2-skill (this working copy may not be git-initialized).
+Upstream source of truth: https://github.com/janbrus/ssb-api-v2-examples/tree/main/ssb-pxwebapi-v2-skill
 
 ## Commands
 
@@ -39,16 +39,18 @@ There is no single-test flag; scope a run by pointing `check_common_tables.py --
 
 ## Layout
 
-- `SKILL.md` — the skill entrypoint. Frontmatter (`name`, `description`, `metadata.version`) controls when the skill auto-triggers; the body is the operational guide Claude follows. Keep triggers (Norwegian + English keywords for Norwegian official statistics) in the `description`. Structure: data-integrity rule → endpoint table → 6-step workflow (Steg 1–6) → pitfalls → worked examples → error handling/fallback.
+- `SKILL.md` — the skill entrypoint. Frontmatter (`name`, `description`, `metadata.version`) controls when the skill auto-triggers; the body is the operational guide Claude follows. Keep triggers (Norwegian + English keywords for Norwegian official statistics) in the `description`. Structure: data-integrity rule → routing to sibling skills/tools → endpoint table → tool selection → language → 6-step workflow (Steg 1–6) → pitfalls → worked examples → fallback (which also carries the pointer to `troubleshooting.md`).
+
+Since 1.5.0 the file is deliberately deduplicated: each rule has **one** primary occurrence in `SKILL.md` plus pointers, and detail lives in `references/`. Before adding a paragraph, grep for the term — if it already appears, extend the existing occurrence or the reference file instead of writing a second one. Terms worth grepping: `elimination`, `noteMandatory`, `top()`, `Lagre`, rate limit.
 - `references/` — deeper reference material loaded on demand:
   - `json-stat2.md` — json-stat2 Dataset structure, row-major indexing, status codes, `extension` semantics at both dataset and dimension level, `link.related` (vendor-neutral; also covers pyjstat)
   - `api-details.md` — SSB-specific operational info (publishing times, rate-limit headers, license)
   - `codelists-and-filters.md` — codelist/filter syntax: `codelist[Var]=agg_…`, `top(n)`/`from(x)`/`range(a,b)`, wildcards, plus the `outputValues[Var]` parameter and the finding that it is **not load-bearing** at SSB (identical data for `aggregated`, `single` and omitted; an invalid value returns HTTP 200 unvalidated — verified 2026-08-30). Don't reintroduce it as a requirement. Note prefixes: `agg_KommFylker` uses `F-`, `agg_KommSummer` uses `K-`. Includes KPI/COICOP groupings (`vs_CoiCop2018Kpi01`, `agg_CoiCop2018Kpi011`).
-  - `search-syntax.md` — Lucene query parser syntax for `/tables?query=` (PxWebApi uses Lucene.Net under the hood)
-  - `klass-vardok.md` — SSB's Klass (classifications) and VarDok (variable definitions) via URNs in `link.describedby` and ready-made `link.related` links
-  - `output-formats.md` — `json-stat2`, `csv`, `xlsx`, `html`, `px`, `parquet` and parameters (`UseCodesAndTexts`, `IncludeTitle`, `heading`/`stub` pivoting)
+  - `search-syntax.md` — pure Lucene query parser reference for `/tables?query=` (PxWebApi uses Lucene.Net under the hood). Non-Lucene search parameters (`pastDays`, `includeDiscontinued`) and Norwegian term choice belong in `SKILL.md` Steg 2, not here
+  - `klass-vardok.md` — SSB's Klass (classifications) and VarDok (variable definitions) via URNs in `link.describedby` and ready-made `link.related` links, plus deriving the statistics shortname from `paths[0][2].id` before metadata is fetched
+  - `output-formats.md` — `json-stat2`, `csv`, `xlsx`, `html`, `px`, `parquet` and parameters (`UseCodesAndTexts`, `IncludeTitle`, `heading`/`stub` pivoting). Holds the full parquet column contract (`value`/`ContentsCode_{code}` plus the `_symbol` columns that carry `status`); `SKILL.md` keeps one sentence
   - `common-tables.md` — well-known table IDs (KPI, befolkning, etc.); the machine-checked table (`| id | title | frekvens | … |`) is parsed by `check_common_tables.py`, so keep the column order
-  - `troubleshooting.md` — common errors and fixes
+  - `troubleshooting.md` — common errors and fixes; also the canonical list of SSB's standardtegn (`.`, `..`, `:` plus the pre-2021 symbols) under «NULL-verdier i data» — `json-stat2.md` points here rather than repeating them
   - `mcp-tools.md` — mapping between `pxweb-mcp` MCP tools (`@jarib/pxweb-mcp`) and API endpoints, plus limitations (lossy `search_tables`, no `codelist[Var]` in `fetch_metadata`, no `outputFormatParams`) and the `--url` config caveat. Facts are version-bound — re-verify against the package source when it ships a new major version.
 - `evals/eval-scenarios.md` — maintainer-internal behavioral fixtures: typical user questions with the expected table ID and endpoint sequence. Run via the `skill-creator` skill after larger edits to `SKILL.md` or `references/`. This layer catches *routing* regressions (picking discontinued 03013 instead of 14700); the Python checkers catch *factual* regressions. When an eval fails, run `check_examples.py` first — the table may have changed, not the skill.
 - `scripts/`, `.github/` — repo-internal tooling, deliberately excluded from the distribution.

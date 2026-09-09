@@ -201,6 +201,6 @@ Tabell 12880 er unik fordi den inneholder SSBs egne prognoser for makroøkonomis
 
 ### Helse
 
-| ID    | Tittel                                                               | Frekvens | Typisk bruk                                                       |
-| ----- | -------------------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
+| ID    | Tittel                                                               | Frekvens | Typisk bruk                           |
+| ----- | -------------------------------------------------------------------- | -------- | --------------------------------------|
 | 14824 | Pasienter, behandlinger og oppholdsdøgn, somatisk, diagnose og aktør | Årlig    | Bruk av sykehus etter diagnosegrupper |

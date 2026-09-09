@@ -57,7 +57,7 @@ før du antar at skillen er problemet.
 
 - **Forventet tabell:** 07459 med `lang=en`
 - **Nøkkelvalg:** `Region=0`, `ContentsCode=Personer1`, `Tid=top(1)`
-- **Suksess:** Svar på engelsk, engelsk tallformat (5,550,203), «Source: Statistics Norway, table 07459»
+- **Suksess:** Svar på engelsk, engelsk tallformat (komma som tusenskilletegn), «Source: Statistics Norway, table 07459». Fasiten er *formen*, ikke verdien — et bestemt folketall skal ikke stå her, for da belønner scenarioet et tall gjengitt fra hukommelsen i stedet for et hentet tall
 
 ## 9. «Folketallet i Norge i 1875»
 
@@ -68,3 +68,20 @@ før du antar at skillen er problemet.
 
 - **Forventet atferd:** Rutes til `norges-bank-api`-skillen (hvis tilgjengelig) — ikke SSB-tabeller; sentralbankdata finnes ikke i Statistikkbanken
 - **Suksess:** Ingen forsøk på å besvare med SSB-uttrekk. Generell regel som også gjelder alle scenariene over: presentasjonen kommenterer kun tall fra det hentede uttrekket — aldri innblandede tall fra andre kilder
+
+## 11. «Lag en delbar URL for folketallet i Oslo 2020–2022»
+
+- **Forventet tabell:** 07459
+- **Nøkkelvalg:** GET-URL med `valueCodes[Tid]=[range(2020,2022)]` — hakeparentesene er obligatoriske i GET fordi komma er listeskilletegn (verifisert 2026-09-09). Kjøres URL-en med curl, skal `-g` være med
+- **Suksess:** URL-en gir HTTP 200 med tre perioder; ingen `Illegal selection expression`, ingen lokal curl-feil «bad range in URL». Svaret nevner at `range()` er et fast vindu valgt bevisst (brukeren ba om et bestemt intervall), ikke et brudd på `top()`/`from()`-regelen
+
+## 12. «KPI for alle hovedgrupper, hver måned i 2024, som csv til Excel»
+
+- **Forventet tabell:** 14700
+- **Nøkkelvalg:** `valueCodes[Tid]=2024*` (ikke 12 oppramsede måneder), `valueCodes[VareTjenesteGrp]=??` eller `codelist[VareTjenesteGrp]=agg_CoiCop2018Kpi011`, `ContentsCode=KpiIndMnd`, `outputFormat=csv&outputFormatParams=SeparatorSemicolon,UseTexts` og alle variabler i `stub` (pivotvennlig)
+- **Suksess:** Én GET-URL som gir 200; svaret sier at csv er Latin-1 og at desimalpunktum må byttes i Power Query; obligatorisk note fra 14700 om referanseår vises
+
+## 13. «Her er en gammel lagret spørring: https://www.ssb.no/statbank/sq/10119120 — kan du hente dataene?»
+
+- **Forventet atferd:** `GET /savedqueries/10119120` for definisjonen (tabell 08655), deretter `/savedqueries/10119120/data` — ikke avvisning som «v1-stoff», ikke websøk
+- **Suksess:** Data levert; svaret opplyser at web-sq-lenken kun gir skjermvisning i PxWeb v2, og tilbyr en ekvivalent API-GET-URL med `from()`/`top()` som brukeren kan bruke i Power Query i stedet

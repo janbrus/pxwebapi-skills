@@ -9,11 +9,28 @@ Praktisk driftsinformasjon for SSBs PxWebApi v2. For json-stat2-formatet (Datase
 - Nye tall publiseres vanligvis kl. 08.00. Unngå spørringer 07.55–08.15 ved høy belastning.
 - Tall som skal revideres kl. 08 vises som 0 eller prikk i tidsrommet 05.00–08.00.
 - Metadata oppdateres kl. 05.00 og 11.30 — tabellene er utilgjengelige under oppdatering.
-- API-grense: 800 000 celler per uttrekk. Rate limit: 40 spørringer per minutt (per 2026-08-05) — les gjeldende verdi fra `x-ratelimit-*`-responsheaderne (se under), ikke fra `/config`.
-- GET-URL kan ikke overstige ca. 2 100 tegn — bruk POST for komplekse spørringer.
+- API-grense: 800 000 celler per uttrekk (tomme celler teller med). Rate limit: 40 spørringer per minutt (`x-ratelimit-policy: 40;w=60s`, bekreftet 2026-09-09) — les gjeldende verdi fra `x-ratelimit-*`-responsheaderne (se under), ikke fra `/config`. SSBs brukerveiledning oppgir 30 per minutt; headeren er autoritativ når de to avviker.
+- GET-URL kan ikke overstige ca. 2 100 tegn — over det svarer API-et 404. Bruk POST for komplekse spørringer.
 - Desimalskilletegn er `.` (punktum) for alle formater unntatt xlsx på norsk (komma).
 - Lisens: Creative Commons CC BY 4.0.
 - Strukturelle endringer i tabeller dokumenteres på: https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller
+- `navigation`-endepunktet fra v1 er tatt bort i v2 (gir 404). Emnehierarkiet leses i stedet fra `paths` på hvert `/tables`-treff — se `klass-vardok.md` for kortnavn-utledning.
+
+---
+
+## Spesifikasjon, veiledning og kontakt
+
+| Ressurs                                   | URL                                                                  |
+| ----------------------------------------- | -------------------------------------------------------------------- |
+| SSBs brukerveiledning (norsk / engelsk)   | https://www.ssb.no/api/pxwebapiv2 · https://www.ssb.no/en/api/pxwebapiv2 |
+| OpenAPI-spesifikasjon (interaktiv)        | https://data.ssb.no/api/pxwebapi/v2/index.html                       |
+| PxApiSpecs (YAML, felles for PxWeb-miljøet) | https://github.com/PxTools/PxApiSpecs/blob/master/PxAPI-2.yml      |
+| PxTools' generelle brukerguide            | https://www.pxtools.net/PxWebApi/documentation/user-guide/           |
+| Kodeeksempler (Python, R, JS)             | https://github.com/janbrus/ssb-api-v2-examples                       |
+| Spørsmål om tabeller eller API-et         | statistikkbanken@ssb.no                                              |
+| Feil og forslag til API-et                | https://github.com/PxTools/PxApiSpecs · https://github.com/PxTools/PxWebApi |
+
+Den engelske veiledningen dekker kun SSB-spesifikke forhold (grenser, publiseringstider, standardtegn, lagrede spørringer) og delegerer resten til PxTools-guiden. Den norske er komplett.
 
 ---
 

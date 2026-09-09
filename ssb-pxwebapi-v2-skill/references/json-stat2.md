@@ -30,11 +30,7 @@ Både metadata (`/tables/{id}/metadata`) og data (`/tables/{id}/data`) returnere
 - **`value`** — Flat array med alle dataverdier lagret i **row-major order** (siste dimensjon i `id` varierer raskest, første varierer saktest — samme konvensjon som C/NumPy). Indeksen beregnes fra `id`, `size` og `dimension.{var}.category.index`: for `size = [s₀, s₁, …, sₙ]` og kategori-indekser `(i₀, i₁, …, iₙ)` er flat-indeksen `i₀·(s₁·s₂·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ`.
 - **`dimension`** — Detaljert info per variabel med koder (`category.index`), navn (`category.label`), enheter (`category.unit`) og metadata (`extension`)
 - **`role`** — Hvilke variabler som har rolle som `time`, `geo` eller `metric`. **Start analyse her:** `role.metric` viser hva som måles (sjekk `dimension.{metric}.category.unit` for enhet/desimaler), `role.time` er tidsdimensjonen, `role.geo` er geografi. Hvis `role.geo` mangler, gjelder dataene typisk hele landet/totalen — ikke spør brukeren. Variabler som er i `id` men ikke i `role` er nedbrytningsdimensjoner.
-- **`status`** — Markerer spesielle verdier. Nøkkelen er indeks i value-arrayet, f.eks. `"status": { "3": ".." }` betyr at `value[3]` mangler tallgrunnlag. Feltet utelates når alle verdier er ordinære. SSB bruker:
-  - `"."` = ikke mulig å oppgi tall
-  - `".."` = tallgrunnlag mangler
-  - `":"` = konfidensielt (vises ikke av hensyn til identifisering)
-  - Andre leverandører kan bruke andre symboler — sjekk responsen.
+- **`status`** — Markerer spesielle verdier. Nøkkelen er indeks i value-arrayet, f.eks. `"status": { "3": ".." }` betyr at `value[3]` mangler tallgrunnlag. Feltet utelates når alle verdier er ordinære. Symbolene er leverandørspesifikke — SSBs standardtegn, inkludert de eldre som forekommer i tabeller fra før 2021, står i `troubleshooting.md` under «NULL-verdier i data».
 - **`link`** — Standard json-stat2-mekanisme for relaterte ressurser, gruppert per relasjonstype. Kan i likhet med `extension` forekomme på både rot- og variabel-nivå. Hos SSB (kun i metadata-responser, ikke i data-responser): `link.describedby` med URN-er til Klass/VarDok, og `link.related` med ferdige menneskelesbare lenker — på rot-nivå til statistikksiden og «Om statistikken», på variabel-nivå til klassifikasjons-/definisjonssider med label. Se `klass-vardok.md`.
 - **`note`** — **Array** med tabellnoter. Finnes på de aller fleste tabeller (11 av 12 stikkprøvde) og skal leses før en serie tolkes: basisårsskifter, rettelser og etterfølgertabeller står her. Noen av dem er obligatoriske å vise — se «Obligatoriske noter» under.
 - **`extension`** — Leverandørspesifikk metadata. I json-stat2 kan `extension` forekomme på **to nivåer**:
@@ -95,5 +91,7 @@ Verifisert 2026-08-30. `dimension.{var}.extension.elimination` svarer på **ulik
 ## Verktøy / biblioteker
 
 **pyjstat** (https://pypi.org/project/pyjstat/) — Python-bibliotek for å lese og skrive json-stat. Konverterer mellom json-stat(2) og pandas DataFrame, nyttig for å ta et SSB-uttrekk videre til analyse i Python.
+
+**JSON-stat Toolkit** (https://jsonstat.com/) — referanseimplementasjonen i JavaScript, med **JSON-stat Explorer** (http://jsonstat.com/explorer/) for å bla i et datasett interaktivt — nyttig når du vil forstå `id`/`size`/`value`-indekseringen på en konkret respons. Toolkiten har også kommandolinjeverktøy (https://github.com/jsonstat/conv/, krever node.js): `jsonstat2csv` (bedre tilpasset CSV enn API-ets eget csv-format), `jsonstat2arrow`, `jsonstat2array`/`jsonstat2arrobj`/`jsonstat2objarr` (ulike JS-strukturer), `jsonstatdice` (lag et nytt json-stat-datasett fra et utsnitt), `csv2jsonstat` og `sdmx2jsonstat` (OECD, UN, IMF → json-stat). Eksempler: https://observablehq.com/@jsonstat.
 
 For R finnes PxWebApiData, en API-klient som henter PxWeb-data direkte inn i R — se README.

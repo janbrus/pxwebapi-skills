@@ -7,6 +7,26 @@ Metadata-responsen fra `/tables/{id}/metadata` kobler tabellen og variablene til
 
 `link` finnes på både rot-nivå (om statistikken) og variabel-nivå (om den enkelte dimensjonen). Data-responser (`/tables/{id}/data`) inneholder kun `describedby` — `related` finnes bare i metadata-responsen.
 
+## Kortnavn før du har metadata
+
+I søkefasen (Steg 2) har du bare `/tables`-treffet, ikke metadata — og dermed ingen `link.related`. Kortnavnet kan likevel leses ut av `paths`.
+
+`paths` er en **liste av stier**, der hver sti er en liste av noder med `id` og `label`. Statistikkens kortnavn er tredje node i stien, `paths[0][2].id`:
+
+| Tabell | `paths[0]` (id-er)                           | Kortnavn      |
+| ------ | -------------------------------------------  | ------------- |
+| 07459  | `be` → `be01` → `folkemengde` → `SBMENU6924` | `folkemengde` |
+| 14700  | `if` → `if01` → `kpi` → `SBMENU12005`        | `kpi`         |
+| 07221  | `bb` → `bb01` → `bpi` → `SBMENU4008`         | `bpi`         |
+
+Kortnavnet gir tre ting uten flere API-kall:
+
+- Statistikksiden: `https://www.ssb.no/<kortnavn>`
+- «Om statistikken» med definisjoner og forklaringer: `https://www.ssb.no/<kortnavn>#om-statistikken` (engelsk: `https://www.ssb.no/en/<kortnavn>#om-statistikken`) — f.eks. `https://www.ssb.no/arblonn#om-statistikken`
+- RSS-feeden for statistikken: `https://www.ssb.no/rss/statbank/<kortnavn>` (se `api-details.md`)
+
+Har du først hentet metadata, trengs ikke utledningen: `<root>.link.related` gir de to første lenkene ferdig, og `extension.metaid` (`KORTNAVN:<kortnavn>`) gir kortnavnet direkte — se under.
+
 ## Rot-nivå: statistikkside og «Om statistikken»
 
 `<root>.link.related` gir ferdige lenker til statistikken tabellen tilhører:
@@ -32,7 +52,7 @@ Metadata-responsen fra `/tables/{id}/metadata` kobler tabellen og variablene til
 
 - `relation: "statistics-homepage"` → statistikksiden (`ssb.no/<kortnavn>`)
 - `relation: "about-statistics"` → «Om statistikken»-siden med definisjoner og forklaringer
-- `extension.metaid` = `KORTNAVN:<kortnavn>` — gir statistikkens kortnavn direkte, uten å utlede det fra `paths` (jf. Steg 2 i SKILL.md; `paths`-utledningen trengs fortsatt i søkefasen, før du har hentet metadata)
+- `extension.metaid` = `KORTNAVN:<kortnavn>` — gir statistikkens kortnavn direkte, uten å utlede det fra `paths` (utledningen over trengs kun i søkefasen, før du har hentet metadata)
 - Lenker og labels følger `lang`-parameteren: `lang=en` gir `/en/`-URL-er og engelske labels («Statistics page», «Definitions and explanations»)
 
 ## Variabel-nivå: definisjoner per variabel

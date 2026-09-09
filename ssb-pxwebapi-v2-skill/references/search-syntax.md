@@ -10,7 +10,7 @@ API-et søker i tabelltitler, variabler og variabelverdier (case-insensitivt). S
 
 ## Mønstermatching
 
-- `anlegg*` — trunkering, matcher alt som starter med "anlegg"
+- `anlegg*` — trunkering, matcher alt som starter med "anlegg". NB: wildcard matcher den *stemmede* indekstermen, ikke ordet slik det står i tittelen — på den engelske indeksen gir `population*` 0 treff mens `popul*` gir treff (verifisert av `generic-pxweb-v2-skill` 2026-09-08). Trunker før endelsen, eller søk hele ordet uten `*`
 - `konsumpris~1` — fuzzy søk, `~N` tillater N tegns avvik
 - `"varenummer hs" ~5` — nærhetssøk, finner ordene innen 5 ord fra hverandre
 
@@ -18,19 +18,6 @@ API-et søker i tabelltitler, variabler og variabelverdier (case-insensitivt). S
 
 - `trend AND anlegg*` — begge må matche
 - `title:foretak AND title:(F)` — fylkesnivå-tabeller om foretak
-- Standard mellom ord er OR; bruk AND/NOT eksplisitt
+- **Standard mellom ord er AND hos SSB** (verifisert 2026-09-09: `folkemengde region` = `folkemengde AND region` = 17 treff; `folkemengde OR region` = 1 414). Et lengre søkeord gir altså *færre* treff — bra for å snevre inn, men ett ord som ikke står i tabellen nuller lista. Standarden er ikke lik overalt (Latvias installasjon bruker OR), så skriv `AND`/`OR` eksplisitt i spørringer som skal deles
 
-## Synonymer og termer
-
-Bruk norske fagtermer:
-
-- "konsumprisindeks" (ikke "KPI")
-- "sysselsatte" (ikke "jobber")
-- "folkemengde" (ikke "befolkning")
-
-Vurder synonymer: "folkemengde" ≈ "befolkning" ≈ "innbyggere".
-
-## Tidsmessig avgrensning
-
-- `pastDays=N` — kun tabeller oppdatert siste N dager
-- `includeDiscontinued=false` (default) — skjuler avsluttede serier; sett `true` for historiske data
+(Fagtermer og synonymvalg: se Steg 2 i `SKILL.md`. De ikke-Lucene-parametrene `pastDays` og `includeDiscontinued` står i søkeparametertabellen samme sted.)

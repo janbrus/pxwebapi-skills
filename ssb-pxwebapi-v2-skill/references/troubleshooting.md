@@ -16,21 +16,33 @@ Ugyldig forespørsel. **Diagnostiser fra `title`, ikke fra `detail`** — `detai
 | Ugyldig verdikode | `… "title":"Non-existent value" …` |
 | Manglende obligatorisk variabel | `… "title":"Missing selection for mandantory variable" …` (sic, `mandantory`) |
 | For mange celler | `… "title":"Too many cells selected","detail":"Too many cells selected"` |
+| Komma-uttrykk i GET uten hakeparenteser | `… "title":"Illegal selection expression" …` |
+| Ukjent kodeliste-ID | `… "title":"Non-existent codelist" …` |
 
-`detail` settes kun i det siste tilfellet, og gjentar da bare `title`. Formen er identisk hos SCB, så en feilhåndtering skrevet mot SSB virker også der.
+`detail` settes kun i «Too many cells»-tilfellet, og gjentar da bare `title`. Formen er identisk hos SCB, så en feilhåndtering skrevet mot SSB virker også der.
 
 **Vanlige årsaker:**
 
-- **Ukjent variabelkode** — `variableCode` i selection matcher ikke metadata. Variabelkoder er case-sensitive.
+- **Ukjent variabelkode** — `variableCode` i selection matcher ikke metadata. Variabel- og verdikoder er *ikke* case-sensitive (`region`, `contentscode`, `personer1` og `TOP(1)` aksepteres — verifisert 2026-09-09), så feilen skyldes at koden ikke finnes, ikke stor/liten bokstav.
 - **Ugyldig verdikode** — Koden finnes ikke i tabellen. Sjekk `category.index` i metadata.
 - **Feil tidsformat** — Bruker `"2024"` i en månedlig tabell (skal være `"2024M01"`).
 - **For mange celler** — Resultatet overstiger `maxDataCells` fra `/config`.
 - **Manglende obligatorisk variabel** — Variabel med `elimination: false` mangler fra selection.
-- **Ugyldig kodeliste-ID** — Kodelisten finnes ikke for denne variabelen.
-- **Blanding av filteruttrykk og koder** — `top()`, `from()`, `range()` skal brukes alene i valueCodes.
+- **Ugyldig kodeliste-ID** — Kodelisten finnes ikke for denne variabelen. Kodeliste-ID-er *er* case-sensitive: `agg_kommfylker` gir `Non-existent codelist`.
+- **`range()`, `top(N, offset)` eller `bottom(N, offset)` i GET uten hakeparenteser** — komma er listeskilletegn i URL-en, så uttrykket deles i to. Skriv `valueCodes[Tid]=[range(2020,2022)]`. Gjelder ikke POST. Se `codelists-and-filters.md`.
 - **Manglende `OutputFormatParams` i `POST /savedqueries`** — feltet er obligatorisk i request-bodyen selv om verdien er tom. Send `"outputFormatParams": []` hvis du ikke trenger noen. Symptom: `400 — "The OutputFormatParams field is required."`
 
 **Løsning:** Hent metadata på nytt, sammenlign variabelkoder og verdikoder nøyaktig.
+
+### curl: «bad range in URL» er ikke en API-feil
+
+curl tolker `[` og `]` som sitt eget «globbing»-mønster. En URL med `valueCodes[Region]=…` feiler derfor lokalt, før noe er sendt:
+
+```
+curl: (3) bad range in URL position 66:
+```
+
+Bruk `curl -g` (`--globoff`), eller URL-kod hakeparentesene som `%5B`/`%5D` — API-et godtar begge. Det samme gjelder `[range(2020,2022)]`-uttrykk. Får du ingen JSON-respons i det hele tatt, sjekk dette først.
 
 ### 403 Forbidden
 
@@ -51,14 +63,19 @@ Ressursen finnes ikke.
 - Tabellen er fjernet og erstattet av en ny — søk etter temaet
 - Feil kodeliste-ID
 - Feil saved query-ID
+- **URL-en er lengre enn ca. 2 100 tegn** — API-et svarer 404, ikke 400 (verifisert 2026-09-09 med 450 kommunekoder i `valueCodes[Region]`). Bytt lange verdilister mot `*`, `?`, `from()`/`to()`/`range()` eller en kodeliste, eller bruk POST
 
-**Løsning:** Bruk `GET /tables?query=...` for å finne riktig ID.
+**Løsning:** Bruk `GET /tables?query=...` for å finne riktig ID. Er URL-en lang, kort den ned før du konkluderer med at ressursen mangler.
 
 ### 429 Too Many Requests
 
 Rate-limiting. Du har sendt for mange forespørsler.
 
-**Løsning:** Vent til tidsvinduet nullstilles og prøv igjen. Grensen står i `x-ratelimit-*`-responsheaderne (ikke lenger i `/config`): `x-ratelimit-policy: 40;w=60s` betyr 40 kall per 60 sekunder, og `x-ratelimit-remaining` viser gjenstående kall i inneværende vindu. Se `api-details.md` for full headeroversikt.
+**Løsning:** Vent til tidsvinduet nullstilles og prøv igjen. Kjør store spørringer sekvensielt — vent på svaret før neste sendes, ikke parallelt. Grensen står i `x-ratelimit-*`-responsheaderne (ikke lenger i `/config`): `x-ratelimit-policy: 40;w=60s` betyr 40 kall per 60 sekunder, og `x-ratelimit-remaining` viser gjenstående kall i inneværende vindu. Se `api-details.md` for full headeroversikt.
+
+### 503 Service Unavailable
+
+Tjenesten er nede eller under oppdatering. Metadata oppdateres kl. 05.00 og 11.30, og tabellene er utilgjengelige imens; rundt kl. 08.00 er belastningen høy (se `api-details.md`). Vent og prøv igjen. Får du ikke svar, gjelder Fallback i `SKILL.md`: si at data ikke kunne hentes — ikke fyll tomrommet med tall fra hukommelsen.
 
 ---
 
@@ -66,7 +83,7 @@ Rate-limiting. Du har sendt for mange forespørsler.
 
 ### For mange celler
 
-**Symptom:** 400-feil med melding om at resultatet overstiger cellegrensen.
+**Symptom:** 400-feil med melding om at resultatet overstiger cellegrensen. Grensen teller alle celler i uttrekket, også tomme.
 
 **Beregning:** Antall celler = produktet av antall verdier per variabel. Eksempel:
 - 400 kommuner × 2 kjønn × 100 aldre × 40 år = 3 200 000 celler
@@ -158,4 +175,4 @@ Full respons, verifisert 2026-08-30:
 
 `sourceReferences` er verdt å kjenne: det er SSBs egen kildehenvisningsstreng per språk («Kilde: Statistisk sentralbyrå» / «Source: Statistics Norway»), ved siden av kortformen skillen bruker i Steg 5 («Kilde: SSB, tabell {id}»). Merk også at `parquet` ligger i `dataFormats`.
 
-Verdiene kan endre seg — hardkod dem ikke. NB: `maxCallsPerTimeWindow` og `timeWindow` står igjen i responsen, men er nullstilt til `0` og ikke lenger i bruk — `0` betyr **ikke** «ingen grense». Gjeldende rate limit annonseres i `x-ratelimit-*`-responsheaderne, se 429-avsnittet over og `api-details.md`.
+Verdiene kan endre seg — hardkod dem ikke. NB: `maxCallsPerTimeWindow` og `timeWindow` er nullstilt til `0` og ikke lenger i bruk; rate limit leses fra `x-ratelimit-*`-headerne — se `api-details.md`.

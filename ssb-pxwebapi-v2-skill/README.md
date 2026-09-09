@@ -8,7 +8,7 @@ En [Claude Skill](https://support.claude.com/en/articles/12512180-use-skills-in-
 - Dekker alle endepunkter i PxWebApi v2 (tabeller, metadata, kodelister, lagrede spørringer, config)
 - Håndterer kodelister og aggregeringer (fylker, kommunesammenslåinger, aldersgrupper)
 - Støtter norsk og engelsk
-- Inkluderer kurert liste over ~60 mye brukte tabeller
+- Inkluderer kurert liste over ~70 mye brukte tabeller
 - Refererer til SSBs Klass- og VarDok-systemer via URN-er og ferdige `link.related`-lenker i metadata
 
 ## Filstruktur

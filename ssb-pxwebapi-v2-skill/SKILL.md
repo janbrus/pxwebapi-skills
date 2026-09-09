@@ -12,7 +12,7 @@ description: >
   websøk når svaret finnes i norsk offentlig statistikk. Dekker kodelister,
   lagrede spørringer og outputformater (json-stat2, csv, xlsx).
 metadata:
-  version: "1.4.1"
+  version: "1.5.0"
   source: https://github.com/janbrus/ssb-api-v2-examples/tree/main/ssb-pxwebapi-v2-skill
 ---
 
@@ -25,11 +25,8 @@ https://data.ssb.no/api/pxwebapi/v2
 ```
 
 **Skillen vedlikeholdes her:** https://github.com/janbrus/ssb-api-v2-examples/tree/main/ssb-pxwebapi-v2-skill
-Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.4.1.
 
-**SSB kjører fortsatt v1-API-et parallelt, på `https://data.ssb.no/api/v0/{no|en}/table`.** Det dukker opp fordi brukere kommer med gamle POST-bodyer i v1-form (`{"query": […], "response": {…}}`) fra skript og Power BI. Oversett dem ikke ad hoc — rut til `generic-pxweb-v1-skill` hvis den er tilgjengelig i miljøet. Request-siden er genuint forskjellig; kun respons-siden (json-stat2) er felles.
-
-**R-pakken `PxWebApiData` er derimot ikke en grunn til å rute til v1** — den støtter begge API-versjonene (1.9.0, 2026-02-02), med egne vignetter for hver. v2 har et eget snake_case-grensesnitt: `api_data()`, `get_api_data()`, `query_url()` og metadatafunksjonene `meta_frames()`/`meta_code_list()`/`meta_data()`, hver med `_1`/`_2`/`_12`-varianter for henholdsvis labels, koder eller begge. v1 bruker den eldre camelCase-formen `ApiData()`. Kommer brukeren med R-kode mot v2, hører den hjemme i denne skillen.
+Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.5.0.
 
 ## Dataintegritet — grunnregelen
 
@@ -53,36 +50,39 @@ Finner du ikke tallet i Statistikkbanken, er riktig svar at det ikke ble funnet 
 
 ---
 
+## Ruting til andre skills / verktøy
+
+Alle henvisninger er **ruting, aldri datablanding** — svaret i denne skillen kommenterer kun tall hentet fra SSBs API.
+
+- **v1-API-et.** SSB kjører fortsatt v1 parallelt på `https://data.ssb.no/api/v0/{no|en}/table`. Det dukker opp fordi brukere kommer med gamle POST-bodyer i v1-form (`{"query": […], "response": {…}}`) fra skript og Power BI. Oversett dem ikke ad hoc — rut til `generic-pxweb-v1-skill` hvis den er tilgjengelig i miljøet. Request-siden er genuint forskjellig; kun respons-siden (json-stat2) er felles. Gamle `ssb.no/statbank/sq/{id}`-lenker er derimot v2-stoff — se Steg 6. v1s `navigation`-endepunkt finnes ikke i v2; emnehierarkiet ligger i `paths` på `/tables`-treffene (Steg 2).
+- **R-pakken `PxWebApiData` er derimot ikke en grunn til å rute til v1** — den støtter begge API-versjonene (1.9.0, 2026-02-02), med snake_case-grensesnittet `api_data()`/`query_url()`/`meta_frames()` m.fl. for v2 og den eldre camelCase-formen `ApiData()` for v1. Kommer brukeren med R-kode mot v2, hører den hjemme i denne skillen; funksjonsoversikt i README.
+- **Sentralbankdata** — styringsrente, valutakurser, NOWA, statsgjeld: `norges-bank-api` (se Steg 1).
+- **Historisk statistikk** fra før Statistikkbanken-perioden: `ssb-histstat` (se Fallback).
+- **Visualisering** av et hentet uttrekk: `ssb-chart-skill` (se Steg 5).
+
+---
+
 ## API-oversikt
 
 PxWebApi v2 har disse endepunktene:
 
-| Endepunkt                       | Metode     | Formål                                       |
-| ------------------------------- | ---------- | -------------------------------------------- |
-| `/tables`                       | GET        | Søk og list tabeller                         |
-| `/tables/{id}`                  | GET        | Hent info om én tabell                       |
-| `/tables/{id}/metadata`         | GET        | Hent metadata (variabler, koder, kodelister) |
-| `/tables/{id}/defaultselection` | GET        | Hent tabellens forhåndsvalgte seleksjon      |
-| `/tables/{id}/data`             | GET / POST | Hent data med filtre                         |
-| `/codelists/{id}`               | GET        | Slå opp en kodeliste                         |
-| `/savedqueries`                 | POST       | Opprett en lagret spørring                   |
-| `/savedqueries/{id}`            | GET        | Hent en lagret spørring                      |
-| `/savedqueries/{id}/data`       | GET        | Kjør en lagret spørring og hent data         |
-| `/savedqueries/{id}/selection`  | GET        | Hent seleksjonen til en lagret spørring      |
-| `/config`                       | GET        | API-konfigurasjon (grenser, formater, språk) |
+| Endepunkt                       | Metode     | Formål                                                                        |
+| ------------------------------- | ---------- | ----------------------------------------------------------------------------- |
+| `/tables`                       | GET        | Søk etter tabell når du ikke vet tabell-ID-en                                 |
+| `/tables/{id}`                  | GET        | Info om én tabell: `firstPeriod`/`lastPeriod`, `timeUnit`, `discontinued`      |
+| `/tables/{id}/metadata`         | GET        | Variabler, koder og kodelister — obligatorisk før datauttrekk                  |
+| `/tables/{id}/defaultselection` | GET        | Tabellens forhåndsvalgte seleksjon — utgangspunkt for store tabeller           |
+| `/tables/{id}/data`             | GET / POST | Hent data. POST for komplekse spørringer, GET for delbare URL-er              |
+| `/codelists/{id}`               | GET        | Slå opp en kodeliste isolert                                                  |
+| `/savedqueries`                 | POST       | Opprett en delbar, gjenbrukbar spørring                                       |
+| `/savedqueries/{id}`            | GET        | Hent definisjonen av en lagret spørring                                       |
+| `/savedqueries/{id}/data`       | GET        | Kjør en lagret spørring og hent data                                          |
+| `/savedqueries/{id}/selection`  | GET        | Hent seleksjonen til en lagret spørring                                       |
+| `/config`                       | GET        | `maxDataCells`, formater og språk (rate limit står i responsheaderne)          |
 
 Alle endepunkter aksepterer `lang`-parameter (`no`, `en`). Standard er `no`.
 
-**Hvilket endepunkt når?**
-
-- Vet ikke tabell-ID → `GET /tables?query=…`
-- Har tabell-ID, kjenner ikke struktur → `GET /tables/{id}/metadata`
-- Trenger forhåndsvalgt seleksjon for stor tabell → `GET /tables/{id}/defaultselection`
-- Kjenner struktur, skal hente data → `POST /tables/{id}/data` (eller GET for delbar URL)
-- Slå opp en kodeliste isolert → `GET /codelists/{id}`
-- Bruker har bygd uttrekk i Statistikkbanken → kopier "Lagre"-URL/POST-body direkte
-- Skal gjenbruke/dele spørring → `POST /savedqueries`, deretter `GET /savedqueries/{id}/data`
-- Sjekke grenser (maxDataCells, rate limit) → `GET /config`
+SSB-spesifikk driftsinfo — publiseringstider, rate limit-headere, lisens og RSS-feeds for publiseringskalender og nyoppdaterte tabeller: se `references/api-details.md`.
 
 ---
 
@@ -91,7 +91,7 @@ Alle endepunkter aksepterer `lang`-parameter (`no`, `en`). Standard er `no`.
 API-et kan nås via to kanaler:
 
 - **MCP-verktøy fra `pxweb-mcp`** (npm: `@jarib/pxweb-mcp`) — bruk disse når de er tilkoblet *og dekker behovet*. Se `references/mcp-tools.md` for verktøytabell og begrensninger.
-- **Direkte HTTP** (curl via Bash eller tilsvarende) — bruk URL-strukturen under «Arbeidsflyt». POST-spørringer krever et verktøy med request-body-støtte.
+- **Direkte HTTP** (curl via Bash eller tilsvarende) — bruk URL-strukturen under «Arbeidsflyt». POST-spørringer krever et verktøy med request-body-støtte. Med curl: bruk `-g` (`--globoff`), ellers stopper curl lokalt på hakeparentesene i `valueCodes[Var]` med «bad range in URL».
 
 HTTP er eneste kanal for `/savedqueries`, `/tables/{id}/defaultselection`, `/config` og `outputFormatParams` — disse er ikke eksponert av MCP-serveren.
 
@@ -152,7 +152,7 @@ Bruk `GET /tables` med `query`-parameter.
 
 Presenter de 3–5 mest relevante treffene med tabell-ID, tittel, siste periode, tidsfrekvens og `discontinued`-status. Anbefal den mest passende.
 
-Respons-strukturen for hvert treff inkluderer: `id`, `label`, `description`, `updated`, `firstPeriod`, `lastPeriod`, `timeUnit` (Annual/Quarterly/Monthly/Weekly), `variableNames`, `discontinued`, `subjectCode`, og `paths` (emneplassering i SSBs hierarki — **3. nivå i pathen er statistikkens kortnavn**, f.eks. brukt i URL-er som `ssb.no/<kortnavn>`). Kortnavnet gir også tilgang til "Om statistikken"-siden med definisjoner og forklaringer: `https://www.ssb.no/<kortnavn>#om-statistikken` (norsk) eller `https://www.ssb.no/en/<kortnavn>#om-statistikken` (engelsk) — f.eks. `https://www.ssb.no/arblonn#om-statistikken`. (Når du senere henter metadata i Steg 3, ligger disse lenkene ferdig i rot-`link.related` — se `references/klass-vardok.md`.)
+Respons-strukturen for hvert treff inkluderer: `id`, `label`, `description`, `updated`, `firstPeriod`, `lastPeriod`, `timeUnit` (Annual/Quarterly/Monthly/Weekly), `variableNames`, `discontinued`, `subjectCode`, og `paths` (emneplassering i SSBs hierarki — en liste av stier, hver med noder). Tredje node i stien (`paths[0][2].id`) er statistikkens kortnavn, brukt i `ssb.no/<kortnavn>` og i RSS-feedene — se `references/klass-vardok.md`.
 
 Se `references/common-tables.md` for en kurert liste over mye brukte tabeller.
 
@@ -166,16 +166,14 @@ Metadata returneres i json-stat2-format (Dataset-schema) — full formatreferans
 
 - **`id`-array** — Variabelnavnene (f.eks. `["Region", "Kjonn", "Alder", "ContentsCode", "Tid"]`); `size`-arrayet gir antall verdier per variabel
 - **`dimension`-objekt** — Per variabel: koder (`category.index`), lesbare navn (`category.label`), enhet og desimaler (`category.unit`, på ContentsCode), noter per verdi (`category.note`), samt `extension` med `elimination`, `codelists` (tilgjengelige kodelister) og `categoryNoteMandatory`
-- **`note`-array + `extension.noteMandatory` (rot)** — tabellnoter, og hvilke av dem som **skal vises**. `noteMandatory` er nøklet på note-indeks: `{"1": true}` betyr `note[1]`. Satt på bl.a. 14700, 14710 og 03013 — se Steg 5 og `references/json-stat2.md`
-- **`extension`-objekt (rot)** — `contact`, `discontinued`, `noteMandatory`, og PX-metadata under `extension.px`: `subject-code`, `subject-area`, `decimals`, `aggregallowed`, `heading`/`stub` (default-pivotering), og `contents` (kort tabelltittel — brukes til tittelbygging i Steg 5). **`firstPeriod`/`lastPeriod` ligger ikke her**, men på `/tables`-treffet og `GET /tables/{id}` — sammen med `timeUnit`, som er eneste kilde til tidsfrekvens
-- **`role`-objekt** — **Start analysen her:** `role.metric` viser hva som måles (antall, prosent, NOK, indeks) — hos SSB heter variabelen "statistikkvariabel" på norsk og `ContentsCode` på engelsk; sjekk `category.unit` for enhet og desimaler. `role.time` er tidsdimensjonen, `role.geo` er geografi — **hvis `role.geo` mangler, anta at dataene gjelder hele Norge**, ikke spør brukeren. Øvrige variabler i `id` er nedbrytningsdimensjoner (kjønn, alder, næring osv.). Når du senere filtrerer `role.time` (Steg 4), foretrekk `top()`/`from()` framfor `range()`/enkeltverdier.
-- **`link`-objekter (rot og per variabel)** — `link.describedby` kobler til SSBs Klass (klassifikasjoner) og VarDok (variabeldefinisjoner) via URN-er; `link.related` gir ferdige menneskelesbare lenker: på rot-nivå til statistikksiden og «Om statistikken», per variabel til definisjonssidene med label (f.eks. «Standard for kjønn») — se `references/klass-vardok.md`
+- **`role`-objekt** — **Start analysen her:** `role.metric` viser hva som måles (antall, prosent, NOK, indeks) — hos SSB heter variabelen "statistikkvariabel" på norsk og `ContentsCode` på engelsk; sjekk `category.unit` for enhet og desimaler. `role.time` er tidsdimensjonen, `role.geo` er geografi — **hvis `role.geo` mangler, anta at dataene gjelder hele Norge**, ikke spør brukeren. Øvrige variabler i `id` er nedbrytningsdimensjoner (kjønn, alder, næring osv.)
+- **`note`-array + `extension.noteMandatory` (rot)** — tabellnoter, og hvilke av dem som **skal vises**; `noteMandatory` er nøklet på note-indeks. Se Steg 5 og `references/json-stat2.md`
+- **`extension`-objekt (rot)** — `contact`, `discontinued`, `noteMandatory` og PX-metadata under `extension.px` (bl.a. `contents`, den korte tabelltittelen du bygger tittel fra i Steg 5). **`firstPeriod`/`lastPeriod` ligger ikke her**, men på `/tables`-treffet og `GET /tables/{id}` — sammen med `timeUnit`, som er eneste kilde til tidsfrekvens. Se `references/json-stat2.md`
+- **`link`-objekter (rot og per variabel)** — `link.describedby` gir URN-er til Klass og VarDok; `link.related` gir ferdige menneskelesbare lenker til statistikksiden, «Om statistikken» og definisjonssidene. Se `references/klass-vardok.md`
 
 **Viktige regler om metadata:**
 
-- Variabler med `elimination: true` kan utelates — de summeres automatisk. **Les alltid dette flagget fra metadata-responsen.** I en data-respons svarer samme felt på et annet spørsmål (om uttrekket du fikk inneholder totalen), og villeder deg — se fellen i `references/json-stat2.md`
-- Utelater du en eliminerbar variabel, **forsvinner den helt fra responsen** — ikke som en «total»-rad, men ut av `id` og `dimension`. Ingenting i datasettet forteller at den ble summert bort. Noter det selv
-- SSB bruker begge PX-formene, og metadata skiller dem ikke: `Kjonn` i 07459 har ingen totalkode (kun `{Kvinner, Menn}`, API-et summerer på flyet), mens `Region` har totalkoden `0` = «Hele landet». `eliminationValueCode` er diskriminanten, men **den mangler i metadata** — en sveip over 50 tabeller fant den på null dimensjoner. Den dukker kun opp i en data-respons som inkluderer totalen. Se etter «Hele landet»/«I alt» i `category.label` i stedet
+- Les `elimination` **kun fra metadata** — i en data-respons betyr feltet noe annet og villeder deg. Utelater du en eliminerbar variabel, forsvinner den helt fra responsen (ut av `id` og `dimension`, ikke som en «total»-rad); noter det selv. Metadata skiller ikke tabeller med egen totalkode (`Region` = `0`, «Hele landet») fra dem som summeres på flyet (`Kjonn` i 07459) — se etter «I alt»/«Hele landet» i `category.label`. Detaljer og verifisering: `references/json-stat2.md`
 - Variabler med `elimination: false` MÅ inkluderes i query. Tid og ContentsCode er alltid ikke-eliminerbare.
 - Detaljer per statistikkvariabel (`measuringType`, `priceType`, `adjustment`, `basePeriod`), obligatoriske noter, `aggregallowed` og status-koder: se `references/json-stat2.md`
 
@@ -187,11 +185,11 @@ Kort oppsummert: Bruk `codelist`-parameter i metadata-oppslag eller data-query f
 
 **Defaultselection:**
 
-Bruk `GET /tables/{id}/defaultselection` for å hente tabellens forhåndsvalgte seleksjon. Nyttig som utgangspunkt — spesielt for store tabeller der du ikke vet hvilke verdier du bør velge. Returnerer en liste `VariableSelection`-objekter med `variableCode`, `codelist` og `valueCodes`.
+Bruk `GET /tables/{id}/defaultselection` for å hente tabellens forhåndsvalgte seleksjon. Nyttig som utgangspunkt — spesielt for store tabeller der du ikke vet hvilke verdier du bør velge. Returnerer en liste `VariableSelection`-objekter med `variableCode`, `codelist` og `valueCodes`. Høyst to dimensjoner får flere enn én verdi i defaultselection (07459: `Region` 360 verdier, `Tid` og `ContentsCode` én hver, `Alder`/`Kjonn` tomme) — trenger du flere dimensjoner utbrettet, må du angi dem selv.
 
 ### Steg 4: Bygg og kjør query
 
-PxWebApi v2 støtter **både GET og POST** for datahenting. Du kan også bruke Statistikkbanken (https://www.ssb.no/statbank) som grafisk spørringsbygger — velg tabell og verdier, trykk "Lagre" for å få ferdig GET-URL og POST-body.
+PxWebApi v2 støtter **både GET og POST** for datahenting. Du kan også bruke Statistikkbanken (https://www.ssb.no/statbank) som grafisk spørringsbygger — velg tabell og verdier, trykk "Lagre" for å få ferdig GET-URL og POST-body. Nyttig for å verifisere koder og filtre. NB: velger du bare noen perioder, rammer «Lagre» dem opp som faste verdier — skriv om til `top()`/`from()` før du deler URL-en (verktøy for brukere: https://github.com/janbrus/pxwebapi-skills/blob/main/forenkle_url.html). Velger du alle verdier i en variabel, setter PxWeb inn `*` selv.
 
 #### POST (anbefalt for komplekse spørringer)
 
@@ -226,39 +224,35 @@ Variabler med `elimination: true` kan utelates fra `selection`-arrayet.
 GET /tables/{id}/data?valueCodes[Region]=F-03&codelist[Region]=agg_KommFylker&valueCodes[ContentsCode]=Personer1&valueCodes[Tid]=top(5)&outputFormat=json-stat2
 ```
 
-GET-varianten er ideell for å lage URL-er som kan deles direkte. En GET helt uten seleksjonsparametre er ikke en feil: da returnerer API-et data for tabellens defaultselection (07459 gir f.eks. 360 celler — ikke hele tabellen). Men angir du filtre, må alle variabler med `elimination: false` (typisk `Tid` og `ContentsCode`) inkluderes — ellers returnerer API-et HTTP 400 "Missing selection for mandantory variable" (sic). Se `references/codelists-and-filters.md` for `outputValues`-parameter ved bruk av grupperinger.
+GET-varianten er ideell for å lage URL-er som kan deles direkte. En GET helt uten seleksjonsparametre er ikke en feil: da returnerer API-et data for tabellens defaultselection (07459 gir f.eks. 360 celler — ikke hele tabellen). Men angir du filtre, må alle variabler med `elimination: false` (typisk `Tid` og `ContentsCode`) inkluderes — ellers returnerer API-et HTTP 400 "Missing selection for mandantory variable" (sic).
 
 #### Outputformater
 
 Standard er `json-stat2`. Øvrige formater: `csv`, `xlsx`, `html`, `px`, `json-px` og `parquet`. Sjekk `dataFormats` i `GET /config` for gjeldende liste.
 
-`parquet` er kolonneformat for dataanalyse — les direkte med pandas eller DuckDB. Formatet returneres som `application/octet-stream` og gir lang-format med én rad per observasjon, pluss en `timestamp`-kolonne. Ved én statistikkvariabel heter kolonnene `value` og `value_symbol`; ved flere blir de `ContentsCode_{kode}` og `ContentsCode_{kode}_symbol`. **`_symbol`-kolonnene bærer `status`-kodene** — les dem, ikke bare `value`. Parquet bruker alltid koder, ikke tekst; `outputFormatParams=UseCodesAndTexts` gir HTTP 400.
+`parquet` gir lang-format for pandas/DuckDB — `_symbol`-kolonnene bærer `status`. 
 
-For `outputFormatParams` som `UseCodesAndTexts` og `IncludeTitle`, CSV-separatorer og `heading`/`stub`-pivotering — se `references/output-formats.md`.
+For dette, `outputFormatParams` som `UseCodesAndTexts` og `IncludeTitle`, CSV-separatorer og `heading`/`stub`-pivotering: se `references/output-formats.md`.
 
 #### Filteruttrykk i valueCodes
 
-Viktigste mønstre: `top(N)` = siste N verdier, `from(verdi)` = fra og med, `range(fra,til)` = intervall, `*` = alle verdier. Wildcards `*` og `?` kan brukes for mønstermatching (f.eks. `46*` = alle kommuner i Vestland). **For tid: foretrekk `top()` eller `from()` framfor `range()` og enkeltverdier** — relative filtre fanger nye perioder automatisk, så delbare URL-er og lagrede spørringer holder seg oppdaterte. Se `references/codelists-and-filters.md` for komplett syntaks.
+Viktigste mønstre: `top(N)` = siste N verdier, `from(verdi)` = fra og med, `range(fra,til)` = intervall, `*` = alle verdier. Wildcards `*` og `?` kan brukes for mønstermatching (f.eks. `46*` = alle kommuner i Vestland). Uttrykk kan kombineres med enkeltkoder (`["2015", "top(2)"]`). **I GET må uttrykk som inneholder komma stå i hakeparenteser** — `valueCodes[Tid]=[range(2020,2022)]`, `[top(3,2)]` — ellers deles de på kommaet og gir 400 «Illegal selection expression»; POST trenger ikke dette. **For tid: foretrekk `top()` eller `from()` framfor `range()` og enkeltverdier** — relative filtre fanger nye perioder automatisk, så delbare URL-er og lagrede spørringer holder seg oppdaterte. Se `references/codelists-and-filters.md` for komplett syntaks.
 
 **Viktige begrensninger:**
 
-- API-et har en øvre grense for antall celler per spørring. Sjekk `/config` for `maxDataCells` (typisk 800 000 men kan endre seg).
-- Rate limiting: `/config` viser `maxCallsPerTimeWindow` og `timeWindow`.
+- API-et har en øvre grense for antall celler per spørring. Sjekk `/config` for `maxDataCells` (typisk 800 000, men kan endre seg). Hos SSB annonseres Rate limit i `x-ratelimit-*`-responsheaderne, ikke i `/config` — se `references/api-details.md`.
 - Start smalt — det er lettere å utvide enn å håndtere for mye data.
 
 ### Steg 5: Presenter resultatene
 
 - Vis dataene i en ryddig markdown-tabell
 - Bygg tittel fra `extension.px.contents` (kort tabelltittel) og utvid med valgte variabler og tidsperiode fra uttrekket — f.eks. "Befolkning i Oslo, 2020–2025" basert på `contents: "07459: Befolkning,"` + valgt region og tidsfilter
-- Inkluder **alltid** kildehenvisning med **samtlige tabell-ID-er** som er brukt (list opp alle hvis flere tabeller er kombinert — ikke utelat noen):
-  - Norsk: **"Kilde: SSB, tabell {id}"** (eller "tabellene {id1}, {id2}, …")
-  - Engelsk: **"Source: Statistics Norway, table {id}"** (eller "tables {id1}, {id2}, …")
-- Forklar hva tallene betyr i kontekst — på brukerens språk. Kommenter **kun** tallene som er hentet i uttrekket — ikke hent inn eller bland data fra andre kilder (Norges Bank, Eurostat, websøk) i svaret. Trenger brukeren slike tall, henvis til riktig skill eller kilde (f.eks. `norges-bank-api`) i stedet
-- Tallformat: norsk = mellomrom + komma (1 234,5); engelsk = komma + punktum (1,234.5)
+- Inkluder **alltid** kildehenvisning med **samtlige tabell-ID-er** som er brukt — er flere tabeller kombinert, list opp alle, ikke utelat noen. Henvisnings- og tallformat: se «Språk»
+- Forklar hva tallene betyr i kontekst — på brukerens språk. Kommenter **kun** tallene som er hentet i uttrekket; trenger brukeren tall fra andre kilder, henvis videre i stedet (se «Ruting»)
 - Presenter enheter tydelig (antall/count, prosent/percent, indeks/index, NOK). For indekser: oppgi referanseperioden (f.eks. 2015=100)
 - **Skill hentede tall fra egne beregninger.** Kildehenvisningen dekker tallene fra API-et. Regner du ut vekst, andeler eller differanser, marker det — f.eks. «Endring i prosent er beregnet fra indeksverdiene over»
-- **Gjør uttrekket etterprøvbart.** Vis GET-URL-en eller POST-bodyen, eller tilby en lagret spørring (Steg 6), så brukeren kan kjøre samme uttrekk selv. **Oppgi eksplisitt hvilke dimensjoner du utelot og hvilken kodeliste du brukte** — responsen registrerer ingen av delene. En utelatt dimensjon forsvinner sporløst, og `codelist[Region]=agg_Fylker2024` kommer tilbake uten noe felt som navngir grupperingen. `agg_KommFylker` og `agg_KommSummer` gir tall som ser like ut og ikke er det
-- **Vis obligatoriske noter.** Er `extension.noteMandatory` satt, skal den noten fram i svaret — SSB har flagget den fordi tallet trenger forbeholdet. På 14700 og 14710 er det varselet om at referanseåret ble 2025=100 f.o.m. 2026, og at **endringstall beregnet fra disse seriene kan avvike fra publiserte endringstall**. Regner du ut endringstall etter regelen over, er det nøyaktig den størrelsen SSB har tatt forbehold om — da hører noten med. Noten følger med i data-responsen, så den koster ingen ekstra kall
+- **Gjør uttrekket etterprøvbart.** Vis GET-URL-en eller POST-bodyen, eller tilby en lagret spørring (Steg 6). **Oppgi eksplisitt hvilke dimensjoner du utelot og hvilken kodeliste du brukte** — responsen registrerer ingen av delene, og `agg_KommFylker` og `agg_KommSummer` gir tall som ser like ut og ikke er det
+- **Vis obligatoriske noter.** Er `extension.noteMandatory` satt, skal noten fram i svaret — SSB har flagget den fordi tallet trenger forbeholdet. Den følger med i data-responsen, så den koster ingen ekstra kall. På KPI-tabellene treffer forbeholdet nettopp endringstall du regner ut selv — se `references/json-stat2.md`
 - **Vis `status`-merkede verdier som de er.** Bruk SSBs standardtegn i tabellen og forklar dem i en fotnote — ikke erstatt dem med tall, nuller eller tomme celler
 - Tilby å visualisere dataene — bruk `ssb-chart-skill` hvis den er tilgjengelig i miljøet
 - Tilby å laste ned i annet format (csv, xlsx)
@@ -296,33 +290,18 @@ GET /savedqueries/{id}/data
 
 Nyttig for rapporter som oppdateres jevnlig — `top(N)` gir alltid de nyeste periodene.
 
----
-
-## Responsformat
-
-Både metadata (`/tables/{id}/metadata`) og data (`/tables/{id}/data`) returneres som **json-stat2** som standard. Se `references/json-stat2.md` for Dataset-struktur, indeksering (row-major) og status-koder. Se `references/api-details.md` for SSB-spesifikk driftsinfo (publiseringstider, grenser, lisens, RSS-feeds for publiseringskalender og nyoppdaterte tabeller).
-
----
-
-## Kobling til SSBs metadata-systemer
-
-Metadata-responsen inneholder `link`-objekter på rot- og variabel-nivå: `link.describedby` med URN-er som peker til Klass (klassifikasjoner, korrespondansetabeller, kommunehistorikk) og VarDok (variabeldefinisjoner), og `link.related` med ferdige menneskelesbare lenker til statistikksiden, «Om statistikken» og definisjonssidene. Trenger du å slå opp definisjoner eller fullstendige kodeverk — se `references/klass-vardok.md`.
+**SSBs forbehold:** til automatisering (Power Query, skript) anbefaler SSB en vanlig API-spørring med `top()`/`from()` framfor en lagret spørring — den kan endres senere og er ikke bundet til en ID. Web-lenken `ssb.no/statbank/sq/{id}` gir i PxWeb v2 kun skjermvisning, ikke csv/xlsx, så Power Query-oppsett som pekte dit fra v1-tiden feiler. API-endepunktene virker fortsatt, også for gamle ID-er: `GET /savedqueries/10119120` viser definisjonen, og `/savedqueries/10119120/data` leverer fila i formatet spørringen ble lagret med (verifisert 2026-09-09). Kommer brukeren med en sq-lenke, er dette veien til dataene.
 
 ---
 
 ## Fallgruver — gjør aldri
 
-- **Oppgi et tall du ikke har hentet i denne samtalen** — heller ikke som «omtrent» eller «rundt»
-- **Fyll hull i tidsserien** med anslag, interpolering eller framskriving
-- **Gjett variabelkoder** i stedet for å hente dem fra metadata
-- **Presenter tall fra en avsluttet tabell som gjeldende** — sjekk `discontinued`, oppgi `lastPeriod`, og finn tabellen serien fortsetter i
-- **Presenter egen beregning som SSB-tall** — vekstrater og andeler du har regnet ut, er dine
+Integritetsreglene øverst gjelder alltid — i tillegg:
+
 - Hent data uten filtre og anta at du får hele tabellen — API-et returnerer defaultselection-uttrekket, og du kontrollerer ikke hva det inneholder; angi alltid eksplisitt seleksjon
 - Anta at kommunekoder er stabile over tid (kommunesammenslåinger i 2020!)
 - Bland koder fra forskjellige kodelister
 - Presenter data uten enhet
-- Suppler SSB-tall med data hentet fra andre kilder i samme svar — kommenter kun det hentede uttrekket, og henvis heller videre (f.eks. til `norges-bank-api` for sentralbankdata)
-- Ignorer `status`-feltet — det kan indikere manglende eller konfidensielle verdier
 
 ---
 
@@ -339,7 +318,7 @@ Metadata-responsen inneholder `link`-objekter på rot- og variabel-nivå: `link.
        { "variableCode": "ContentsCode", "valueCodes": ["Personer1"] },
        { "variableCode": "Tid", "valueCodes": ["top(1)"] }
    ]}
-→ "Per 1. januar 2025 hadde Oslo 723 803 innbyggere (Kilde: SSB, tabell 07459)"
+→ "Per 1. januar {år} hadde Oslo {N} innbyggere (Kilde: SSB, tabell 07459)"
 ```
 
 ### "KPI siste 5 år, månedlig"
@@ -373,18 +352,10 @@ Metadata-responsen inneholder `link`-objekter på rot- og variabel-nivå: `link.
 
 ### "Lag en delbar URL for Oslos befolkning siste 10 år"
 
-Tidsserier med kommunedata bør bruke kodeliste `agg_KommSummer` for å håndtere kommunesammenslåinger og gi konsistente tall over tid.
-
-NB: `agg_KommSummer` krever `K-`-prefiks på koden. **Det er kodelisten som aggregerer** — `outputValues[Region]=aggregated` er ikke nødvendig for å få summerte verdier. Parameteren står igjen i eksempelet fordi den er ufarlig, men den er ikke bærende: se `references/codelists-and-filters.md` før du stoler på den.
+Tidsserier med kommunedata bør bruke kodeliste `agg_KommSummer` for å håndtere kommunesammenslåinger og gi konsistente tall over tid. `agg_KommSummer` krever `K-`-prefiks på koden; **det er kodelisten som aggregerer**.
 
 ```
-GET /tables/07459/data?valueCodes[Region]=K-0301&codelist[Region]=agg_KommSummer&outputValues[Region]=aggregated&valueCodes[ContentsCode]=Personer1&valueCodes[Tid]=top(10)&outputFormat=json-stat2
-```
-
-Full URL:
-
-```
-https://data.ssb.no/api/pxwebapi/v2/tables/07459/data?valueCodes[Region]=K-0301&codelist[Region]=agg_KommSummer&outputValues[Region]=aggregated&valueCodes[ContentsCode]=Personer1&valueCodes[Tid]=top(10)&outputFormat=json-stat2
+https://data.ssb.no/api/pxwebapi/v2/tables/07459/data?valueCodes[Region]=K-0301&codelist[Region]=agg_KommSummer&valueCodes[ContentsCode]=Personer1&valueCodes[Tid]=top(10)&outputFormat=json-stat2
 ```
 
 ### "Eksporter boligpriser som Excel"
@@ -410,18 +381,14 @@ POST /tables/07221/data?outputFormat=xlsx&outputFormatParams=UseCodesAndTexts&ou
        { "variableCode": "ContentsCode", "valueCodes": ["Personer1"] },
        { "variableCode": "Tid", "valueCodes": ["top(1)"] }
    ]}
-→ "As of 1 January 2026, Norway had 5 550 203 inhabitants (Source: Statistics Norway, table 07459)"
+→ "As of 1 January {year}, Norway had {N} inhabitants (Source: Statistics Norway, table 07459)"
 ```
 
 ---
 
-## Feilhåndtering
-
-Se `references/troubleshooting.md` for vanlige feil og løsninger.
-
----
-
 ## Fallback
+
+Feilkoder og vanlige problemer (400/403/404/429, cellegrense, tomme søkeresultater, NULL-verdier): se `references/troubleshooting.md`.
 
 Hvis API-et ikke er tilgjengelig:
 
@@ -431,5 +398,3 @@ Hvis API-et ikke er tilgjengelig:
 4. Gi veiledning for manuelt oppslag (tabellnummer, variabler å se etter)
 
 Trenger brukeren tall fra før Statistikkbanken-perioden (eldre folketellinger, NOS-publikasjoner, tidsserier fra 1800-tallet): bruk `ssb-histstat`-skillen hvis den er tilgjengelig i miljøet.
-
-**Tips:** I Statistikkbanken kan du bygge opp et uttrekk grafisk, deretter trykke "Lagre" for å få ferdig API-spørring som både GET-URL og POST-body. Nyttig for å verifisere koder og filtre.
