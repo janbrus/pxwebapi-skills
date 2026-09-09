@@ -1,0 +1,53 @@
+# Validerer scb-pxwebapi-v2-skill mot SCBs live PxWebApi v2.
+#
+# Port av check-tables.yaml (SSB-skillen). SCB-skillen har ingen common-tables.md, så kun
+# eksempelsjekkeren og zip-synk kjøres. Skriptene antar at skillmappa er
+# arbeidskatalog, derfor working-directory nedenfor.
+name: Validate scb-pxwebapi-v2-skill
+
+on:
+  push:
+    paths:
+      - 'scb-pxwebapi-v2-skill/SKILL.md'
+      - 'scb-pxwebapi-v2-skill/references/**'
+      - 'scb-pxwebapi-v2-skill/scripts/**'
+      - 'scb-pxwebapi-v2-skill/scb-pxwebapi-v2-skill.zip'
+      - '.github/workflows/check-scb-examples.yaml'
+  pull_request:
+    paths:
+      - 'scb-pxwebapi-v2-skill/SKILL.md'
+      - 'scb-pxwebapi-v2-skill/references/**'
+      - 'scb-pxwebapi-v2-skill/scripts/**'
+      - 'scb-pxwebapi-v2-skill/scb-pxwebapi-v2-skill.zip'
+      - '.github/workflows/check-scb-examples.yaml'
+  schedule:
+    - cron: '10 6 * * 1'  # mandag 06:10 UTC — fanger drift i SCB-tabeller
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: scb-pxwebapi-v2-skill
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate example URLs and queries
+        run: python3 scripts/check_examples.py --quiet --delay 1.0
+
+  zip-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify scb-pxwebapi-v2-skill.zip matches working tree
+        run: |
+          bash scripts/build_zip.sh /tmp/fresh.zip
+          mkdir /tmp/committed /tmp/fresh
+          unzip -q scb-pxwebapi-v2-skill.zip -d /tmp/committed
+          unzip -q /tmp/fresh.zip -d /tmp/fresh
+          diff -r /tmp/committed /tmp/fresh \
+            || { echo '::error::scb-pxwebapi-v2-skill/scb-pxwebapi-v2-skill.zip er utdatert — kjør scripts/build_zip.sh i skillmappa og sjekk inn ny zip'; exit 1; }
