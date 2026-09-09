@@ -13,7 +13,7 @@ Reference for codelists and filter expressions in PxWebApi v2.
 | **Aggregation** | `agg_` | Maps many values to one (e.g. municipalities → regions) | `agg_RegionLevel` |
 | **Valueset** | `vs_` | Shows an alternative set of values | `vs_RegionOnly` |
 
-Codelist IDs and prefixes vary between installations and tables. Always check metadata.
+Codelist IDs and prefixes vary between installations and tables, and IDs are **case-sensitive** — use the exact string from metadata.
 
 ### Where codelists come from, and why mixing them fails
 
@@ -64,7 +64,7 @@ Codelists are listed in metadata under `dimension.{variable}.extension.codelists
 GET /tables/{id}/data?valueCodes[Region]=*&codelist[Region]=agg_RegionLevel&valueCodes[ContentsCode]=Population&valueCodes[Tid]=top(5)
 ```
 
-Variables with `role: time` and `role: metric` are typically never eliminable and must always be included — verify per installation via the `extension.elimination` flag in metadata. In Nordic installations these are usually named `Tid` and `ContentsCode`.
+Which variables must be included is read from `extension.elimination` in the metadata response — per table, not per installation (see `SKILL.md` Step 3).
 
 ### Looking up codelist contents
 
@@ -74,14 +74,9 @@ GET /codelists/{codelist_id}?lang=en
 
 Returns all codes with labels and `valueMap` showing which original codes map to each aggregated code.
 
-### outputValues parameter (with aggregation codelists)
+### outputValues parameter — not load-bearing
 
-When using an aggregation codelist, `outputValues[variable]` controls what is returned:
-
-| Value | Description |
-|---|---|
-| `aggregated` | Return aggregated (summed) values |
-| `single` | Return individual values from the codelist without summing |
+The specification describes `outputValues[variable]=aggregated|single` as controlling whether an aggregation codelist returns summed or individual values, and `pxweb-mcp` maps `output_values` to it. **On both installations where it has been tested it has no observable effect**: SSB (2026-08-30) and SCB (2026-09-07) return identical data for `aggregated`, `single`, the parameter omitted, and the invalid value `nonsense` — HTTP 200 for all four, so the value is not even validated. It is the codelist that aggregates. Do not rely on the parameter, and do not read a 200 as confirmation that it worked.
 
 ---
 
@@ -95,11 +90,25 @@ When using an aggregation codelist, `outputValues[variable]` controls what is re
 | `bottom(N)` | First N values (oldest) | `bottom(3)` → 3 oldest periods |
 | `from(value)` | From and including (inclusive) | `from(2020)` → 2020 onwards |
 | `to(value)` | Up to and including (inclusive) | `to(2022)` → up to 2022 |
-| `range(from,to)` | Interval (inclusive both ends) | `range(2018,2023)` |
+| `range(from,to)` | Closed interval, both ends inclusive | `range(2024M01,2024M03)` → 3 months |
+| `top(N,offset)` | N values, skipping the last `offset` | `top(3,2)` → the 3 before the last 2 |
+| `bottom(N,offset)` | N values, skipping the first `offset` | `bottom(2,1)` → the 2 after the first |
 
-These are used as the **sole element** in the valueCodes array — do not combine with explicit codes.
+All verified on SSB, SCB and Latvia (2026-09-09); case does not matter (`TOP(3)` works). An expression **can be mixed with explicit codes** in the same array — `["2015", "top(2)"]` returns 2015 plus the two newest periods (verified on all three installations, GET and POST, 2026-09-09). What does *not* work is two function expressions as an intersection: `["from(2024M01)", "to(2024M03)"]` in one array returns the **union** (319 periods), not the interval — use `range()` for that.
 
-**For the time dimension, prefer `top(N)` and `from(value)` over `range(from,to)` and explicit period codes.** Relative filters pick up new periods automatically, so a shareable GET URL or a saved query keeps returning current data instead of freezing on the periods that happened to be latest when it was written. `range(2018,2023)` is right only when the closed interval is the point — a fixed reporting period, or a comparison against a specific baseline. This matters most for `/savedqueries`, whose whole purpose is to be re-run later.
+### GET and POST spell the expressions differently
+
+| | GET (`valueCodes[Var]=`) | POST (`"valueCodes": [...]`) |
+|---|---|---|
+| Single-argument function | `top(3)` or `[top(3)]` — both work | `"top(3)"` |
+| Function with a comma | **`[range(2024M01,2024M03)]`, `[top(3,2)]` — brackets required** | `"range(2024M01,2024M03)"`, `"top(3,2)"` — **no brackets** |
+| Explicit list | `2024M01,2024M02` — no brackets | `"2024M01", "2024M02"` |
+
+The reason is the comma: in a GET value it is the list separator, so the API needs the brackets to read `range(a,b)` as one expression. Unwrapped it answers `400 — "Illegal selection expression"`, which looks exactly like "this function does not exist" and was documented as such in 0.11.0's first draft until a bracketed URL from the maintainer disproved it. In a POST body the string is already one element, and a bracketed string is looked up as a literal code (`400 — "Non-existent value"`). Verified on all three installations, both directions.
+
+The brackets — and the ones in `valueCodes[Var]` itself — trip **curl**: it treats `[…]` as its own globbing syntax and stops locally with `curl: (3) bad range in URL` before anything is sent. Pass `-g` (`--globoff`), or URL-encode the brackets as `%5B`/`%5D`; the API accepts both.
+
+**For the time dimension, prefer `top(N)` and `from(value)` over explicit period codes.** Relative filters pick up new periods automatically, so a shareable GET URL or a saved query keeps returning current data. This matters most for `/savedqueries`, whose whole purpose is to be re-run later.
 
 ### Wildcard filters
 
@@ -108,7 +117,7 @@ These are used as the **sole element** in the valueCodes array — do not combin
 | `*` | All values, or matches zero or more characters | `*` alone = all values; `03*` = codes starting with "03" |
 | `?` | Matches exactly one character | `??` = all two-digit codes |
 
-`*` alone in valueCodes means "select all values for this variable". Combined with a codelist, it means "all values in the codelist".
+`*` alone in valueCodes means "select all values for this variable". Combined with a codelist, it means "all values in the codelist". Codes are strings — always quoted in a POST body, even purely numeric ones (`"0301"`, `"2024"`).
 
 Wildcards can be combined with explicit codes in the same valueCodes array:
 ```json
@@ -117,25 +126,16 @@ Wildcards can be combined with explicit codes in the same valueCodes array:
 
 ### Time formats
 
-The format in valueCodes must match the table's `timeUnit`:
+The format in valueCodes must match the table's `timeUnit` — and **the period letter is a per-installation (and per-language) choice**. Verified forms, 2026-09-08:
 
-| timeUnit | Format | Example |
-|---|---|---|
-| Annual | `YYYY` | `"2024"` |
-| Monthly | `YYYYMNN` | `"2024M06"` |
-| Quarterly | `YYYYKN` or `YYYYQN` | Varies by installation |
-| Weekly | `YYYYWNN` | `"2024W01"` |
+| timeUnit | SSB | SCB | Latvia |
+|---|---|---|---|
+| Annual | `2024` | `2024` | `2024` |
+| Monthly | `2024M06` | `2024M06` | `2026M04` |
+| Quarterly | `2024K2` | `2020K4` | `2026Q2` |
+| Weekly | `2026U35` | `2026V30` | `2026W13` |
+| Other | — | — | `Time01` (not a date at all) |
 
-**Note:** Quarterly format may differ between installations. SSB uses `K` (e.g. `2024K2`), SCB uses `K` as well. Always check metadata for actual time codes.
+Only the annual and monthly forms are universal. Quarters are `K` in the Nordic installations and `Q` at Latvia; weeks use three different letters on three installations, so a `W` written from habit returns `Non-existent value` at SSB and SCB. **Read the codes from `category.index` before writing a time filter** — they are the only reliable source.
 
 ---
-
-## Important rules
-
-1. **Function filters are used alone** — `top()`, `from()`, `range()` etc. are the sole element in the array
-2. **Wildcards can be combined** with explicit codes in the same array
-3. **Codes must match metadata** — always use metadata to see valid codes
-4. **Time format varies per table** — check `timeUnit`
-5. **Codes are strings** — always in quotes, even purely numeric ones
-6. **Codelist IDs are case-sensitive** — use the exact ID from metadata
-7. **Codelist codes may have prefixes** — aggregation codelists often use prefixes on their codes (check the codelist contents)

@@ -1,0 +1,44 @@
+# Holder generic-pxweb-v2-skill.zip synkron med arbeidstreet.
+#
+# Den generiske v2-skillen har skjematiske eksempler ({base_url}, {id}) og derfor
+# ingen eksempelsjekker; workflowen dekker bare zip-synk.
+name: Validate generic-pxweb-v2-skill
+
+on:
+  push:
+    paths:
+      - 'pxwebapi-v2-generic-skill/SKILL.md'
+      - 'pxwebapi-v2-generic-skill/README.md'
+      - 'pxwebapi-v2-generic-skill/CHANGELOG.md'
+      - 'pxwebapi-v2-generic-skill/references/**'
+      - 'pxwebapi-v2-generic-skill/scripts/**'
+      - 'pxwebapi-v2-generic-skill/generic-pxweb-v2-skill.zip'
+      - '.github/workflows/check-v2-generic-zip.yaml'
+  pull_request:
+    paths:
+      - 'pxwebapi-v2-generic-skill/SKILL.md'
+      - 'pxwebapi-v2-generic-skill/README.md'
+      - 'pxwebapi-v2-generic-skill/CHANGELOG.md'
+      - 'pxwebapi-v2-generic-skill/references/**'
+      - 'pxwebapi-v2-generic-skill/scripts/**'
+      - 'pxwebapi-v2-generic-skill/generic-pxweb-v2-skill.zip'
+      - '.github/workflows/check-v2-generic-zip.yaml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: pxwebapi-v2-generic-skill
+
+jobs:
+  zip-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify generic-pxweb-v2-skill.zip matches working tree
+        run: |
+          bash scripts/build_zip.sh /tmp/fresh.zip
+          mkdir /tmp/committed /tmp/fresh
+          unzip -q generic-pxweb-v2-skill.zip -d /tmp/committed
+          unzip -q /tmp/fresh.zip -d /tmp/fresh
+          diff -r /tmp/committed /tmp/fresh \
+            || { echo '::error::pxwebapi-v2-generic-skill/generic-pxweb-v2-skill.zip er utdatert — kjør scripts/build_zip.sh i skillmappa og sjekk inn ny zip'; exit 1; }

@@ -31,7 +31,7 @@ In v2, **both** `/tables/{id}/metadata` and `/tables/{id}/data` return a json-st
 
 - **`id`** — variable names in order.
 - **`size`** — number of values per variable, same order as `id`.
-- **`value`** — flat array of all data values in **row-major order**: the last dimension in `id` varies fastest, the first varies slowest (the C/NumPy convention). For `size = [s₀, s₁, …, sₙ]` and category indices `(i₀, i₁, …, iₙ)`, the flat index is `i₀·(s₁·s₂·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ`. Category positions come from `dimension.{var}.category.index`.
+- **`value`** — flat array of all data values in **row-major order**: the last dimension in `id` varies fastest, the first varies slowest (the C/NumPy convention). For `size = [s₀, s₁, …, sₙ]` and category indices `(i₀, i₁, …, iₙ)`, the flat index is `i₀·(s₁·s₂·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ`. Category positions come from `dimension.{var}.category.index`. **Use the `id` of the response you are indexing** — a default-selection response can order dimensions differently from the metadata (Latvia IRS010m: metadata `["ContentsCode", "TIME"]`, default data `["TIME", "ContentsCode"]`).
 - **`dimension`** — per variable: codes (`category.index`), labels (`category.label`), units (`category.unit`), per-value notes (`category.note`), and `extension`.
 - **`role`** — which variables are `time`, `geo` and `metric`. **Start your analysis here** (see below).
 - **`status`** — special values, keyed by index into `value`; the corresponding `value` entry is `null`.
@@ -45,9 +45,9 @@ Older serializers may omit `"version": "2.0"`. The rest of the structure is unaf
 
 ## Start the analysis with `role`
 
-- **`role.metric`** — what is being measured. In Nordic installations this is usually a variable named `ContentsCode`, but **check `role.metric` for the actual name** rather than assuming — other installations differ. Read `dimension.{metric}.category.unit` for the unit and the number of decimals.
-- **`role.time`** — the time dimension.
-- **`role.geo`** — geography. **If `role.geo` is missing, the figures cover the installation's whole country or area — do not ask the user.**
+- **`role.metric`** — what is being measured. Named `ContentsCode` on all three known installations (Nordic and Latvian alike), but **check `role.metric` for the actual name** rather than assuming. Read `dimension.{metric}.category.unit` for the unit and the number of decimals.
+- **`role.time`** — the time dimension: `Tid` at SSB and SCB, `TIME` at Latvia.
+- **`role.geo`** — geography, **when the installation sets it.** SSB and Latvia do (`Region`, `AREA`); SCB does not, even on tables with a 290-municipality `Region` dimension (verified 2026-09-07 on TAB638, TAB6471, TAB5444 — all `role: {time, metric}`). Look for a geographic variable in `id` first; only when none exists do the figures cover the whole country or area. Do not ask the user.
 - Variables in `id` but not in `role` are breakdown dimensions — sex, age, industry, and so on.
 
 ---
@@ -87,7 +87,7 @@ Older serializers may omit `"version": "2.0"`. The rest of the structure is unaf
 
 ### Trap: eliminability is readable only from the metadata response
 
-`extension.elimination` answers a **different question** in each response type (verified on two installations, 2026-08-30):
+`extension.elimination` answers a **different question** in each response type (verified on SSB and SCB 2026-08-30, Latvia 2026-09-08):
 
 - **In a metadata response** it is the contract: *may this dimension be left out of a query?* This is the one you want.
 - **In a data response** it describes the extract you just received: it is `true` only when the value set that came back still contains the elimination value, and `false` otherwise. Select one ordinary region and it reads `false`; apply a codelist and it reads `false`; and neither says anything about whether the dimension was eliminable.
@@ -99,7 +99,9 @@ The same asymmetry runs the other way for `eliminationValueCode`, which is why a
 - `ELIMINATION=YES` — there is no total value; the API sums the dimension on the fly when you omit it. (A sex dimension whose only categories are "women" and "men".)
 - `ELIMINATION("<value>")` — a predefined total value already exists in the value set. (A region dimension carrying a "whole country" code alongside the municipalities.)
 
-In metadata both appear as a bare `elimination: true` — `eliminationValueCode` was absent from every dimension across a 50-table sweep. A **data** response that includes the total is what reveals it, as `eliminationValueCode: "<code>"`. If you need to know which form a dimension uses, that probe is the way to find out.
+In metadata both appear as a bare `elimination: true` — `eliminationValueCode` was absent from every dimension across a 50-table sweep at SSB, and from all six dimensions of SCB's TAB638. A **data** response that includes the total is what reveals it, as `eliminationValueCode: "<code>"` (SSB 07459 `Region` → `"0"`, SCB TAB6471 `Region` → `"00"`). If you need to know which form a dimension uses, that probe is the way to find out.
+
+Eliminability is a property of the **table**, not of the variable name: SCB's `Alder` is eliminable in TAB638 and mandatory in TAB6471.
 
 ---
 
@@ -187,7 +189,7 @@ The `extension` key is either a variable name (a URN for the whole variable) or 
 
 The loss is silent in all three cases:
 
-- **Time periodicity.** PX declares it explicitly (`TIMEVAL(...)=TLIST(A1|H1|Q1|M1|W1)`, which also guarantees consecutive periods). json-stat2 has no standard field for it — `role.time` names the time dimension but says nothing about its frequency. PxWebApi v2 works around this with **`timeUnit` on the `/tables` resource, *outside* the json-stat2 document**. If a consumer downstream needs to know whether an axis is monthly or quarterly, carry `timeUnit` across yourself; the dataset will not.
+- **Time periodicity.** PX declares it explicitly (`TIMEVAL(...)=TLIST(A1|H1|Q1|M1|W1)`, which also guarantees consecutive periods). json-stat2 has no standard field for it — `role.time` names the time dimension but says nothing about its frequency. PxWebApi v2 works around this with **`timeUnit` on the `/tables` resource, *outside* the json-stat2 document**. If a consumer downstream needs to know whether an axis is monthly or quarterly, carry `timeUnit` across yourself; the dataset will not. `timeUnit: Other` means the codes are not periods at all (Latvia `IRJ010`: `Time01`).
 - **The aggregation that produced a figure.** An omitted dimension is eliminated and **disappears from `id` and `dimension` entirely** — the dataset does not record that it was summed away, or over what.
 - **Which codelist a code came from.** Requesting `codelist[Var]=agg_…` leaves no trace in the response: the dimension comes back with the aggregated codes and an `extension` that names no codelist. Two different aggregations of the same variable produce datasets that look alike and are not.
 
