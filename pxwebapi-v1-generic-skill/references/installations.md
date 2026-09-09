@@ -1,13 +1,18 @@
 # Known PxWebApi v1 installations
 
-**49 installations**, merged from the two catalogues shipped with the R package `pxweb`
-(rOpenGov) and probed live on **2026-08-31**. 43 responded; all 43 also answered `?config`.
+**50 installations.** 49 of them are merged from the two catalogues shipped with the R package
+`pxweb` (rOpenGov) and were probed live on **2026-08-31**; 43 responded, and all 43 answered
+`?config`. The 50th, Oslo kommune, does not appear in either catalogue and was added and probed
+separately on **2026-09-04**. The catalogues are not confined to national statistical offices —
+they already carry three Swedish municipalities and a number of sector agencies — but their
+coverage outside Sweden thins out quickly, so treat a missing agency as unprobed rather than as
+evidence it runs no PxWeb.
 
 ## How this relates to the table in `SKILL.md`
 
 The two lists answer different questions and are verified to different depths.
 
-| | `SKILL.md` table (7) | This file (49) |
+| | `SKILL.md` table (7) | This file (50) |
 |---|---|---|
 | Base URL given | through DATABASEID — ready to POST against | to the LANGUAGE level only |
 | `?query=` support | probed and recorded | **not probed** |
@@ -19,6 +24,27 @@ described in Step 1.
 
 An entry here is **not** promotable to the `SKILL.md` table without probing `?query=` support
 and finding its DATABASEID.
+
+## Operational notes for the seven verified installations
+
+Three of the seven do not follow the shape the `SKILL.md` table implies, and each breaks a
+different assumption:
+
+- **Iceland splits its content across six databases** — `Atvinnuvegir`, `Efnahagur`, `Ibuar`,
+  `Samfelag`, `Sogulegar`, `Umhverfi` — so there is no single base URL; GET
+  `https://px.hagstofa.is/pxis/api/v1/is` to list them. English is served by a **different
+  APINAME**, `pxen` in place of `pxis` (`https://px.hagstofa.is/pxen/api/v1/en`), *not* by
+  swapping the language segment. This is the one installation where the language does not live
+  where the URL template says it does.
+- **Statistics Finland hosts eleven databases**, of which `StatFin` is only the main one; the rest
+  include `StatFin_Passiivi` (discontinued series), `Kuntien_avainluvut` (municipal key figures),
+  `Hyvinvointialueet` (wellbeing services counties) and `SDG`. GET
+  `https://pxdata.stat.fi/PXWeb/api/v1/en` to list them. **A table missing from `StatFin` is often
+  in `StatFin_Passiivi`** — check there before concluding a series does not exist.
+- **SSB's `table` is a DATABASEID, not a literal path segment.** `GET
+  https://data.ssb.no/api/v0/no` returns `[{"dbid": "table", "text": "Statistikkbanken etter
+  emne"}]`. It just happens to read like a REST resource, which invites the assumption that other
+  installations have a `/table` segment too. They do not.
 
 ## Reading the tables
 
@@ -39,18 +65,51 @@ it by bisection if it matters.
 
 Markers: **‡** present only in the CRAN 0.17.0 catalogue, not in the development one ·
 **†** the installation reports `1000000 calls per 1000000 seconds`, which is a "not in use"
-sentinel rather than a real limit · **\*** URL corrected against the catalogue after probing
+sentinel rather than a real limit · **\*** URL corrected against the catalogue after probing · **§** not from the R catalogues; added and probed separately
 
 Status reflects the **root endpoint at probe time**. It does not mean the whole API works,
 and it says nothing about `?query=` support.
 
-## Nordic countries and autonomous areas (26 of 29 responding)
+## Nordic countries and autonomous areas (27 of 30 responding)
 
-### Norway (1)
+### Norway (2)
 
 | Status | Organisation | Lang | Calls | Values / cells | URL template |
 |---|---|---|---|---|---|
 | **OK** | Statistics Norway ‡ (v0) \* | `en`, `no` | 300/60 s | 50 k / 800 k | `https://data.ssb.no/api/[version]/[lang]` |
+| **OK** | Oslo kommune — Oslostatistikken § | `no` only | 50/10 s | **1 k** / 550 k | `https://statistikkbanken.oslo.kommune.no/statbank/api/v1/no` |
+
+Oslo kommune joins the Swedish municipalities already listed here (Linköping, Sundsvall, Västerås)
+as a sub-national installation, and unlike most entries in this file it is verified **end to end** —
+base URL through DATABASEID, hierarchy walked, `?query=` probed, a real extract retrieved. Five
+things about it are worth knowing before you query it, and none of them follow from the SSB entry
+above:
+
+- **It has the widest gap between the two ceilings in this file: 1 000 values against 550 000
+  cells, a factor of 550.** The 1 000-value limit is itself unremarkable — it is the single most
+  common `maxValues` here, appearing on 19 installations, and looks like the PxWeb default. What
+  makes Oslo the sharpest illustration of the independent-ceilings rule is the pairing: a selection
+  can sit at a fraction of a percent of the cell budget and still be refused for naming too many
+  individual values. Compare SSB, where the same ratio is 16.
+- **One database, `db1`,** whose `text` is also literally `db1`. `GET …/no` returns
+  `[{"dbid":"db1","text":"db1"}]`.
+- **Norwegian only.** `…/api/v1/en` returns 400; there is no English service.
+- **Level ids are full Norwegian phrases containing spaces, commas and å/ø** — for example
+  `Befolkning/Fødte, døde og forventet levealder`. They must be percent-encoded when building the
+  URL. Table ids carry an `OK-` prefix and a `.px` extension (`OK-BEF001.px`), so this is a
+  file-based installation and its aggregations are not discoverable through the API.
+- **Variable codes are lowercase Norwegian words** — `bosted`, `kjønn`, `alder`, `år` — not SSB's
+  `Region` / `Kjonn` / `Alder` / `Tid`. Two installations in the same country, same language, and
+  the naming does not carry across. Note also that `år` is `time: true` with codes that are
+  **sequence numbers**, the years appearing only in the labels (`"36" → "2026"`), the same shape as
+  Statistics Greenland's time variables — so `item` takes `"36"`, never `"2026"`.
+
+Errors come back as a bare `Bad Request` with no JSON diagnostic, as everywhere except SSB. Omitting
+`"response"` yields json-stat2. The `source` field credits Statistics Norway: Oslo republishes SSB
+data cut to city geography — administrative and school-intake districts SSB's own tables do not
+carry — so it complements `data.ssb.no` rather than duplicating it.
+
+§ Not from the `pxweb` R catalogues; added from a user report and probed directly 2026-09-04.
 
 ### Sweden (14)
 

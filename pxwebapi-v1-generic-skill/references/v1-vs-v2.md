@@ -23,7 +23,7 @@ request side — endpoints, body shape, filters, discovery — differs.
 | Default selection | *(none)* | `GET /tables/{id}/defaultselection` |
 | **Get data** | **`POST {table_url}`** | `GET` or `POST /tables/{id}/data` |
 | Look up a codelist | *(none)* | `GET /codelists/{id}` |
-| Saved queries | *(none)* | `POST /savedqueries`, `GET /savedqueries/{id}/data` |
+| Saved queries | *(none — only PxWeb's web "saved query" links, e.g. SSB's `ssb.no/statbank/sq/{id}`)* | `POST /savedqueries`, `GET /savedqueries/{id}/data`. At SSB the v1-era web IDs resolve here too: `GET /savedqueries/10119120` returns the definition and `/data` the file (verified 2026-09-09) — the route for a user who arrives with an old sq link, since the PxWeb v2 web page for it no longer serves csv/xlsx |
 
 v1's table space is a **tree**: a table is addressed by its full subject path. v2's is **flat**:
 a table is addressed by id alone. SSB's `/table/{5-digit number}` shortcut is a v1 installation
@@ -72,7 +72,7 @@ disappears, its meaning folded into the value expressions themselves.
 | `{"filter": "top", "values": ["5"]}` | `["top(5)"]` | Count is a string in v1 |
 | `{"filter": "agg:KommFylker", "values": ["F-03"]}` | `"codelist": "agg_KommFylker", "valueCodes": ["F-03"]` | **`agg:X` ↔ `agg_X`** |
 | `{"filter": "vs:NUTS", "values": [...]}` | `"codelist": "vs_NUTS", "valueCodes": [...]` | **`vs:X` ↔ `vs_X`** |
-| *(no equivalent)* | `["bottom(3)"]`, `["from(2020)"]`, `["to(2022)"]`, `["range(2018,2023)"]` | v2-only |
+| *(no equivalent)* | `["bottom(3)"]`, `["from(2020)"]`, `["to(2022)"]`, `["range(2018,2023)"]`, `["top(3,2)"]` / `["bottom(5,1)"]` (offset forms) | v2-only. Shown in POST form; in a v2 **GET** URL an expression containing a comma must be bracketed — `valueCodes[Tid]=[range(2018,2023)]` — or it is split on the comma and rejected (`Illegal selection expression`). Expressions may be mixed with plain codes |
 | *(no equivalent)* | `["??"]` | `?` masking is v2-only |
 
 That `agg:X` ↔ `agg_X` correspondence is more than cosmetic — see "Using v2 to fill v1's gaps".
@@ -149,15 +149,17 @@ the unhyphenated form.
 
 ## Using v2 to fill v1's gaps
 
-When an installation runs both versions over the same tables — SSB and SCB both do — v2 is the
-better discovery tool even if you must retrieve through v1. Verified end to end against SSB
-table 07459 on 2026-08-28:
+When an installation runs both versions over the same tables — SSB and SCB, which are also the only
+two relational installations, so the trick helps least where it is available — v2 is the better
+discovery tool even if you must retrieve through v1. Verified end to end against SSB table 07459,
+re-confirmed 2026-09-03:
 
 ```
 # 1. v2 metadata lists the aggregations v1 will not show you
+#    Note the casing: the JSON field is `codelists`, though the endpoint path is /codeLists/
 GET https://data.ssb.no/api/pxwebapi/v2/tables/07459/metadata?lang=no
-    → dimension.Region.extension.codeLists = [{"id": "agg_KommFylker", "label": "Fylker 2024, …"}, …]
-      dimension.Alder.extension.codeLists  = [{"id": "agg_FemAarigGruppering", …}, …]
+    → dimension.Region.extension.codelists = [{"id": "agg_KommFylker", "label": "Fylker 2024, …"}, …]
+      dimension.Alder.extension.codelists  = [{"id": "agg_FemAarigGruppering", …}, …]
 
 # 2. v2 codelist endpoint gives the member codes and what each aggregates
 GET https://data.ssb.no/api/pxwebapi/v2/codeLists/agg_KommFylker?lang=no
@@ -171,6 +173,19 @@ POST https://data.ssb.no/api/v0/no/table/07459
 ```
 
 The same trick recovers units, decimals and `role` without spending a probe query.
+
+**Matching a v1 table to its v2 id: use `extension.px.tableid`.** The two APIs name tables
+differently — SCB's v1 addresses them by PX filename (`BefolkManadCKM`) and its v2 by an opaque id
+(`TAB6471`) — so guessing from the label is unreliable, and two tables with near-identical titles
+can differ in coverage by decades. Run any small v1 query and read `extension.px.tableid`: it
+carries the v2 id directly, and `extension.px.matrix` carries the PX matrix name. Confirm the match
+before importing anything from the v2 side; a codelist taken from the wrong table produces a 400
+that looks exactly like a forbidden aggregation.
+
+**One thing does not carry across, so check it before assuming a v2 recipe will run on v1.** When
+`extension.px.aggregallowed` is `false`, v2 still applies the aggregation and returns data, while
+SSB's v1 rejects `agg:` with 400 on the same table with the same codes — verified on tables 14700
+and 11342, 2026-09-03. `vs:` is unaffected in both. See `px-files-and-classifications.md`.
 
 If the installation has no v2, the fallbacks are the agency's web front end ("API query for this
 table" emits a complete v1 body including aggregation names) and its classification service.

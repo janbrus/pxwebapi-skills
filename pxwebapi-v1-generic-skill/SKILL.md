@@ -13,7 +13,7 @@ description: >
   SCB `statistikdatabasen.scb.se/api/v2`) prefer `generic-pxweb-v2-skill`,
   `ssb-pxwebapi-v2` or `scb-pxwebapi-v2` instead.
 metadata:
-  version: "0.11.0"
+  version: "0.12.0"
 ---
 
 # PxWebApi v1 — Generic Skill
@@ -51,25 +51,9 @@ All base URLs below were verified live on 2026-08-28.
 | Statistics Greenland | Greenland | `https://bank.stat.gl/api/v1/{da\|en\|kl}/Greenland` | yes |
 | Statistics Estonia | Estonia | `https://andmed.stat.ee/api/v1/{et\|en}/stat` | yes |
 
-Two of these do not follow the pattern the others suggest:
+Three of the seven break the shape this table implies: **Iceland and Finland each host several databases** rather than one, and Iceland serves English from a different APINAME (`pxen`, not a language swap) — see `references/installations.md` for those and for SSB's `table`, which is a DATABASEID that merely reads like a path segment.
 
-- **Iceland splits its content across six databases** — `Atvinnuvegir`, `Efnahagur`, `Ibuar`,
-  `Samfelag`, `Sogulegar`, `Umhverfi` — so there is no single base URL; GET
-  `https://px.hagstofa.is/pxis/api/v1/is` to list them. English is served by a **different
-  APINAME**: `pxen` in place of `pxis` (`https://px.hagstofa.is/pxen/api/v1/en`), not by swapping
-  the language segment.
-- **SSB's `table` is a DATABASEID, not a literal path segment** — `GET https://data.ssb.no/api/v0/no`
-  returns `[{"dbid": "table", "text": "Statistikkbanken etter emne"}]`. It just happens to read
-  like a REST resource.
-- **Statistics Finland hosts eleven databases**, of which `StatFin` is only the main one; the rest
-  include `StatFin_Passiivi` (discontinued series), `Kuntien_avainluvut` (municipal key figures),
-  `Hyvinvointialueet` (wellbeing services counties) and `SDG`. GET
-  `https://pxdata.stat.fi/PXWeb/api/v1/en` to list them. A table missing from `StatFin` is often
-  in `StatFin_Passiivi`.
-
-The seven above are verified end to end: base URL through DATABASEID, hierarchy walked, `?query=` support probed. **`references/installations.md` holds the full inventory of 49 known v1 installations** — status, languages and `?config` limits, all probed 2026-08-31 — but only to the LANGUAGE level, without `?query=` support. Look there when the user names an agency not in this table; then walk the hierarchy from its base URL as in Step 1.
-
-Neither list is exhaustive — many national and regional agencies run PxWeb. If an installation appears in neither, probe it rather than assuming it does not exist.
+These seven are verified end to end: base URL through DATABASEID, hierarchy walked, `?query=` support probed. **`references/installations.md` holds the broad inventory of 50 known v1 installations** — status, languages and `?config` limits, most of them probed only to the LANGUAGE level. Look there when the user names an agency missing from this table, then walk its hierarchy as in Step 1; and if it appears in neither list, probe it rather than assuming it does not exist.
 
 **Note:** SSB serves PxWebApi **1.0 at `/api/v0/`** — the `v0` is the URL's API-version segment, not a beta marker. SSB also runs v2 in parallel at `https://data.ssb.no/api/pxwebapi/v2`; so does SCB. When an installation offers both, prefer v2 (`generic-pxweb-v2-skill`) unless the user specifically wants v1.
 
@@ -88,9 +72,6 @@ If you know PxWebApi v2, read this table before doing anything else. The **respo
 | Output format | `"response": {"format": "json-stat2"}` in the body | `?outputFormat=json-stat2` in the query string |
 | Filters | `item`, `all`, `top`, `agg:X`, `vs:X` | `top(n)`, `bottom(n)`, `from(x)`, `to(x)`, `range(a,b)`, `*`, `?` |
 | Codelists / aggregations | **not in metadata** — must be known in advance | `extension.codelists` + `GET /codelists/{id}` |
-| Table discovery | hierarchy navigation; `?query=` on some installations | `GET /tables?query=…` with pagination |
-| Limits | `GET …/{LANGUAGE}/?config` (query parameter) | `GET /config` (path segment) |
-| Saved queries | none | `/savedqueries` |
 | Units, decimals, `role` in metadata | no (present in the json-stat2 *data* response only) | yes |
 
 See `references/v1-vs-v2.md` for a migration guide in both directions.
@@ -99,32 +80,12 @@ See `references/v1-vs-v2.md` for a migration guide in both directions.
 
 ## Environment check — before Step 1
 
-v1 data retrieval needs an HTTP **POST** with a JSON body. Confirm you
-actually have a tool that can send one before starting the workflow below —
-otherwise you can burn many search/fetch calls discovering this only at the
-end.
+v1 data retrieval needs an HTTP **POST** with a JSON body. Confirm you have a tool that can send one before starting the workflow — otherwise you can burn many calls discovering this only at the end.
 
-- **Bash/shell with network access to the target host** (Claude Code, a
-  sandboxed bash tool with the host allowlisted, a terminal) → `curl -X POST`
-  works. Proceed normally.
-- **A GET-only web-fetch tool** (e.g. one restricted to URLs already seen in
-  a search or fetch result) **cannot** send the POST body v1 data retrieval
-  needs. It can only retrieve what GET returns — metadata, database/table
-  hierarchy listings, and the `?config` limits. It cannot retrieve the data
-  cube itself.
-- **An MCP tool that wraps HTTP with POST support** (e.g. a curl-style MCP
-  server) → works if connected.
+- **Bash/shell with network access to the host**, or an MCP tool that wraps HTTP with POST support → `curl -X POST` works. Proceed normally.
+- **A GET-only web-fetch tool** (e.g. one restricted to URLs already seen in a search result) **cannot** send the body v1 needs. It reaches metadata, hierarchy listings and `?config` — never the data cube.
 
-If you don't have a POST-capable tool: say so plainly, then still do the
-useful GET-only parts — identify the installation, walk the hierarchy, find
-the exact table and its variable codes via metadata (Step 1–2 below don't
-need POST). Skip straight to **Fallback** for the data itself: give the user
-the direct table URL in the agency's web interface, and point them to its
-"API query for this table" / "Make this table available in your
-application" button, which emits a ready-made POST body they (or a
-POST-capable tool) can run. State clearly that you could not retrieve the
-actual figures in this environment — don't substitute numbers from memory or
-from a third-party aggregator instead.
+Without POST, say so plainly and still do the GET-only parts: Steps 1–2 identify the installation, walk the hierarchy and read the variable codes without ever needing POST. Then go to **Fallback** for the figures themselves. State clearly that you could not retrieve them in this environment — do not substitute numbers from memory or from a third-party aggregator.
 
 ---
 
@@ -148,8 +109,10 @@ If you do not know an installation's base URL, walk it down from the top: a GET 
 
 ```
 GET {host}/{APINAME}/{APIVERSION}/{LANGUAGE}/?config
-→ {"maxValues": 120000, "maxCells": 120000, "maxCalls": 40, "timeWindow": 60, "CORS": true}
+→ {"maxValues": {n}, "maxCells": {n}, "maxCalls": {n}, "timeWindow": {seconds}, "CORS": true}
 ```
+
+The field *names* are the point; the values are not. Real figures for the installations probed so far are in `references/api-details.md` and `references/installations.md` — never carry one installation's numbers to another.
 
 | Field | Meaning |
 |---|---|
@@ -158,13 +121,14 @@ GET {host}/{APINAME}/{APIVERSION}/{LANGUAGE}/?config
 | `maxCalls` / `timeWindow` | Rate limit: `maxCalls` requests per `timeWindow` seconds |
 | `CORS` | Whether browser clients can call the API directly |
 
-Verified on all seven installations listed above (Estonia needs the URL without a trailing slash: `.../et?config`), and on **43 of 43** reachable installations in the wider sweep of 2026-08-31 — `?config` is universal in v1, not a feature some installations happen to offer.
+Every v1 installation probed so far answers it, so treat it as universal rather than as a feature some agencies happen to offer. Estonia is the one quirk: it needs the URL without a trailing slash (`.../et?config`).
 
-`maxValues` and `maxCells` are independent — SSB allows 800,000 cells but only 50,000 selected values, so a query naming tens of thousands of individual codes can fail well inside the cell budget.
+Three things to know about what comes back:
 
-**`maxCells` may be absent.** Five of the 43 return the other four fields without it. Do not read that as "no cell limit" — the 403 cell-limit response still applies; you just have to find the ceiling by bisection. See `references/installations.md`.
-
-**Do not trust a limit from anywhere but `?config`.** Agencies' published figures and third-party catalogues disagree with it routinely: of 26 installations listed in the R package `pxweb`, 10 have the wrong call limit and 10 the wrong value limit. SSB is the clean example — its own documentation says 30 calls/60 s, `?config` says 300.
+- **`maxCells` is sometimes missing.** Absence is not "no cell limit" — the 403 still fires; you just have to find the ceiling by bisection.
+- **Check your query against the ceilings before sending it.** Cells are the *product* of the selected value counts, values their *sum*. From a metadata response that is `prod(len(v["values"]))` and `sum(len(v["values"]))` over the variables you did not restrict — cheaper than discovering the limit as a 403.
+- **`maxValues` and `maxCells` are independent ceilings, and the tighter one varies by installation.** Selecting `*` on a large variable can breach the value ceiling while the cell count still looks safe. The limits also spread across roughly two orders of magnitude between installations, so a query shaped for one agency can fail outright at another — the measured table is in `references/api-details.md`.
+- **Do not take a limit from anywhere else.** Agencies' published figures and third-party catalogues disagree with `?config` routinely, in both directions. SSB is the clean example: its own documentation says 30 calls/60 s, `?config` says 300. `?config` wins — it reports what the installation *enforces*, while the others record what someone *published*.
 
 ### Step 2: Find the table
 
@@ -173,8 +137,9 @@ Two routes. Use search where it exists; otherwise navigate.
 **a) Navigate the hierarchy (works everywhere).** GET any level to list its children:
 
 ```
-GET {base_url}/be
-→ [{"id":"be01","type":"l","text":"Befolkning"}, …]
+GET {base_url}/BE
+→ [{"id":"BE0001","type":"l","text":"Namnstatistik"},
+   {"id":"BE0101","type":"l","text":"Befolkningsstatistik"}, …]
 ```
 
 Each node has `id`, `text` and `type`:
@@ -227,21 +192,19 @@ The same URL you will POST to. The response is deliberately minimal:
 }
 ```
 
-Each variable object has `code` and `text` (both required), plus optional `elimination` and `time` — **when absent, both default to `false`**. `values` and `valueTexts` are positionally aligned: `values[i]` is the code you put in a query, `valueTexts[i]` is its human label. At most one variable may have `time: true`.
+Each variable object has `code` and `text` (both required), plus optional `elimination` and `time` — **when absent, both default to `false`**. `values` and `valueTexts` are positionally aligned: `values[i]` is the code you put in a query, `valueTexts[i]` is its human label. At most one variable may have `time: true`. Installations may add fields of their own — Statistics Finland attaches `map` (e.g. `"Alue 2026"`) to its geography variable — so read what is there rather than assuming this list is complete. There is **no** field naming the elimination value; that gap is real, and Step 4 explains how to work around it.
 
-**`time: true` tells you nothing about the frequency, and does not guarantee the codes are dates.** The PX file declares a time scale (`TLIST(A1|H1|Q1|M1|W1)`) but v1 discards it, and json-stat2 has no field for it either. Infer the frequency from `values` — `2026` annual, `2025M12` monthly, `2020K3` quarterly at SSB/SCB — and never construct codes from a pattern you have not seen in that table. Statistics Greenland has a `time: true` variable whose codes are `0`–`50` with the years only in `valueTexts`; there, `item` needs `"50"`, not `"2025"`. See `references/query-syntax.md`.
+**`time: true` tells you nothing about the frequency, and does not guarantee the codes are dates.** The PX file's time scale (`TLIST`) is discarded by v1, and json-stat2 has no field for it either, so read the frequency off the shape of `values` and never construct a code from a pattern you have not seen in that table. Statistics Greenland has a `time: true` variable whose codes are `0`–`50`, with the years only in `valueTexts`. `references/query-syntax.md` has the period formats and the full TLIST story.
 
-**Never assume variable names.** The Nordic convention `Region` / `ContentsCode` / `Tid` holds at SSB and SCB but nowhere near universally — Statistics Finland uses `alue_23_20260101`, `contentscode` and `timeperiod_y` in the same role, and the geography code even embeds a classification date that changes between table versions. Statistics Greenland uses lowercase English words, **including codes that contain spaces** (`place of birth`). Read `variables[].code` every time and copy it verbatim into `"code"`.
-
-**Totals may be explicit values, eliminable, or both.** Greenland's `BEXST8.px` gives `age` an explicit `-1` = "Total" *and* `elimination: true`; selecting `-1` and omitting the variable return the same figure (verified). SSB's `Kjonn` in table 07459 has neither total in `values` nor any way to get one except omission. Check `valueTexts` for a "Total"/"I alt"/"Hele landet" entry before assuming which route you need.
+**Never assume variable names.** The Nordic convention `Region` / `ContentsCode` / `Tid` holds at SSB and SCB but nowhere near universally — Statistics Finland uses `alue_23_20260101`, `contentscode` and `timeperiod_y` in the same role, and the geography code even embeds a classification date that changes between table versions. Statistics Greenland uses lowercase English words, **including codes that contain spaces** (`place of birth`). Statistics Iceland's *English* endpoint returns codes still in Icelandic, accents and all — `Ár` and `Eining` where you would expect `Tid` and `ContentsCode` — so an English URL is no guarantee of English codes. Read `variables[].code` every time and copy it verbatim into `"code"`.
 
 **What v1 metadata does *not* tell you** — plan around these gaps:
 
-- **No `role`.** You must infer which variable is the metric, the time and the geography. The time variable is the one with `time: true`. The metric is usually the one named like `ContentsCode`/`contentscode`; otherwise it is the variable whose `valueTexts` read as measures ("Persons", "Index", "NOK"). Geography is whatever looks like regions. *The json-stat2 data response does include `role`* — so if you are unsure, run a tiny `top`-1 probe query and read `role` off the result.
+- **No `role`.** You must infer which variable is the metric, the time and the geography. The time variable is the one with `time: true`. The metric is usually the one named like `ContentsCode`/`contentscode`; otherwise it is the variable whose `valueTexts` read as measures ("Persons", "Index", "NOK"). Geography is whatever looks like regions. *The json-stat2 data response usually does include `role`* — so if you are unsure, run a tiny `top`-1 probe query and read `role` off the result. Do not count on it: Greenland's `BEXSAT1.PX` returns **no `role` key at all** (verified 2026-09-04), because its metadata sets no `time: true` on the variable it literally calls `time`. When the probe comes back without `role`, fall back to reading the title and `valueTexts`.
 - **There may be no metric variable at all.** Many tables outside the Nordic core have no `ContentsCode`-equivalent: the whole table measures one thing, named only in the title. Statistics Greenland's `BEXST8.px` has variables `age`, `place of birth`, `gender`, `time` and nothing else — its data response comes back with `role: {"time": ["time"]}`, no `metric` and no `geo`. When `role.metric` is absent, do not hunt for it: read the measure off the table title and the subject level, and say so explicitly when presenting.
 - **No units or decimals.** Also only in the data response (`dimension.{metric}.category.unit`) — and some installations omit `unit` there too.
 - **No codelists or aggregations.** Groupings such as five-year age bands or merged-municipality time series exist and are usable via the `agg:` filter, but are invisible here — on file-based installations they are separate `.vs`/`.agg` files that the API never reads. See `references/query-syntax.md` for how to discover them and `references/px-files-and-classifications.md` for how they are structured.
-- **No elimination *value*.** When `elimination: true`, the total exists but is often not in `values` — you obtain it by omitting the variable, not by selecting a code. (Some installations do list an explicit total, e.g. SCB's `TotSA`/`TotSa`.)
+- **Which route gives you a total.** `elimination: true` usually means the total is *not* in `values` and you get it by omitting the variable — but some tables offer both routes (Greenland's `age` has an explicit `-1` = "Total" *and* `elimination: true`; verified to give the same figure either way), some offer only an explicit code (SCB's `TotSA`/`TotSa`), and some only omission (SSB's `Kjonn` in 07459). Scan `valueTexts` for "Total" / "I alt" / "Hele landet" before deciding. See `references/query-syntax.md`.
 
 ### Step 4: Build the query and POST it
 
@@ -259,7 +222,9 @@ Content-Type: application/json
 }
 ```
 
-`"query"` is an array of selection objects; `"response"` is optional and **defaults to PX format**, so always set it explicitly.
+`"query"` is an array of selection objects. `"response"` is optional — **and omitting it gives three different formats across the seven verified installations**, so always set it explicitly. Measured 2026-09-04: SSB, Finland and Estonia return `json-stat2`; SCB and Greenland return PX; the Faroe Islands and Iceland return PX-JSON. The spec says PX; that is true of two installations out of seven.
+
+The PX-JSON case is the dangerous one, because it *is* JSON — a check like "did I get JSON back?" passes, and only then do you find there is no `value`, `dimension` or `id`, just `columns` / `data` / `metadata` in a completely different shape. Set `"response"` and this never arises.
 
 #### Filters
 
@@ -268,16 +233,16 @@ Content-Type: application/json
 | `item` | Explicit list of value codes | `["0301", "1103"]` |
 | `all` | Wildcard match | `["*"]` = all; `["202*"]` = codes starting with 202 |
 | `top` | The N newest (for `time: true`) or first N values | `["5"]` — a single positive integer as a **string** |
-| `agg:{name}` | Values come from aggregation `{name}` | `["F-03", "F-11"]` |
+| `agg:{name}` | Values come from aggregation `{name}` — if you got the name from v2, drop its `agg_` prefix (`agg_KommFylker` → `agg:KommFylker`); keeping it gives `Parameter error` | `["F-03", "F-11"]` |
 | `vs:{name}` | Values come from alternative value set `{name}` | `["01", "02"]` |
 
-Notes verified live against SSB and SCB:
+Verified live against SSB and SCB: `agg:` takes only explicit codes (never `*`), `?` single-character masking does not exist in any filter, and several wildcards in one `all` list do work on current builds despite the spec saying otherwise. Aggregation and valueset names are filenames, so a name valid on one table is often invalid on another. Details and verification: `references/query-syntax.md`.
 
-- **Multiple wildcards in one `all` list work** — `{"filter": "all", "values": ["199*", "202*"]}` correctly returns the 1990s plus the 2020s. The official SCB 1.0 specification states only one wildcard is permitted; current builds allow several. Older installations may not — fall back to `item` if you get a 400.
-- **`agg:` accepts only explicit codes.** `{"filter": "agg:X", "values": ["*"]}` returns 400. You must enumerate the aggregate codes.
-- **Aggregation and valueset names are filenames**, so they may contain spaces and punctuation (`agg:25-years classes`). An aggregation belongs to one valueset, so a name valid on one table is often invalid on another.
-- **`?` single-character masking is not supported** in any filter.
-- `top` is the tool for **rolling queries** — a stored `top` query keeps returning the newest periods as new data is published, whereas an `item` list of future dates errors out.
+Two things worth knowing before you reach for `agg:`:
+
+- `top` is the tool for **rolling queries** — a stored `top` query keeps returning the newest periods as data is published, whereas an `item` list of future dates errors out.
+- **`extension.px.aggregallowed` is a hint, not a prediction.** Read it from any small query's response, but do not plan around it: it is **absent entirely** at Iceland, the Faroes and Estonia, and where it is `false` the installations disagree about what that means — SSB rejects `agg:` with 400, SCB serves the data anyway (verified across all seven, 2026-09-03/04). Send the query and handle the answer. See `references/px-files-and-classifications.md`.
+- **Before concluding you need `agg:` at all, look at the code shapes in `values`.** Hierarchical classifications usually carry their own levels as ordinary item codes, so the grouping you want may already be selectable: SSB 14700's `VareTjenesteGrp` runs `00` (total) → `01` (main group) → `01.1` → `01.1.1`, and 07459's `Region` runs 1 digit (country) → 2 (county) → 4 (municipality). An `item` selection of the right code length gives you the level directly. This does **not** replace `agg:` for consistent time series — 07459 lists 41 two-digit county codes because it keeps historical ones, so selecting them all mixes boundaries across reforms, which is exactly what `agg:KommFylker` exists to fix.
 
 #### Elimination — omitting a variable
 
@@ -299,87 +264,32 @@ Set in the body as `"response": {"format": "…"}`.
 
 | Format | Notes |
 |---|---|
-| `json-stat2` | **Recommended.** json-stat2 v2.0. Rich metadata, logical element order, handles large extracts. |
-| `json-stat` | json-stat v1.2. Legacy; random element order, struggles with the largest datasets. |
-| `csv3` | Codes only, comma-separated, first row is variable codes + table id. Most robust CSV. |
-| `csv2` | Pivoted, human-readable texts, one value per row. |
-| `csv` | Legacy, single-header layout. Not recommended. |
-| `px` | PC-Axis PX. **The default when `response` is omitted.** |
+| `json-stat2` | **Recommended.** Rich metadata, logical element order, handles large extracts. |
+| `px` | PC-Axis PX. The spec's default when `response` is omitted — but only two of seven installations actually do that. |
+| `csv3` | Codes only. The most robust CSV. |
 | `xlsx` | Excel. Avoid for large extracts — prone to timeouts. |
-| `json` | PX-JSON: `{"columns": […], "data": [{"key": […], "values": […]}]}`. |
-| `sdmx` | SDMX-ML. |
 
-**Format names are hyphenated.** Live SSB and SCB both accept `json-stat2` and `json-stat` and both reject `jsonstat2` and `jsonstat` with `400`. The published PxWeb 1.0 specification and several agency guides give the unhyphenated spellings; they are outdated. Availability also varies — some agencies disable `px`, `json` and `sdmx` even though PxWeb implements them.
-
-CSV conventions differ from agency "ready-made dataset" APIs: in PxWebApi, CSV2/CSV3 use comma as field separator, `.` as decimal separator, and quote text fields. Decimal separator is `.` in every format and language, except Excel output in some locales.
+**Format names are hyphenated**: `json-stat2` and `json-stat` work, `jsonstat2` and `jsonstat` return 400, and the published spec giving the unhyphenated spellings is simply outdated. The other formats (`json-stat`, `csv2`, `csv`, `json`, `sdmx`), their CSV conventions, and the fact that availability varies by agency: `references/api-details.md`.
 
 ### Step 5: Present results
 
 - Display data in a clean markdown table.
 - **Always** cite every table used — e.g. "Source: {Agency}, table {id}". Never omit a source table when combining several.
-- State units explicitly. v1 metadata has none, so take them from `dimension.{metric}.category.unit` in the json-stat2 response, or from the metric's `valueTexts`. **Both can be missing** — Statistics Greenland returns no `unit` on any dimension. Then the unit lives only in the table title, and you must name it yourself rather than presenting bare numbers.
-- Say which variables you eliminated and what that means ("all ages and both sexes combined") — the response will not show it.
+- State units explicitly. v1 metadata has none, so take them from `dimension.{metric}.category.unit` in the json-stat2 response, or from the metric's `valueTexts`. **Both can be missing** — then the unit lives only in the table title, and you must name it yourself rather than presenting bare numbers.
+- Say which variables you eliminated and what that means ("all ages and both sexes combined") — the response will not.
 - Check `status` for suppressed or missing values before drawing conclusions.
 - Explain the numbers in context, in the user's language.
 
----
-
-## Limits
-
-Query them with `?config` (Step 1) rather than assuming. The spread across installations is
-enormous — verified 2026-08-28:
-
-| Agency | `maxCells` | `maxValues` | Rate limit |
-|---|---:|---:|---|
-| Statistics Estonia | 25,000,000 | 25,000,000 | 1,000 / 10 s |
-| Statistics Faroe Islands | 8,000,000 | 8,000,000 | effectively none |
-| Statistics Greenland | 2,000,000 | 1,000,000 | 10,000 / 10 s |
-| Statistics Norway (SSB) | 800,000 | 50,000 | 300 / 60 s |
-| Statistics Sweden (SCB) | 150,000 | 110,000 | 30 / 10 s |
-| **Statistics Finland** | **120,000** | 120,000 | 40 / 60 s |
-| Statistics Iceland | 100,000 | **5,000** | 200 / 10 s |
-
-Two traps this table makes visible:
-
-- **A query shaped for one installation can fail on another by two orders of magnitude.** Finland
-  and Iceland refuse at roughly a seventh of SSB's ceiling; Estonia would accept thirty times SSB's.
-- **`maxValues` can bite before `maxCells`.** Iceland allows 100,000 cells but only 5,000 selected
-  values; SSB allows 800,000 cells but only 50,000 values. Selecting `*` on a large variable can
-  breach the value ceiling while the cell count still looks safe.
-
-Published agency documentation drifts from these values — SSB's user guide states 30 calls / 60 s
-where `?config` reports 300, and Statistics Finland's API page states a 100,000-cell limit where
-`?config` reports 120,000 (independently confirmed by bisection: 117,000 accepted, 124,800
-refused). **Trust `?config` over the documentation.**
-
-Run large queries **in sequence**, waiting for each response before firing the next. Avoid the
-minutes right after a publishing deadline (SSB publishes at 08:00 CET; avoid 07:55–08:15).
-
----
-
-## Response format
-
-`json-stat2` returns a standard json-stat2 Dataset — the same structure as PxWebApi v2, Eurostat and the World Bank. See `references/json-stat2.md` for the Dataset shape, row-major indexing, `role`, and status codes.
-
-Special-value symbols in `status` (data itself is `null`):
-
-| Symbol | Meaning |
-|---|---|
-| `.` | Not applicable — category did not exist when data was collected |
-| `..` | Data not available |
-| `:` | Confidential — withheld to avoid identifying a person or business |
-
-Exact symbols vary by agency; check the response.
+The json-stat2 structure itself — row-major indexing, `role`, units, and the `status` symbols — is in `references/json-stat2.md`.
 
 ---
 
 ## Pitfalls — never
 
 - Try to fetch data with GET — v1 has no GET data endpoint; a GET returns metadata.
-- Omit `"response"` and then expect JSON — the default is PX.
+- Rely on the default output format — omitting `"response"` yields PX, PX-JSON or json-stat2 depending on the installation. Always set it.
 - Use `jsonstat2`/`jsonstat` as format names — they are rejected; use `json-stat2`/`json-stat`.
 - Assume variable codes (`Region`, `ContentsCode`, `Tid`) carry across installations — read metadata every time.
-- Assume `?query=` search exists — several installations return 400.
 - Assume an omitted variable is summed — if `elimination` is false or absent, you get *all* its values.
 - Combine `agg:` with `*`, or use `?` masking — both fail.
 - Present data without units, or without saying which dimensions were collapsed.
@@ -387,23 +297,8 @@ Exact symbols vary by agency; check the response.
 
 ---
 
-## Troubleshooting
-
-See `references/troubleshooting.md` for verified HTTP codes, exact error payloads, and how to tell v1's three distinct error messages apart.
-
----
-
-## PX files behind the API
-
-Most installations are file-based, which is why `.px` appears in their URLs and why their
-classifications are undiscoverable. `references/px-files-and-classifications.md` covers the
-`.vs`/`.agg` file structure, how filter names derive from filenames, and which PX-file keywords
-produce the metadata you see — including `ELIMINATION`, whose two forms are exactly the first two
-elimination rules, and `AGGREGALLOWED=NO`, which can forbid aggregation on a table with no
-API-visible sign.
-
----
-
 ## Fallback
 
-If the API is unavailable or the query cannot be expressed, refer the user to the agency's web statistical database. Most PxWeb front ends offer an "API query for this table" button that emits a ready-made v1 query body — the fastest way to obtain aggregation names that metadata does not expose.
+- **A call failed?** `references/troubleshooting.md` has the verified HTTP codes and how to tell v1's three distinct error payloads apart — including the bare `Bad Request` that carries no diagnostic at all.
+- **The query cannot be expressed, or the aggregation name is unknown?** Refer the user to the agency's web statistical database. Most PxWeb front ends offer an **"API query for this table"** button that emits a ready-made v1 query body — the fastest route to aggregation names metadata never exposes, and the thing to hand a user when your own environment cannot POST.
+- **Wondering why a classification is invisible?** Most installations are file-based, which is why `.px` appears in their URLs and why their `.vs`/`.agg` classifications are undiscoverable through the API. `references/px-files-and-classifications.md` covers that, and the PX keywords behind the metadata you do see — `ELIMINATION`, whose two forms are exactly the first two elimination rules, and `AGGREGALLOWED`.

@@ -1,0 +1,46 @@
+# Holder generic-pxweb-v1-skill.zip synkron med arbeidstreet.
+#
+# v1-skillen har ingen live-sjekkere (den ville trengt POST-støtte og en
+# installasjonsliste — se CLAUDE.md), så denne workflowen dekker bare zip-synk.
+# Det er likevel den feilklassen som faktisk oppsto: zip-en ble bygd for hånd og
+# kom til å inneholde CLAUDE.md, som ikke hører hjemme i distribusjonspakken.
+name: Validate generic-pxweb-v1-skill
+
+on:
+  push:
+    paths:
+      - 'pxwebapi-v1-generic-skill/SKILL.md'
+      - 'pxwebapi-v1-generic-skill/README.md'
+      - 'pxwebapi-v1-generic-skill/CHANGELOG.md'
+      - 'pxwebapi-v1-generic-skill/references/**'
+      - 'pxwebapi-v1-generic-skill/scripts/**'
+      - 'pxwebapi-v1-generic-skill/generic-pxweb-v1-skill.zip'
+      - '.github/workflows/check-v1-zip.yaml'
+  pull_request:
+    paths:
+      - 'pxwebapi-v1-generic-skill/SKILL.md'
+      - 'pxwebapi-v1-generic-skill/README.md'
+      - 'pxwebapi-v1-generic-skill/CHANGELOG.md'
+      - 'pxwebapi-v1-generic-skill/references/**'
+      - 'pxwebapi-v1-generic-skill/scripts/**'
+      - 'pxwebapi-v1-generic-skill/generic-pxweb-v1-skill.zip'
+      - '.github/workflows/check-v1-zip.yaml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: pxwebapi-v1-generic-skill
+
+jobs:
+  zip-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify generic-pxweb-v1-skill.zip matches working tree
+        run: |
+          bash scripts/build_zip.sh /tmp/fresh.zip
+          mkdir /tmp/committed /tmp/fresh
+          unzip -q generic-pxweb-v1-skill.zip -d /tmp/committed
+          unzip -q /tmp/fresh.zip -d /tmp/fresh
+          diff -r /tmp/committed /tmp/fresh \
+            || { echo '::error::pxwebapi-v1-generic-skill/generic-pxweb-v1-skill.zip er utdatert — kjør scripts/build_zip.sh i skillmappa og sjekk inn ny zip'; exit 1; }

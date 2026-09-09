@@ -128,10 +128,28 @@ Working as designed. v1 has **no GET data endpoint** — the table URL serves me
 data on POST. If you need a shareable data URL, the installation must be on v2, or you must use
 the agency's separate ready-made-dataset API.
 
-### The response is PX, not JSON
+### The response is not the format you expected
 
-`"response"` was omitted. The v1 default output format is PC-Axis PX. Always set
-`"response": {"format": "json-stat2"}` explicitly.
+`"response"` was omitted. **There is no single v1 default** — the same omission produces three
+different formats across the seven verified installations, measured 2026-09-04:
+
+| Default when `"response"` is omitted | Installations |
+|---|---|
+| `json-stat2` | SSB, Statistics Finland, Statistics Estonia |
+| PX (as the PxWeb 1.0 spec prescribes) | SCB, Statistics Greenland |
+| PX-JSON (`{"columns": …, "data": …}`) | Statistics Faroe Islands, Statistics Iceland |
+
+Always set `"response": {"format": "json-stat2"}` explicitly; all seven accept it.
+
+Two distinct symptoms, and the second is the nastier one:
+
+- **PX** starts `CHARSET="ANSI";`. A JSON parser fails on it immediately, in a way that can look
+  like a transport error rather than a format mismatch.
+- **PX-JSON parses fine as JSON** — so a "did I get JSON back?" check passes. It simply has none
+  of the json-stat2 fields: no `value`, no `dimension`, no `id`, no `role`. Instead there is
+  `columns` (one entry per variable plus the metric, tagged `type: "t"` / `"d"` / `"c"`), `data`
+  as a list of `{"key": […], "values": […]}` rows, and `metadata`. If your code reports "no data
+  found" against a 200 response, check this before blaming the query.
 
 ### `?query=` returns 400 Bad Request
 
@@ -181,17 +199,19 @@ cases the figures cover the whole country or area — do not ask the user to dis
 
 ### Nulls in `value` with symbols in `status`
 
-Not missing data in the transport sense — deliberate markers. `.` = not applicable, `..` = data
-not available, `:` = confidential. Never treat these as zero.
+Not missing data in the transport sense — deliberate markers, and the symbols are defined per PX
+file, so read them rather than assuming. The table of symbols is in `json-stat2.md`. Never treat
+any of them as zero.
 
 ---
 
 ## Sequencing and load
 
-- Send large queries **one at a time**, waiting for each response. The rate limiter counts
-  requests per IP over a sliding window (30 / 60 s at SSB; 10 / 10 s in the spec default).
-- 429 means back off, not retry immediately.
+Run large queries in sequence and stay off the minutes after a publishing deadline — the four
+practical rules are in `api-details.md` under "Practical guidance". Two response codes matter here:
+
+- 429 means back off, not retry immediately. The limiter counts requests per IP over a sliding
+  window; read the actual ceiling from `?config` (300 / 60 s at SSB, 30 / 10 s at SCB, verified
+  2026-09-03), never from published documentation.
 - 503 usually means the extract was too large or too slow rather than that the service is down.
   Narrow the selection, or switch from `xlsx` to `json-stat2` or `csv3`.
-- Right after a publishing deadline, first requests can take ~30 seconds while caches fill. At
-  SSB, avoid 07:55–08:15 CET.

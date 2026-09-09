@@ -71,22 +71,30 @@ guides:
 generic-pxweb-v1-skill/
 ├── SKILL.md                  # Main skill entrypoint (loaded on trigger)
 ├── README.md                 # This file
+├── CHANGELOG.md              # Version history; every content change gets an entry
 ├── CLAUDE.md                 # Guidance for Claude Code when editing this skill
-└── references/               # Loaded on demand
-    ├── query-syntax.md       # Query body, filters, elimination, aggregations, cURL
-    ├── api-details.md        # URL structure, navigation, search, formats, limits
-    ├── px-files-and-classifications.md  # PX files, .vs/.agg, PX keywords behind the metadata
-    ├── json-stat2.md         # json-stat2 format spec (also Eurostat, World Bank)
-    ├── troubleshooting.md    # HTTP codes and the three v1 error payloads
-    ├── installations.md      # 49 known v1 installations: status, languages, ?config limits
-    └── v1-vs-v2.md           # Translation guide, and using v2 to fill v1's gaps
+├── references/               # Loaded on demand
+│   ├── query-syntax.md       # Query body, filters, elimination, aggregations, cURL
+│   ├── api-details.md        # URL structure, navigation, search, formats, limits
+│   ├── px-files-and-classifications.md  # PX files, .vs/.agg, PX keywords behind the metadata
+│   ├── json-stat2.md         # json-stat2 format spec (also Eurostat, World Bank)
+│   ├── troubleshooting.md    # HTTP codes and the three v1 error payloads
+│   ├── installations.md      # 50 known v1 installations: status, languages, ?config limits
+│   └── v1-vs-v2.md           # Translation guide, and using v2 to fill v1's gaps
+├── evals/                    # Repo-internal: scenarios for testing the skill end to end
+└── scripts/
+    └── build_zip.sh          # Builds the distribution ZIP (user-facing files only)
 ```
+
+The four files above `references/` plus `references/` itself are what ships. `CLAUDE.md`,
+`evals/` and `scripts/` are repo-internal and deliberately excluded from the ZIP.
 
 ## Installation
 
 ### Claude.ai
 
-1. Download or create a ZIP of this folder
+1. Build the ZIP with `scripts/build_zip.sh` — do not zip the folder by hand, or
+   repo-internal files end up in the package
 2. Go to **Settings > Features > Skills**
 3. Upload the ZIP file
 

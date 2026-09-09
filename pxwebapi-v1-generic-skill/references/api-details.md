@@ -234,11 +234,11 @@ Verified on every installation in the inventory, 2026-08-28:
 
 Estonia answers only without a trailing slash (`.../api/v1/et?config`); the others accept either.
 
-**`?config` beats the published documentation.** Both diverge from their own agency's guidance:
-SSB's user guide states 30 calls / 60 s where `?config` reports 300, and Statistics Finland's API
-help page states a 100,000-cell limit where `?config` reports 120,000 — the latter confirmed by
-bisection against the live endpoint (117,000 cells accepted, 124,800 refused). Read `?config` at
-the start of a session and believe it.
+**`?config` beats the published documentation**, which diverges from it in both directions: SSB's
+user guide states 30 calls / 60 s where `?config` reports 300 (re-confirmed 2026-09-03), and
+Statistics Finland's help page states 100,000 cells where `?config` reports 120,000 — the latter
+settled by bisection against the live endpoint, 117,000 accepted and 124,800 refused. Read
+`?config` at the start of a session and believe it over every other source.
 
 **Watch `maxValues` separately from `maxCells`.** They are independent, and the tighter one varies
 by installation: Iceland permits 100,000 cells but only 5,000 selected values, SSB 800,000 cells

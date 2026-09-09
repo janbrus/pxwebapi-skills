@@ -133,7 +133,7 @@ explains behaviour the API documents only obliquely.
 | *keyword absent* | `elimination` absent → `false`; omitting the variable returns all values (**rule 3**) |
 | `TIMEVAL` … `TLIST(A1\|H1\|Q1\|M1\|W1)` | Marks the time variable → `time: true`. **The scale is discarded** — the API exposes no frequency, and json-stat2 has no field for one |
 | `DOMAIN("var")` | Links the variable to a valueset, enabling `vs:` and `agg:` for it |
-| `AGGREGALLOWED=NO` | **Forbids aggregation** for the table — used where summing is meaningless (indices, averages). Absent from the metadata endpoint, but **exposed in the data response** as `extension.px.aggregallowed` |
+| `AGGREGALLOWED=NO` | Declares aggregation **not meaningful** for the table — set where summing produces nonsense (indices, averages). Absent from the metadata endpoint, but **exposed in the data response** as `extension.px.aggregallowed`. How strictly it is enforced differs between v1 and v2 — see below |
 | `CONTVARIABLE` | The metric variable — the `ContentsCode`-equivalent. Tables without it have **no metric dimension at all** and no `role.metric` |
 | `UNITS`, `DECIMALS` | `category.unit.base` and `.decimals` in the json-stat2 data response |
 | `CODES`, `VALUES` | `values` and `valueTexts` in the metadata response |
@@ -162,9 +162,46 @@ This is the only route to several PX keywords the metadata endpoint drops — mo
 `aggregallowed`, and also `decimals`, plus `heading`/`stub` (the table's default pivot layout).
 
 So `AGGREGALLOWED=NO` **is** detectable, just not where you would look for it: run any small query
-and read `extension.px.aggregallowed`. If it is `false`, `agg:` will not work on that table no
-matter how correct the aggregation name is — SSB's monthly CPI table 14710 is a live example, and
-that is the right answer for an index series, where a sum would be meaningless.
+and read `extension.px.aggregallowed`.
+
+**But do not read `false` as "aggregation will fail".** All seven verified installations were probed
+2026-09-03/04, and the flag turns out to be neither universal nor uniformly enforced:
+
+| Installation | Flag in the response | `false` seen? | Does `false` block `agg:`? |
+|---|---|---|---|
+| Statistics Norway (SSB) | yes | yes | **Yes — 400** |
+| Statistics Sweden (SCB) | yes | yes | **No — 200 with data** |
+| Statistics Finland | yes | no, `true` everywhere sampled | untestable |
+| Statistics Greenland | yes | no, `true` everywhere sampled | untestable |
+| Statistics Iceland | **absent** | — | n/a |
+| Statistics Faroe Islands | **absent** | — | n/a |
+| Statistics Estonia | **absent** | — | n/a |
+
+Three consequences, each of which was a wrong assumption in an earlier revision of this file:
+
+- **The signal is missing at three of seven installations.** Iceland, the Faroes and Estonia return
+  an `extension.px` with one or two keys and no `aggregallowed` at all. "Run a probe and read the
+  flag" yields nothing there, so absence must not be read as `true`.
+- **Where it is present and `false`, enforcement differs between installations.** At SSB, 14700 and
+  11342 reject their own aggregations with `400` while `vs:` on the same table and variable answers
+  `200` — `vs:CoiCop2018Kpi01` and `vs:Kommune` respectively — which rules out the reading that v1
+  merely does not know those classifications. At SCB the identical experiment gives the opposite
+  result: `AKURLBefM` (v2 `TAB6387`) reports `aggregallowed: false` and still returns 200 with data
+  for `agg:ISD2`, with the aggregate categories correctly applied. Two relational installations,
+  the same API version, opposite behaviour.
+- **The flag's *value* is an editorial choice, not a property of the data.** SSB marks its consumer
+  price index tables `false`; Finland marks its CPI tables (`rki/11na.px` and neighbours) `true`,
+  and Greenland does the same for its price indices. So "index tables are `false`" describes SSB's
+  cataloguing habit, not PxWeb.
+
+It is also **version-specific at SSB**: the same aggregation on the same table succeeds in **v2**
+(`codelist[VareTjenesteGrp]=agg_CoiCop2018Kpi011` on 14700 → 200 with data). That is what
+`generic-pxweb-v2-skill` says, and it is correct there. Do not reconcile the skills; they describe
+different APIs, and now also different installations.
+
+**Practical rule.** Read `aggregallowed` as a hint about whether summing the table is *meaningful*,
+never as a prediction about whether the request will *succeed*. Send the `agg:` query and handle
+the response you get.
 
 **`extension.px` does not carry the time scale.** `TLIST` is absent from the payload in both
 versions, even though neighbouring PX keywords come through — see `json-stat2.md`.

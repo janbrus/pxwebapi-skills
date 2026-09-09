@@ -96,23 +96,17 @@ Worth knowing when moving between PX and json-stat, because the loss is silent:
 
 ## `extension.px` — PX keywords inside the dataset
 
-PxWeb adds a non-standard `extension.px` object at the top level of the **data** response,
-carrying part of the source PX file's header. Present in both v1 and v2, verified identical for
-SSB table 14710:
+PxWeb adds a non-standard `extension.px` object at the top level of the **data** response, carrying
+part of the source PX file's header — `decimals`, `heading`/`stub` (the intended pivot layout),
+`official-statistics`, the subject classification and `aggregallowed`. It is the only place several
+of them appear; the metadata endpoint has none of them, and non-PxWeb json-stat producers have no
+`extension.px` at all.
 
-```json
-"extension": {
-  "px": { "tableid": "14710", "matrix": "KpiIndMnd", "decimals": 1,
-          "aggregallowed": false, "official-statistics": true,
-          "heading": ["ContentsCode", "Tid"], "stub": [],
-          "subject-code": "pp", "subject-area": "Priser og prisindekser" } },
-"contact": [ … ]
-```
-
-Useful fields: `aggregallowed` (whether `agg:` can work on this table at all), `decimals`,
-`heading`/`stub` (the table's intended pivot layout), `official-statistics`, and the subject
-classification. This is the only place several of them appear — the metadata endpoint has none of
-them. It is a PxWeb extension, so do not expect it from other json-stat producers.
+`aggregallowed` says whether summing the table is meaningful. Treat it as a hint only: it is
+**absent from three of the seven verified installations**, and where it is `false` the installations
+do not agree on what follows — SSB's v1 rejects `agg:` with 400, SCB's serves the data (verified
+2026-09-04). The full matrix, the controls behind it and the SSB-v1-vs-v2 difference are in
+`px-files-and-classifications.md`.
 
 ---
 
@@ -153,8 +147,10 @@ belong in a careful presentation of the numbers, and none of which appear in v1 
 | `..` | Data not available — not yet in the database |
 | `:` | Confidential — withheld to avoid identifying a person or business |
 
-Exact symbols vary by agency; check the response and the agency's documentation. Never treat any
-of them as zero.
+These three are only the common defaults. In PxWeb each symbol is declared per PX file
+(`DATASYMBOL1`–`6`), so they vary between agencies and even between tables in one database — read
+what the response actually contains rather than matching against this list. Never treat any of
+them as zero.
 
 ---
 

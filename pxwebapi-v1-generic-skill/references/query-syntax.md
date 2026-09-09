@@ -17,7 +17,7 @@ Everything about the JSON you POST to a table URL. All examples verified live on
 ```
 
 - `query` — required, may be empty (`[]`).
-- `response` — optional, but **always set it**: the default output is PC-Axis PX, not JSON.
+- `response` — optional, but **always set it**: the format you get when you omit it is installation-specific, and there are three answers, not two. Measured across all seven verified installations on 2026-09-04 — `json-stat2` at SSB, Finland and Estonia; PX at SCB and Greenland; PX-JSON (`{"columns": …, "data": …}`) at the Faroe Islands and Iceland. The PxWeb 1.0 spec prescribes PX, which two of the seven do.
 
 A selection object is:
 
@@ -187,27 +187,11 @@ Practical rule: **use `top` for recency, `all` with a wildcard for a span, and r
 
 v1 gives you no way to list them. In rough order of reliability:
 
-**1. Ask the installation's v2 API, if it has one.** This works at SSB and SCB — but note the
-irony: those are the only two *relational* installations, and both already run v2. On a file-based
-v1-only installation, which is most of them, there is no API route to the classifications at all
-and you must fall back to methods 2 and 3. SSB and SCB run both versions over the same
-tables. v2 exposes every code list in metadata, and the ids map onto v1 filters by swapping the
-underscore for a colon — v2 `agg_KommFylker` is v1 `agg:KommFylker`. Verified end to end:
-
-```
-GET https://data.ssb.no/api/pxwebapi/v2/tables/07459/metadata?lang=no
-    → dimension.Region.extension.codeLists[] = [{"id": "agg_KommFylker", …}, …]
-
-GET https://data.ssb.no/api/pxwebapi/v2/codeLists/agg_KommFylker?lang=no
-    → [{"code": "F-31", "label": "Østfold", "valueMap": ["0101", "3124", …]}, …]
-
-POST https://data.ssb.no/api/v0/no/table/07459
-    {"query": [{"code": "Region",
-                "selection": {"filter": "agg:KommFylker", "values": ["F-03", "F-11"]}}, …]}
-    → 200, dimension.Region.category.index = {"F-03": 0, "F-11": 1}
-```
-
-Same table, same aggregation, v2 for discovery and v1 for retrieval.
+**1. Ask the installation's v2 API, if it has one.** v2 lists every code list in metadata, and the
+ids map onto v1 filters by swapping the underscore for a colon — v2 `agg_KommFylker` is v1
+`agg:KommFylker`. The three-step worked example is in `v1-vs-v2.md` under "Using v2 to fill v1's
+gaps". Note the irony before reaching for it: the installations that run v2 are the ones that
+needed this least, so on most v1-only installations you fall back to methods 2 and 3.
 
 **2. Build the selection in the agency's web front end and export the query.** Most PxWeb UIs
 have an "API query for this table" button on the results view that emits a complete v1 body,
@@ -230,6 +214,14 @@ The rules, from the PxWeb 1.0 specification and confirmed live:
 | `false` *or absent* | — | **All** values of the variable are returned |
 
 `elimination` and `time` both default to `false` when absent from metadata.
+
+**The two routes to a total can coexist, and metadata will not tell you which you have.** In
+Greenland's `BEXST8.px` the `age` variable carries both an explicit `-1` = "Total" among its
+`values` *and* `elimination: true`; selecting `-1` and omitting the variable return the same
+figure (verified). At the other extreme, SSB's `Kjonn` in 07459 has no total in `values` and no
+way to obtain one except omission, while SCB lists an explicit `TotSA`/`TotSa` code. Scan
+`valueTexts` for a "Total" / "I alt" / "Hele landet" entry before deciding which route a table
+needs — rule 1 above fires only when such a value exists.
 
 Two verified illustrations:
 
