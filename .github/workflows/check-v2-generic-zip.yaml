@@ -33,7 +33,7 @@ jobs:
   zip-sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Verify generic-pxweb-v2-skill.zip matches working tree
         run: |
           bash scripts/build_zip.sh /tmp/fresh.zip
