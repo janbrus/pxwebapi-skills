@@ -5,7 +5,7 @@
 
 AI-skills for PxWeb-API-ene til SSB, SCB og andre statistikkbyråer — pluss kodeeksempler for PxWebApi v2.
 
-Et *skill* er ren kunnskap: en `SKILL.md` med arbeidsflyt og regler, og referansefiler som lastes ved behov. Det lærer Claude (og andre AI-verktøy som leser slike instruksjoner) hvordan API-et fungerer. 
+Et *skill* er ren kunnskap: en `SKILL.md` med arbeidsflyt og regler, og referansefiler som lastes ved behov. Det viser Claude (og andre AI-verktøy som leser slike instruksjoner) hvordan API-et fungerer.
 
 Det kaller ikke API-et selv. For det trengs et verktøy som kan sende HTTP GET og POST — en MCP-server, `curl` via Bash, eller en R-/Python-klient. Se «Installasjon».
 
@@ -13,14 +13,12 @@ Det kaller ikke API-et selv. For det trengs et verktøy som kan sende HTTP GET o
 [![SCB](https://github.com/janbrus/pxwebapi-skills/actions/workflows/check-scb-examples.yaml/badge.svg)](https://github.com/janbrus/pxwebapi-skills/actions/workflows/check-scb-examples.yaml)
 [![Generic v2](https://github.com/janbrus/pxwebapi-skills/actions/workflows/check-v2-generic-zip.yaml/badge.svg)](https://github.com/janbrus/pxwebapi-skills/actions/workflows/check-v2-generic-zip.yaml)
 [![Generic v1](https://github.com/janbrus/pxwebapi-skills/actions/workflows/check-v1-zip.yaml/badge.svg)](https://github.com/janbrus/pxwebapi-skills/actions/workflows/check-v1-zip.yaml)
-[![Chart](https://github.com/janbrus/pxwebapi-skills/actions/workflows/check-chart-zip.yaml/badge.svg)](https://github.com/janbrus/pxwebapi-skills/actions/workflows/check-chart-zip.yaml)
-[![Histstat](https://github.com/janbrus/pxwebapi-skills/actions/workflows/check-histstat-zip.yaml/badge.svg)](https://github.com/janbrus/pxwebapi-skills/actions/workflows/check-histstat-zip.yaml)
 
 ## Skillene
 
 | Skill (installert navn) | Mappe i repoet | Dekker | Språk | Versjon | Status |
 | --- | --- | --- | --- | --- | --- |
-| `ssb-pxwebapi-v2` | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/) | SSBs Statistikkbank via PxWebApi v2: søk, metadata, kodelister, lagrede spørringer, outputformater, Klass/VarDok, ~70 kuraterte tabeller | norsk, engelsk | 1.5.0 | stabil |
+| `ssb-pxwebapi-v2` | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/) | SSBs Statistikkbank via PxWebApi v2. Søk, metadata, kodelister, lagrede spørringer, outputformater, Klass/VarDok, ~70 kuraterte tabeller | norsk, engelsk | 1.5.0 | stabil |
 | `scb-pxwebapi-v2` | [scb-pxwebapi-v2-skill/](scb-pxwebapi-v2-skill/) | SCB:s Statistikdatabas via PxWebApi v2 | svensk, engelsk | 0.11.0 | beta |
 | `generic-pxweb-v2-skill` | [pxwebapi-v2-generic-skill/](pxwebapi-v2-generic-skill/) | Alle PxWebApi v2-installasjoner. Verifisert mot SSB, SCB og Latvia (CSP), med tabell over hva som varierer mellom dem | engelsk | 0.11.0 | beta |
 | `generic-pxweb-v1-skill` | [pxwebapi-v1-generic-skill/](pxwebapi-v1-generic-skill/) | Alle PxWebApi v1-installasjoner (den eldre, POST-baserte PxWeb 1.0-API-en). Sju verifisert, 50 kjente | engelsk | 0.12.0 | beta |
@@ -117,7 +115,7 @@ A *skill* is knowledge only: a `SKILL.md` with workflow and rules, and reference
 
 | Skill (installed name) | Folder | Covers | Language | Version | Status |
 | --- | --- | --- | --- | --- | --- |
-| `ssb-pxwebapi-v2` | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/) | Statistics Norway's Statbank via PxWebApi v2, incl. codelists, saved queries, output formats and ~70 curated tables | Norwegian, English | 1.5.0 | stable |
+| `ssb-pxwebapi-v2` | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/) | Statistics Norway's Statbank via PxWebApi v2, incl. search, codelists, saved queries, output formats and ~70 curated tables | Norwegian, English | 1.5.0 | stable |
 | `scb-pxwebapi-v2` | [scb-pxwebapi-v2-skill/](scb-pxwebapi-v2-skill/) | Statistics Sweden's Statistikdatabasen via PxWebApi v2 | Swedish, English | 0.11.0 | beta |
 | `generic-pxweb-v2-skill` | [pxwebapi-v2-generic-skill/](pxwebapi-v2-generic-skill/) | Any PxWebApi v2 installation; verified against SSB, SCB and Latvia (CSP), with a table of what differs between them | English | 0.11.0 | beta |
 | `generic-pxweb-v1-skill` | [pxwebapi-v1-generic-skill/](pxwebapi-v1-generic-skill/) | Any PxWebApi v1 installation (the older POST-only PxWeb 1.0 API); seven verified, 50 known | English | 0.12.0 | beta |
