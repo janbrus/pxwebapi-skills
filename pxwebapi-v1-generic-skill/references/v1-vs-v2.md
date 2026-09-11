@@ -3,8 +3,9 @@
 A translation guide for people who know one version and need the other, and for installations
 that run both. The sibling skill `generic-pxweb-v2-skill` covers v2 in its own right.
 
-The headline: **the response formats are nearly identical, the requests are not.** Both versions
-return json-stat2 datasets with the same `id` / `size` / `dimension` / `value` / `role` /
+The headline: **the response formats are nearly identical, the requests are not.** 
+
+Both versions return json-stat2 datasets with the same `id` / `size` / `dimension` / `value` / `role` /
 `status` structure, so any parsing or charting code carries over unchanged. Everything on the
 request side — endpoints, body shape, filters, discovery — differs.
 
@@ -72,7 +73,7 @@ disappears, its meaning folded into the value expressions themselves.
 | `{"filter": "top", "values": ["5"]}` | `["top(5)"]` | Count is a string in v1 |
 | `{"filter": "agg:KommFylker", "values": ["F-03"]}` | `"codelist": "agg_KommFylker", "valueCodes": ["F-03"]` | **`agg:X` ↔ `agg_X`** |
 | `{"filter": "vs:NUTS", "values": [...]}` | `"codelist": "vs_NUTS", "valueCodes": [...]` | **`vs:X` ↔ `vs_X`** |
-| *(no equivalent)* | `["bottom(3)"]`, `["from(2020)"]`, `["to(2022)"]`, `["range(2018,2023)"]`, `["top(3,2)"]` / `["bottom(5,1)"]` (offset forms) | v2-only. Shown in POST form; in a v2 **GET** URL an expression containing a comma must be bracketed — `valueCodes[Tid]=[range(2018,2023)]` — or it is split on the comma and rejected (`Illegal selection expression`). Expressions may be mixed with plain codes |
+| *(no equivalent)* | `["bottom(3)"]`, `["from(2020)"]`, `["to(2022)"]`, `["range(2018,2023)"]`, `["top(3,2)"]` / `["bottom(5,1)"]` (offset forms) | v2-only. Shown in POST form. In a v2 **GET** URL an expression containing a comma must be bracketed — `valueCodes[Tid]=[range(2018,2023)]` — or it is split on the comma and rejected (`Illegal selection expression`). Expressions may be mixed with plain codes |
 | *(no equivalent)* | `["??"]` | `?` masking is v2-only |
 
 That `agg:X` ↔ `agg_X` correspondence is more than cosmetic — see "Using v2 to fill v1's gaps".
@@ -149,10 +150,8 @@ the unhyphenated form.
 
 ## Using v2 to fill v1's gaps
 
-When an installation runs both versions over the same tables — SSB and SCB, which are also the only
-two relational installations, so the trick helps least where it is available — v2 is the better
-discovery tool even if you must retrieve through v1. Verified end to end against SSB table 07459,
-re-confirmed 2026-09-03:
+SSB and SCB are the two relational installations, who can runs both versions over the same tables. The trick helps least where it is available. PxWebApi v2 is the better
+discovery tool even if you must retrieve through v1. Verified end to end against SSB table 07459, re-confirmed 2026-09-03:
 
 ```
 # 1. v2 metadata lists the aggregations v1 will not show you
@@ -194,7 +193,7 @@ table" emits a complete v1 body including aggregation names) and its classificat
 
 ## When to prefer which
 
-- **The installation is on v2** → use v2. Richer metadata, GET URLs you can share, saved queries,
+- **The installation is on v2 → use v2**. Newer, richer metadata, GET URLs you can share, saved queries,
   discoverable limits.
 - **The installation is v1-only** → use v1. That is most PxWeb installations worldwide, and it is
   fully capable; the constraint is discovery, not retrieval.

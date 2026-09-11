@@ -26,7 +26,7 @@ Praktisk driftsinformasjon for SSBs PxWebApi v2. For json-stat2-formatet (Datase
 | OpenAPI-spesifikasjon (interaktiv)        | https://data.ssb.no/api/pxwebapi/v2/index.html                       |
 | PxApiSpecs (YAML, felles for PxWeb-miljøet) | https://github.com/PxTools/PxApiSpecs/blob/master/PxAPI-2.yml      |
 | PxTools' generelle brukerguide            | https://www.pxtools.net/PxWebApi/documentation/user-guide/           |
-| Kodeeksempler (Python, R, JS)             | https://github.com/janbrus/ssb-api-v2-examples                       |
+| Kodeeksempler (Python, R, JS) og skillene | https://github.com/janbrus/pxwebapi-skills (SSBs veiledning lenker til det gamle navnet `ssb-api-v2-examples`, som redirecter hit) |
 | Spørsmål om tabeller eller API-et         | statistikkbanken@ssb.no                                              |
 | Feil og forslag til API-et                | https://github.com/PxTools/PxApiSpecs · https://github.com/PxTools/PxWebApi |
 

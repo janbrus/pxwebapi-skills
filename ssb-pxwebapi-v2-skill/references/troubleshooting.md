@@ -63,7 +63,7 @@ Ressursen finnes ikke.
 - Tabellen er fjernet og erstattet av en ny — søk etter temaet
 - Feil kodeliste-ID
 - Feil saved query-ID
-- **URL-en er lengre enn ca. 2 100 tegn** — API-et svarer 404, ikke 400 (verifisert 2026-09-09 med 450 kommunekoder i `valueCodes[Region]`). Bytt lange verdilister mot `*`, `?`, `from()`/`to()`/`range()` eller en kodeliste, eller bruk POST
+- **URL-en er lengre enn ca. 2 100 tegn** — API-et svarer 404, ikke 400. Grensen er målt 2026-09-09 på 07459: 400 distinkte kommunekoder (2 092 tegn) gir 200, 410 koder (2 142 tegn) gir 404. Bytt lange verdilister mot `*`, `?`, `from()`/`to()`/`[range()]` eller en kodeliste, eller bruk POST, som ikke har lengdegrensen
 
 **Løsning:** Bruk `GET /tables?query=...` for å finne riktig ID. Er URL-en lang, kort den ned før du konkluderer med at ressursen mangler.
 
@@ -72,6 +72,12 @@ Ressursen finnes ikke.
 Rate-limiting. Du har sendt for mange forespørsler.
 
 **Løsning:** Vent til tidsvinduet nullstilles og prøv igjen. Kjør store spørringer sekvensielt — vent på svaret før neste sendes, ikke parallelt. Grensen står i `x-ratelimit-*`-responsheaderne (ikke lenger i `/config`): `x-ratelimit-policy: 40;w=60s` betyr 40 kall per 60 sekunder, og `x-ratelimit-remaining` viser gjenstående kall i inneværende vindu. Se `api-details.md` for full headeroversikt.
+
+### 500 Internal Server Error
+
+**Gjentatt verdikode.** Oppgir du samme kode to ganger i samme variabel — `valueCodes[Region]=0301,0301`, eller `["0301", "0301"]` i en POST-body — svarer API-et 500 med **tom body**, ikke 400 med forklaring. To like koder er nok. Verifisert 2026-09-09 hos SSB, og samme oppførsel hos SCB og Latvia.
+
+Overlapp mellom et uttrykk og en enkeltkode er derimot uproblematisk: `valueCodes[Tid]=2026,top(1)` gir 200 selv når `top(1)` også er 2026 — det er bare bokstavelig like koder som feiler. Bygger du seleksjonen programmatisk (fra en løkke, en fil eller en union av flere kilder), dedupliser lista før du sender den.
 
 ### 503 Service Unavailable
 

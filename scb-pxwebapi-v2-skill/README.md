@@ -43,8 +43,13 @@ scb-pxwebapi-v2/
 
 ### Claude Code
 
+Installerat namn är `scb-pxwebapi-v2`; mappen i repot heter `scb-pxwebapi-v2-skill`. Från repots rot:
+
 ```bash
 cp -r scb-pxwebapi-v2-skill ~/.claude/skills/scb-pxwebapi-v2
+
+# eller symlänka ett klonat repo, så håller git pull kopian aktuell
+ln -s "$PWD/scb-pxwebapi-v2-skill" ~/.claude/skills/scb-pxwebapi-v2
 ```
 
 ## MCP-servrar

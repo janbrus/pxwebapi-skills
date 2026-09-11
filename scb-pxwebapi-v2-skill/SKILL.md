@@ -224,7 +224,8 @@ Viktigaste mönster: `top(N)` = senaste N värdena, `bottom(N)` = äldsta N, `fr
 
 - API:et har en övre gräns för antal celler per query. Kontrollera `/config` för `maxDataCells`.
 - Rate limiting: `/config` visar `maxCallsPerTimeWindow` och `timeWindow` (30 anrop per 10 sekunder i skrivande stund — läs `/config`, inte denna text). Varje svar bär dessutom `X-Rate-Limit-Remaining` och `X-Rate-Limit-Reset` — läs dem före en serie anrop. Vid 429: kör stora frågor sekventiellt, vänta på svaret innan nästa skickas.
-- En GET-URL över ca 2 100 tecken ger **404**, inte 400 (verifierat 2026-09-09 med 450 koder i `valueCodes[Tid]`). Ersätt långa värdelistor med `*`, `?`, `from()`/`to()`/`[range()]` eller en kodlista, eller använd POST — korta URL:en innan du drar slutsatsen att tabellen saknas.
+- En GET-URL över ca 2 100 tecken ger **404**, inte 400 (gränsen mätt hos SSB 2026-09-09: 2 092 tecken svarar, 2 142 gör det inte). Ersätt långa värdelistor med `*`, `?`, `from()`/`to()`/`[range()]` eller en kodlista, eller använd POST — korta URL:en innan du drar slutsatsen att tabellen saknas.
+- **Upprepad värdekod ger 500 med tom body**, inte 400: `valueCodes[Tid]=2023,2023` räcker, i både GET och POST (verifierat mot TAB1267 2026-09-09; samma hos SSB och Lettland). Överlapp mellan ett uttryck och en enskild kod är däremot okej — `2026,top(1)` svarar. Deduplicera listan om du bygger selektionen programmatiskt.
 - 503 betyder att tjänsten är nere eller laddar om. Vänta och försök igen; kommer den inte tillbaka gäller Fallback — säg att data inte kunde hämtas.
 - Börja smalt — lättare att utvidga än att hantera för mycket data.
 

@@ -13,7 +13,7 @@ description: >
   lagrede spørringer og outputformater (json-stat2, csv, xlsx).
 metadata:
   version: "1.5.0"
-  source: https://github.com/janbrus/ssb-api-v2-examples/tree/main/ssb-pxwebapi-v2-skill
+  source: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 ---
 
 # SSB PxWebApi v2 — Komplett guide
@@ -24,7 +24,7 @@ Denne skillen guider deg gjennom riktig bruk av SSBs PxWebApi v2 for å søke, u
 https://data.ssb.no/api/pxwebapi/v2
 ```
 
-**Skillen vedlikeholdes her:** https://github.com/janbrus/ssb-api-v2-examples/tree/main/ssb-pxwebapi-v2-skill
+**Skillen vedlikeholdes her:** https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 
 Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.5.0.
 

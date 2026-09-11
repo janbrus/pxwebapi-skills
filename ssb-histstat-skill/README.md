@@ -18,30 +18,38 @@ Triggers på norske begreper som "historisk statistikk", "NOS", "Norges offisiel
 ## Filstruktur
 
 ```
-ssb-histstat/
+ssb-histstat-skill/
 ├── SKILL.md                              # Hovedinstruksjoner: arbeidsflyt + decision tree
 ├── README.md                             # Denne filen
-├── CLAUDE.md                             # Veiledning for redigering av selve skillen (URL-verifisering, fallgruver)
+├── CHANGELOG.md                          # Endringslogg — versjon står i SKILL.md-frontmatter
+├── ssb-histstat-skill.zip                # Ferdigpakket skill for opplasting til Claude.ai
 └── references/
     └── structure.md                      # Annotering av huben /a/histstat/publikasjoner/: 25 emnesider, 12 serier, 9 periodika, bibliografi, filnavn-konvensjoner
 ```
+
+`CLAUDE.md` og `scripts/` i repoet er vedlikeholder-interne og følger ikke med i pakken.
 
 ## Installasjon
 
 ### Claude.ai
 
-1. Pakk mappen som ZIP
+1. Last ned [ssb-histstat-skill.zip](ssb-histstat-skill.zip), eller bygg den fra repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger `CLAUDE.md` og `scripts/` med). Pakken har toppmappe `ssb-histstat/`
 2. Gå til **Settings > Features > Skills**
 3. Last opp ZIP-filen
 
 ### Claude Code
 
+Installert navn er `ssb-histstat`; mappen i repoet heter `ssb-histstat-skill`. Fra repo-roten:
+
 ```bash
-# Globalt (tilgjengelig i alle prosjekter)
-cp -r ssb-histstat ~/.claude/skills/ssb-histstat
+# Kopi, globalt (tilgjengelig i alle prosjekter)
+cp -r ssb-histstat-skill ~/.claude/skills/ssb-histstat
+
+# Eller symlenke fra et klonet repo — da holder git pull kopien oppdatert
+ln -s "$PWD/ssb-histstat-skill" ~/.claude/skills/ssb-histstat
 
 # Per prosjekt
-cp -r ssb-histstat .claude/skills/ssb-histstat
+cp -r ssb-histstat-skill .claude/skills/ssb-histstat
 ```
 
 ## Bruk sammen med søsken-skillen

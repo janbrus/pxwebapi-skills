@@ -61,6 +61,7 @@ Everything in this table was observed live on 2026-09-08. It is the evidence beh
 | `outputFormatParams` with `json-stat2` | 400 | 400 | 400 |
 | CSV `Content-Type` charset | `iso-8859-1` | `iso-8859-1` | **`utf-8`, with BOM** |
 | GET URL over ~2 100 chars | 404 | 404 | 404 |
+| Repeated value code in one variable | **500**, empty body | **500** | **500** |
 | `/navigation` (v1 endpoint) | 404 | 404 | 404 |
 
 (The last six rows verified 2026-09-09.)

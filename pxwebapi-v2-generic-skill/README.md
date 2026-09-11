@@ -6,7 +6,7 @@ This skill is a reduced, vendor-neutral version derived from the Statistics Norw
 
 ## What is PxWebApi v2?
 
-PxWebApi v2 is a REST API for statistical databases, developed by Statistics Sweden (SCB) and used by national statistical institutes across the Nordics and beyond. It provides a standardized way to search, explore, and retrieve official statistics.
+PxWebApi v2 is a REST API for statistical databases, developed by Statistics Sweden (SCB) and Statstics Norway (SSB). It is used by national statistical institutes across the Nordics and beyond. It provides a standardized way to search, explore, and retrieve official statistics.
 
 Known v2 installations (all verified live 2026-09-08):
 
@@ -32,7 +32,7 @@ They share the API shape but differ in cell limit (10 000 to 800 000), default d
 - Country-specific codelist IDs or regional codes
 - Country-specific metadata conventions (URN links to classification systems)
 
-For a comprehensive SSB-specific skill with curated table lists, codelist documentation, and Norwegian/English support, see [ssb-pxwebapi-v2](https://github.com/janbrus/ssb-api-v2-examples/tree/main/ssb-pxwebapi-v2-skill). A Swedish counterpart, `scb-pxwebapi-v2`, lives in the same repository.
+For a comprehensive SSB-specific skill with curated table lists, codelist documentation, and Norwegian/English support, see [ssb-pxwebapi-v2](../ssb-pxwebapi-v2-skill/). A Swedish counterpart, [scb-pxwebapi-v2](../scb-pxwebapi-v2-skill/), lives in the same repository.
 
 ## File structure
 
@@ -68,15 +68,20 @@ generic-pxweb-v2-skill/
 
 ### Claude Code
 
+The installed name is `generic-pxweb-v2-skill` (the frontmatter `name`); the repository folder is `pxwebapi-v2-generic-skill`. From the repository root:
+
 ```bash
 cp -r pxwebapi-v2-generic-skill ~/.claude/skills/generic-pxweb-v2-skill
+
+# or symlink a cloned repository, so that git pull keeps the copy current
+ln -s "$PWD/pxwebapi-v2-generic-skill" ~/.claude/skills/generic-pxweb-v2-skill
 ```
 
 ## MCP servers
 
 For Claude to call the API directly, you need an MCP server or a tool that can send HTTP GET and POST (e.g. `curl` via Bash):
 
-- **@jarib/pxweb-mcp** (https://www.npmjs.com/package/@jarib/pxweb-mcp) — open source, works with any PxWeb v2 installation; point it at the installation with `--url {base_url}` (the default is SSB)
+- **@jarib/pxweb-mcp** (https://www.npmjs.com/package/@jarib/pxweb-mcp) — open source, works with any PxWebApi v2 installation; point it at the installation with `--url {base_url}` (the default is SSB)
 - Or build your own with FastMCP or similar
 
 ## License

@@ -46,13 +46,19 @@ Request understood but denied. The table may not be available via API. **Note:**
 
 ### 404 Not Found
 
-Resource does not exist. Wrong table ID, codelist ID, or saved query ID — **or a GET URL longer than roughly 2 100 characters**, which returns 404 rather than 400 on SSB, SCB and Latvia alike (verified 2026-09-09 with a few hundred explicit codes in one `valueCodes[…]`). Replace long value lists with `*`, `?`, `from()`/`to()`/`[range()]` or a codelist, or switch to POST. The v1 `navigation` endpoint also answers 404 on every v2 installation — the subject hierarchy is in `paths` on each `/tables` hit instead.
+Resource does not exist. Wrong table ID, codelist ID, or saved query ID — **or a GET URL longer than roughly 2 100 characters**, which returns 404 rather than 400 (verified 2026-09-09; the threshold was bisected at SSB, where 400 distinct municipality codes — 2 092 characters — answer and 410 codes — 2 142 characters — do not). Replace long value lists with `*`, `?`, `from()`/`to()`/`[range()]` or a codelist, or switch to POST. The v1 `navigation` endpoint also answers 404 on every v2 installation — the subject hierarchy is in `paths` on each `/tables` hit instead.
 
 **Solution:** Use `GET /tables?query=...` to find the correct ID; if the URL is long, shorten it before concluding the resource is missing.
 
 ### 429 Too Many Requests
 
 Rate-limited. The limit is announced in `/config` *or* in `x-ratelimit-*` headers depending on the installation — table and header meanings in `api-details.md`. Run large queries sequentially — wait for one response before sending the next.
+
+### 500 Internal Server Error
+
+**A repeated value code.** Listing the same code twice for one variable — `valueCodes[Region]=0301,0301`, or `["0301", "0301"]` in a POST body — returns 500 with an **empty body**, not a 400 with a diagnostic. Two identical codes are enough. Verified on all three installations 2026-09-09 (SSB `0301,0301`, SCB `2023,2023`, Latvia `2020M01,2020M01`), in both GET and POST.
+
+Overlap between an expression and a plain code is fine: `valueCodes[Tid]=2026,top(1)` answers 200 even when `top(1)` resolves to 2026 — only literal duplicates fail. Deduplicate before sending if you build the selection programmatically, e.g. by unioning code lists from several sources.
 
 ### 503 Service Unavailable
 

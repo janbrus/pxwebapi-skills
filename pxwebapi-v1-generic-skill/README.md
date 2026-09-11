@@ -1,7 +1,7 @@
 # Claude Skill: PxWebApi v1 (Generic)
 
-A [Claude Skill](https://support.claude.com/en/articles/12512180-use-skills-in-claude) for
-accessing official statistics from any **PxWebApi v1** installation — the older, POST-based
+A [Claude Skill](https://support.claude.com/en/articles/12512180-use-skills-in-claude) which guides AI tools 
+access official statistics from any **PxWebApi v1** installation. This is the older, POST-based
 PxWeb 1.0 API that most PxWeb installations worldwide still run.
 
 It is the v1 counterpart to `generic-pxweb-v2-skill`, and shares its vendor-neutral approach.
@@ -21,30 +21,31 @@ Installations verified live on 2026-08-28:
 
 | Agency | Base URL |
 |---|---|
-| Statistics Norway (SSB) | `https://data.ssb.no/api/v0/no/table` |
-| Statistics Sweden (SCB) | `https://api.scb.se/OV0104/v1/doris/sv/ssd` |
 | Statistics Finland | `https://pxdata.stat.fi/PXWeb/api/v1/fi/StatFin` |
 | Statistics Iceland | `https://px.hagstofa.is/pxis/api/v1/is/{database}` |
 | Statistics Faroe Islands | `https://statbank.hagstova.fo/api/v1/en/H2` |
 | Statistics Greenland | `https://bank.stat.gl/api/v1/en/Greenland` |
 | Statistics Estonia | `https://andmed.stat.ee/api/v1/et/stat` |
+| Statistics Norway (SSB) | `https://data.ssb.no/api/v0/no/table` |
+| Statistics Sweden (SCB) | `https://api.scb.se/OV0104/v1/doris/sv/ssd` |
 
-The list is not exhaustive — many more national and regional agencies run PxWeb.
+
+The list is not exhaustive. More than 50 national and regional agencies run PxWeb. SSB and SCB also runs PxWebApi version 2, which is reccomended.
 
 ## What this skill does
 
-- Guides Claude through the v1 workflow: locate table → read metadata → build query → POST → present
-- Covers hierarchy navigation and `?query=` search, including **which installations lack search**
-- Documents the v1 query body and all five filters (`item`, `all`, `top`, `agg:`, `vs:`)
-- Explains the elimination rules, which decide what happens to variables you leave out
-- Handles aggregations and groupings, which v1 metadata does not expose — including a verified
-  method for discovering them, and an explanation of the `.vs`/`.agg` files they come from
+- Guides the agent through the v1 workflow: locate table → read metadata → build query → POST → present result.
+- Works with any v1 installation. You supply the base URL.
+- Covers hierarchy navigation and `?query=` search, including **which installations lack search**.
+- Documents the v1 query body and all five filters (`item`, `all`, `top`, `agg:`, `vs:`).
+- Explains the elimination rules, which decide what happens to variables you leave out.
+- Handles aggregations and groupings, which v1 metadata does not expose. This includes a verified
+  method for discovering them, and an explanation of the `.vs`/`.agg` files they come from.
 - Explains the split between file-based installations (most of them, `.px` in the URL) and the
   relational ones (SSB, SCB)
-- Works with any v1 installation — you supply the base URL
 - Fully in English for international use
-- Output follows the open [json-stat2](https://json-stat.org/) spec, shared with Eurostat and the
-  World Bank
+- Output follows the open [json-stat2](https://json-stat.org/) format, which is also offered by Eurostat and the
+  World Bank APIs.
 
 ## Corrections to the published documentation
 
@@ -56,14 +57,14 @@ guides:
   and `jsonstat` return `400` on both SSB and SCB.
 - **Multiple wildcards in one `all` selection work** (`["199*", "202*"]`), though the
   specification states only one is permitted. Older builds may still enforce the limit.
-- **Exceeding the cell limit returns `403`**, not `400` or `413`, with the body
+- **Exceeding the cell limit returns http `403`**, not `400` or `413`, with the body
   `{"error":"Too many values selected"}`.
 
 ## What this skill does NOT include
 
-- Country-specific table lists — table ids differ per installation
-- Country-specific aggregation names or regional codes
-- Country-specific metadata conventions
+- Country-specific table lists. Table ids differ per installation.
+- Country-specific aggregation names or regional codes.
+- Country-specific metadata conventions.
 
 ## File structure
 
@@ -100,8 +101,13 @@ The four files above `references/` plus `references/` itself are what ships. `CL
 
 ### Claude Code
 
+The installed name is `generic-pxweb-v1-skill` (the frontmatter `name`); the repository folder is `pxwebapi-v1-generic-skill`. From the repository root:
+
 ```bash
-cp -r generic-pxweb-v1-skill ~/.claude/skills/generic-pxweb-v1-skill
+cp -r pxwebapi-v1-generic-skill ~/.claude/skills/generic-pxweb-v1-skill
+
+# or symlink a cloned repository, so that git pull keeps the copy current
+ln -s "$PWD/pxwebapi-v1-generic-skill" ~/.claude/skills/generic-pxweb-v1-skill
 ```
 
 ## Related skills
@@ -121,4 +127,4 @@ live installations on 2026-08-28.
 ## License
 
 PxWeb and PxWebApi are open source: https://github.com/PxTools/PxWebApi.
-Data licensing depends on the individual agency — SSB, for example, publishes under CC BY 4.0.
+Data licensing depends on the individual agency. SSB, for example, publishes under CC BY 4.0.

@@ -35,20 +35,23 @@ ssb-pxwebapi-v2/
 
 ### For AI-plattformer som støtter skills/prompts
 
-1. Last ned ZIP-filen: [ssb-pxwebapi-v2-skill.zip](ssb-pxwebapi-v2-skill.zip) (eller pakk denne mappen som ZIP selv)
+1. Last ned ZIP-filen: [ssb-pxwebapi-v2-skill.zip](ssb-pxwebapi-v2-skill.zip), eller bygg den fra repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger repo-interne filer med)
 2. Gå til **Settings > Features > Skills** i Claude.ai
 3. Last opp ZIP-filen
 
 ### Claude Code
 
-Kopier mappen til din globale eller prosjektspesifikke skills-katalog:
+Kopier mappen til skills-katalogen under det installerte navnet `ssb-pxwebapi-v2` (mappen i repoet heter `ssb-pxwebapi-v2-skill`). Fra repo-roten:
 
 ```bash
-# Globalt (tilgjengelig i alle prosjekter)
-cp -r ssb-pxwebapi-v2 ~/.claude/skills/ssb-pxwebapi-v2
+# Kopi, globalt (tilgjengelig i alle prosjekter)
+cp -r ssb-pxwebapi-v2-skill ~/.claude/skills/ssb-pxwebapi-v2
+
+# Eller symlenke fra et klonet repo — da holder git pull kopien oppdatert
+ln -s "$PWD/ssb-pxwebapi-v2-skill" ~/.claude/skills/ssb-pxwebapi-v2
 
 # Per prosjekt
-cp -r ssb-pxwebapi-v2 .claude/skills/ssb-pxwebapi-v2
+cp -r ssb-pxwebapi-v2-skill .claude/skills/ssb-pxwebapi-v2
 ```
 
 ### Andre
@@ -62,7 +65,7 @@ Skillen er ren kunnskap — den gir AI-assistenten *veiledning* for hvordan PxWe
 - **@jarib/pxweb-mcp** (https://www.npmjs.com/package/@jarib/pxweb-mcp) — open source MCP-server for PxWebApi-er, fungerer med SSB, SCB og andre statistikkbyråer som bruker PxWeb V2. Skillen inneholder `references/mcp-tools.md` med mapping mellom verktøyene og API-endepunktene.
 - **TRYs MCP-server** (https://tools.try.no/ssb-mcp) — hostet MCP-tjeneste; krever e-postregistrering og er av TRY merket som eksperimentell
 - **Egen MCP-server** — bygg din egen med FastMCP eller lignende
-- **PxWebApiData (R)** (https://cran.r-project.org/package=PxWebApiData) — R-pakke som henter data fra PxWeb/PxWebApi (SSB, SCB, Statistikkcentralen i Finland) direkte inn i R som data frames. Støtter **både v1 og v2**, med egen vignett for hver: v2 via `api_data()`/`query_url()`/`meta_data()` (snake_case), v1 via `ApiData()`
+- **PxWebApiData (R)** (https://cran.r-project.org/package=PxWebApiData) — R-pakke som henter data fra PxWeb/PxWebApi (SSB, SCB, StatFi, Eurostat m.fl) direkte inn i R som data frames. Støtter **både v1 og v2**, med egen vignett for hver: v2 via `api_data()`/`query_url()`/`meta_data()` (snake_case), v1 via `ApiData()`
 - **Direkte API-kall** — skillen beskriver endepunktene slik at Claude eller andre kan konstruere korrekte URL-er
 
 ## Lisens
@@ -71,7 +74,7 @@ Skillen er laget som et hjelpemiddel for bruk av SSBs åpne API. Data fra SSB er
 
 ## Relaterte skills
 
-- **ssb-histstat** (`../ssb-histstat/`) — norsk historisk statistikk fra SSBs digitaliserte publikasjoner, for tall fra før Statistikkbanken-perioden
+- **ssb-histstat** ([`../ssb-histstat-skill/`](../ssb-histstat-skill/)) — norsk historisk statistikk fra SSBs digitaliserte publikasjoner, for tall fra før Statistikkbanken-perioden
 - **norges-bank-api** (tredjepart: [avocodetoast/norges-bank-api-skill](https://github.com/avocodetoast/norges-bank-api-skill)) — styringsrente, valutakurser, NOWA, statsgjeld m.m. fra Norges Banks datatorg (SDMX-API)
 
 SSB-skillen *henviser* til disse for spørsmål utenfor Statistikkbanken — den henter aldri data fra andre kilder inn i egne svar; presentasjonen kommenterer kun tallene fra SSB-uttrekket.

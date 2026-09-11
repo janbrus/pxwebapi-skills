@@ -1,6 +1,12 @@
 
 
 
+> **Arkivert bakgrunnsdokument.** Dette er en norsk oversettelse og bearbeiding fra 2025 av SCBs den gang uferdige spesifikasjonsutkast, skrevet mens PxWebApi v2 var i beta hos SSB og det ikke fantes noen ordentlig brukerveiledning. Den er ikke vedlikeholdt, og enkelte detaljer er utdaterte.
+>
+> Gjeldende kilder er SSBs egen veiledning ([norsk](https://www.ssb.no/api/pxwebapiv2), [engelsk](https://www.ssb.no/en/api/pxwebapiv2)), den felles [PxWebApi 2 User Guide](https://www.pxtools.net/PxWebApi/documentation/user-guide/) fra PxTools, og [PxApiSpecs](https://github.com/PxTools/PxApiSpecs). Dokumentet er beholdt fordi det forklarer begrepsapparatet — tabell, database, variabel, statistikkvariabel — grundigere enn de gjeldende veiledningene gjør.
+>
+> For arbeidsflyt og verifiserte detaljer: se AI-skillene i [dette repoet](../../README.md).
+
 # PxWebApi 2.0  
 # Brukerhåndbok for PxWebApi v2 - mangelfull brukerveiledning - basert på utkast fra SCB
 ## Hva denne håndboken dekker  

@@ -2,7 +2,7 @@
 
 En [Claude Skill](https://support.claude.com/en/articles/12512180-use-skills-in-claude) som lærer AI-verktøy som Claude å presentere norsk offentlig statistikk fra SSB i SSBs offisielle visuelle stil — som diagram, tabell eller dashboard.
 
-Skillen styrer **hvordan** data vises, ikke hvordan de hentes. Bruk den sammen med [`ssb-pxwebapi-v2`](../ssb-pxwebapi-v2) som henter dataene; denne skillen tar JSON-Stat2-responsen og gjør den om til en korrekt, SSB-stilet visualisering.
+Skillen styrer **hvordan** data vises, ikke hvordan de hentes. Bruk den sammen med [`ssb-pxwebapi-v2`](../ssb-pxwebapi-v2-skill/) som henter dataene; denne skillen tar JSON-Stat2-responsen og gjør den om til en korrekt, SSB-stilet visualisering.
 
 ## Hva skillen gjør
 
@@ -23,7 +23,7 @@ ssb-chart-skill/
 ├── SKILL.md                       # Hovedinstruksjoner: prinsipper, rendringsmål, palett, typografi, diagramvalg, sjekkliste
 ├── README.md                      # Denne filen
 ├── CHANGELOG.md                   # Endringslogg — versjon står i SKILL.md-frontmatter
-├── CLAUDE.md                      # Veiledning for å redigere selve skillen (følger ikke med i ZIP)
+├── ssb-chart-skill.zip            # Ferdigpakket skill for opplasting til Claude.ai
 └── references/
     ├── chart-selection.md         # Beslutningsmatrise per diagramtype (linje, søyle, ring, kart, scorecard …)
     ├── color-system.md            # Komplett fargespesifikasjon i alle formater (CSS/JS/Python/Recharts/Chart.js/matplotlib)
@@ -31,21 +31,26 @@ ssb-chart-skill/
     └── jsonstat-to-chart.md       # Oppskrift: JSON-Stat2-respons → chart-datasets (labels, decimals, status-hull)
 ```
 
+`CLAUDE.md` og `scripts/` i repoet er vedlikeholder-interne og følger ikke med i pakken.
+
 ## Installasjon
 
 ### For AI-plattformer som støtter skills
 
-1. Pakk denne mappen som ZIP (eller bruk en ferdig `ssb-chart-skill.zip`)
+1. Last ned [ssb-chart-skill.zip](ssb-chart-skill.zip), eller bygg den fra repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger `CLAUDE.md` og `scripts/` med). Pakken har toppmappe `ssb-chart/` og inneholder kun `SKILL.md`, `README.md`, `CHANGELOG.md` og `references/`
 2. Gå til **Settings > Features > Skills** i Claude.ai
 3. Last opp ZIP-filen
 
 ### Claude Code
 
-Kopier mappen til din globale eller prosjektspesifikke skills-katalog:
+Kopier mappen til din globale eller prosjektspesifikke skills-katalog. Fra repo-roten:
 
 ```bash
-# Globalt (tilgjengelig i alle prosjekter)
+# Kopi, globalt (tilgjengelig i alle prosjekter)
 cp -r ssb-chart-skill ~/.claude/skills/ssb-chart-skill
+
+# Eller symlenke fra et klonet repo — da holder git pull kopien oppdatert
+ln -s "$PWD/ssb-chart-skill" ~/.claude/skills/ssb-chart-skill
 
 # Per prosjekt
 cp -r ssb-chart-skill .claude/skills/ssb-chart-skill

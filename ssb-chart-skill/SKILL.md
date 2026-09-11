@@ -12,7 +12,7 @@ description: >
   datakilder — da er en annen dataviz-skill riktig valg.
 metadata:
   version: "1.1"
-  source: https://github.com/janbrus/ssb-api-v2-examples/tree/main/ssb-chart-skill
+  source: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-chart-skill
 ---
 
 # SSB Data Visualization

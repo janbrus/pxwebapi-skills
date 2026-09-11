@@ -8,7 +8,7 @@ This is **not** an application codebase. It is a Claude Code **Skill** package t
 
 There *is* a build step and a test suite, but they are unusual: `scripts/build_zip.sh` packages the distributable, and the Python checkers under `scripts/` treat every example URL, POST body and table ID written in the markdown as an assertion to verify against the **live** SSB API. Prose is the fixture set; drift upstream at SSB fails the build.
 
-Upstream source of truth: https://github.com/janbrus/ssb-api-v2-examples/tree/main/ssb-pxwebapi-v2-skill
+Upstream source of truth: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill (the repo was renamed from `ssb-api-v2-examples`; old URLs redirect)
 
 ## Commands
 

@@ -19,7 +19,10 @@ v2 is not misled: the filter row now lists the offset forms `top(n,offset)`/`bot
 says that comma expressions must be bracketed in a v2 GET URL; the saved-queries row records that
 SSB's v1-era web saved-query IDs (`ssb.no/statbank/sq/{id}`) resolve through v2's
 `GET /savedqueries/{id}` and `/data` (verified on 10119120) — the answer for a user who arrives with
-an old sq link now that the PxWeb v2 web page for it serves only a screen view. Nothing else
+an old sq link now that the PxWeb v2 web page for it serves only a screen view. Same day, no
+version change: the README's Claude Code install block used the installed name
+`generic-pxweb-v1-skill` as the source folder (the repository folder is
+`pxwebapi-v1-generic-skill`); now the right folder, plus the symlink alternative. Nothing else
 changed.
 
 ### Corrections

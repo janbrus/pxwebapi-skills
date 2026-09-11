@@ -6,6 +6,8 @@ Versjoner under 1.0.0 markerer at skillen ikke har noen publisert distribusjon e
 
 ## 0.9.0 — 2026-08-30
 
+- Tillegg 2026-09-09, ingen versjonsendring: **skillen har fått distribusjons-zip, `scripts/build_zip.sh` og en CI-workflow** (`.github/workflows/check-histstat-zip.yaml`). Den hadde ingen pakke i det hele tatt, og README-en ba brukeren zippe mappen selv — det ville lagt `CLAUDE.md` inn i pakken. `ssb-histstat-skill.zip` inneholder nå `SKILL.md`, `README.md`, `CHANGELOG.md` og `references/` under toppmappa `ssb-histstat/` (frontmatter-navnet), slik søskenskillene pakker. Filtreet i README manglet dessuten `CHANGELOG.md` og oppga mappenavnet feil
+- Tillegg 2026-09-09, ingen versjonsendring: installasjonskommandoene i `README.md` brukte det installerte navnet `ssb-histstat` som kildemappe (mappen heter `ssb-histstat-skill`); nå riktig mappe pluss symlenke-alternativ
 - **Versjonering innført** (`metadata.version` i `SKILL.md`-frontmatter + denne loggen). En bruker med en gammel kopi hadde tidligere ingen måte å se det på. `CLAUDE.md` sier nå at URL-rettelser teller som innholdsendringer og skal bumpe versjonen — en foreldet URL er den viktigste måten denne skillen forfaller på
 - **Nytt kulepunkt under «Hva denne skillen IKKE gjør»:** gjengi aldri et historisk tall fra hukommelsen. Skillen returnerer kilde-URL-er og leser ikke PDF-ene, så et tall i et svar kan bare ha kommet fra hukommelsen — det er den ene feilmåten som ville satt et oppdiktet tall under en SSB-henvisning. Punktet er kortformen av «Dataintegritet — grunnregelen» i `ssb-pxwebapi-v2`; den skillen eier regelen, denne peker på den
 
