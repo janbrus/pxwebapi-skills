@@ -9,6 +9,7 @@ Praktisk driftsinformasjon for SSBs PxWebApi v2. For json-stat2-formatet (Datase
 - Nye tall publiseres vanligvis kl. 08.00. Unngå spørringer 07.55–08.15 ved høy belastning.
 - Tall som skal revideres kl. 08 vises som 0 eller prikk i tidsrommet 05.00–08.00.
 - Metadata oppdateres kl. 05.00 og 11.30 — tabellene er utilgjengelige under oppdatering.
+- KOSTRA (385 aktive tabeller under `paths`-noden `kostrahoved`) har egen årsrytme: ureviderte tall for året før 15. mars, reviderte 15. juni; kommunene retter innen 15. april. API-et flagger ikke ureviderte verdier i `status` — `updated` på `/tables/{id}` mot kalenderen avgjør (verifisert 2026-09-20: 321 tabeller oppdatert i juni, 44 i mars). Se `kostra.md`.
 - API-grense: 800 000 celler per uttrekk (tomme celler teller med). Rate limit: 40 spørringer per minutt (`x-ratelimit-policy: 40;w=60s`, bekreftet 2026-09-09) — les gjeldende verdi fra `x-ratelimit-*`-responsheaderne (se under), ikke fra `/config`. SSBs brukerveiledning oppgir 30 per minutt; headeren er autoritativ når de to avviker.
 - GET-URL kan ikke overstige ca. 2 100 tegn — over det svarer API-et 404. Bruk POST for komplekse spørringer.
 - Desimalskilletegn er `.` (punktum) for alle formater unntatt xlsx på norsk (komma).

@@ -1,8 +1,7 @@
-# Claude Skill: PxWebApi v1 (Generic)
+# Agent Skill: PxWebApi v1 (Generic)
 
-A [Claude Skill](https://support.claude.com/en/articles/12512180-use-skills-in-claude) which guides AI tools 
-access official statistics from any **PxWebApi v1** installation. This is the older, POST-based
-PxWeb 1.0 API that most PxWeb installations worldwide still run.
+An [Agent Skill](https://agentskills.io) — a `SKILL.md` with workflow and rules plus reference files. It guides AI tools such as Claude and ChatGPT to
+access official statistics from any **PxWebApi v1** installation. This is the older, http POST-based PxWeb 1.0 API that most PxWeb installations worldwide still run.
 
 It is the v1 counterpart to `generic-pxweb-v2-skill`, and shares its vendor-neutral approach.
 
@@ -87,7 +86,7 @@ generic-pxweb-v1-skill/
     └── build_zip.sh          # Builds the distribution ZIP (user-facing files only)
 ```
 
-The four files above `references/` plus `references/` itself are what ships. `CLAUDE.md`,
+The four files above `references/` plus `references/` itself are what ships, together with `LICENSE` from the repository root. `CLAUDE.md`,
 `evals/` and `scripts/` are repo-internal and deliberately excluded from the ZIP.
 
 ## Installation
@@ -110,6 +109,16 @@ cp -r pxwebapi-v1-generic-skill ~/.claude/skills/generic-pxweb-v1-skill
 ln -s "$PWD/pxwebapi-v1-generic-skill" ~/.claude/skills/generic-pxweb-v1-skill
 ```
 
+### ChatGPT and Codex
+
+ChatGPT and Codex read skills in the same format from `.agents/skills/` (per [OpenAI's documentation](https://developers.openai.com/codex/skills/); untested here). Unpack the ZIP file, or copy the folder from the repository:
+
+```bash
+cp -r pxwebapi-v1-generic-skill ~/.agents/skills/generic-pxweb-v1-skill
+```
+
+Standalone skills are available in the ChatGPT desktop app, Codex CLI and the IDE extension; on web and mobile the skill has to be packaged as a plugin.
+
 ## Related skills
 
 - `generic-pxweb-v2-skill` — the same coverage for PxWebApi v2
@@ -125,6 +134,8 @@ Statistics Finland's *How to use the Statfi PxWeb API*, the PX-file format speci
 live installations on 2026-08-28.
 
 ## License
+
+The skill itself (`SKILL.md`, `references/` and the scripts) is licensed under the [MIT License](https://github.com/janbrus/pxwebapi-skills/blob/main/LICENSE), © 2026 Jan Bruusgaard. The licence text lives in the repository root and ships in the zip as `LICENSE`. MIT covers the skill, not the data it fetches, which is licensed by each agency (see below).
 
 PxWeb and PxWebApi are open source: https://github.com/PxTools/PxWebApi.
 Data licensing depends on the individual agency. SSB, for example, publishes under CC BY 4.0.

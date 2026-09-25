@@ -1,0 +1,47 @@
+# Holder ssb-chart-skill.zip synkron med arbeidstreet.
+#
+# Chart-skillen kaller ingen API og har derfor ingen eksempelsjekker; workflowen
+# dekker bare zip-synk. Zip-en ble bygd for hånd fram til 2026-09-09, og det er
+# nettopp den feilklassen dette fanger: en pakke som ikke lenger stemmer med kilden.
+name: Validate ssb-chart-skill
+
+on:
+  push:
+    paths:
+      - 'ssb-chart-skill/SKILL.md'
+      - 'ssb-chart-skill/README.md'
+      - 'ssb-chart-skill/CHANGELOG.md'
+      - 'ssb-chart-skill/references/**'
+      - 'ssb-chart-skill/scripts/**'
+      - 'ssb-chart-skill/ssb-chart-skill.zip'
+      - '.github/workflows/check-chart-zip.yaml'
+      - 'LICENSE'
+  pull_request:
+    paths:
+      - 'ssb-chart-skill/SKILL.md'
+      - 'ssb-chart-skill/README.md'
+      - 'ssb-chart-skill/CHANGELOG.md'
+      - 'ssb-chart-skill/references/**'
+      - 'ssb-chart-skill/scripts/**'
+      - 'ssb-chart-skill/ssb-chart-skill.zip'
+      - '.github/workflows/check-chart-zip.yaml'
+      - 'LICENSE'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ssb-chart-skill
+
+jobs:
+  zip-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Verify ssb-chart-skill.zip matches working tree
+        run: |
+          bash scripts/build_zip.sh /tmp/fresh.zip
+          mkdir /tmp/committed /tmp/fresh
+          unzip -q ssb-chart-skill.zip -d /tmp/committed
+          unzip -q /tmp/fresh.zip -d /tmp/fresh
+          diff -r /tmp/committed /tmp/fresh \
+            || { echo '::error::ssb-chart-skill/ssb-chart-skill.zip er utdatert — kjør scripts/build_zip.sh i skillmappa og sjekk inn ny zip'; exit 1; }

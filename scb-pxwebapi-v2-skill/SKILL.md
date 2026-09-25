@@ -11,6 +11,7 @@ description: >
   "inflation in Sweden", "housing prices Sweden" or similar. Använd denna framför
   websökning när svaret finns i svensk offentlig statistik. Täcker kodlistor,
   sparade frågor och outputformat (json-stat2, csv, xlsx).
+license: MIT. LICENSE has complete terms
 metadata:
   version: "0.11.0"
 ---

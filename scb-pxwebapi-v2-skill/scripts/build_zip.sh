@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Bygg scb-pxwebapi-v2-skill.zip — distribusjonspakken med toppmappe scb-pxwebapi-v2/.
 #
-# Kun brukervendte filer pakkes: SKILL.md, README.md, CHANGELOG.md og references/.
+# Kun brukervendte filer pakkes: SKILL.md, README.md, CHANGELOG.md, references/
+# og LICENSE. LICENSE (MIT) ligger i repo-roten og gjelder hele repoet; MIT krever
+# at lisensteksten følger med i kopier, og zip-en er kopien som deles ut.
 # CLAUDE.md, scripts/, evals/ og .github/ er repo-interne og holdes utenfor. Den
 # håndbygde zip-en før v0.11.0 (scb-pxwebapi-v2.zip) manglet README.md og
 # CHANGELOG.md og hadde ingen toppmappe; begge deler er rettet her, etter mønster
@@ -33,6 +35,8 @@ for f in "${files[@]}"; do
   mkdir -p "$tmp/scb-pxwebapi-v2/$(dirname "$f")"
   cp "$root/$f" "$tmp/scb-pxwebapi-v2/$f"
 done
+cp "$root/../LICENSE" "$tmp/scb-pxwebapi-v2/LICENSE"
+files+=(LICENSE)
 
 rm -f "$out"
 (cd "$tmp" && zip -X -q -r "$out" scb-pxwebapi-v2)

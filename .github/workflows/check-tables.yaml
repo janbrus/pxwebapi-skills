@@ -10,16 +10,20 @@ on:
     paths:
       - 'ssb-pxwebapi-v2-skill/SKILL.md'
       - 'ssb-pxwebapi-v2-skill/references/**'
+      - 'ssb-pxwebapi-v2-skill/docs/**'
       - 'ssb-pxwebapi-v2-skill/scripts/**'
       - 'ssb-pxwebapi-v2-skill/ssb-pxwebapi-v2-skill.zip'
       - '.github/workflows/check-tables.yaml'
+      - 'LICENSE'
   pull_request:
     paths:
       - 'ssb-pxwebapi-v2-skill/SKILL.md'
       - 'ssb-pxwebapi-v2-skill/references/**'
+      - 'ssb-pxwebapi-v2-skill/docs/**'
       - 'ssb-pxwebapi-v2-skill/scripts/**'
       - 'ssb-pxwebapi-v2-skill/ssb-pxwebapi-v2-skill.zip'
       - '.github/workflows/check-tables.yaml'
+      - 'LICENSE'
   schedule:
     - cron: '0 6 * * 1'   # mandag 06:00 UTC — fanger drift i SSB-tabeller
   workflow_dispatch:

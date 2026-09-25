@@ -52,7 +52,9 @@ rather than presenting it as universal.
   - `v1-vs-v2.md` — endpoint/body/filter translation both directions, and using v2 to fill v1's
     discovery gaps
 - `evals/eval-scenarios.md` — end-to-end scenarios. Repo-internal, not shipped.
-- `scripts/build_zip.sh` — builds `generic-pxweb-v1-skill.zip` from the user-facing files only.
+- `scripts/build_zip.sh` — builds `generic-pxweb-v1-skill.zip` from the user-facing files only
+  (`SKILL.md`, `README.md`, `CHANGELOG.md`, `references/`) plus `LICENSE` from the repo root.
+  `LICENSE` (MIT) lives in the **repo root** and covers the whole repo; `build_zip.sh` copies it into the package because MIT requires the notice to travel with every copy, and the zip is the copy that gets handed out. Don't add a per-skill `LICENSE` — edit the root one, and rebuild **all six** zips when it changes (every zip-sync workflow has `LICENSE` in its `paths:` filter). `SKILL.md` frontmatter carries `license: MIT. LICENSE has complete terms` (the optional Agent Skills field — keep it short, it names the file beside `SKILL.md` in the zip); never put licence text in the body, which is loaded on every trigger.
   CI (`.github/workflows/check-v1-zip.yaml`, in the **repo root**, not here) rebuilds it and
   `diff -r`s against the committed ZIP, so an outdated ZIP fails the build.
 

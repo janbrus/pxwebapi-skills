@@ -1,6 +1,7 @@
 ---
 name: ssb-histstat
 description: Norsk historisk statistikk fra SSB (1828-2010) — digitaliserte publikasjoner under ssb.no/a/histstat/. Bruk når brukeren spør om historiske norske tall fra før Statistikkbanken-perioden, eldre folketellinger, NOS-publikasjoner (Norges offisielle statistikk), Statistisk årbok, "Historisk statistikk"-utgavene, eller tidsserier som strekker seg lenger tilbake enn ssb-pxwebapi-v2 dekker. Trigger på "historisk statistikk", "NOS", "Norges offisielle statistikk", "folketelling 1769/1801/1865/...", "Statistisk årbok", "tall fra 1800-tallet", årstall før 1980 kombinert med statistikkbegreper (befolkning, lønn, priser, handel, jordbruk, fiske, industri, skole, fattigvesen), eller når ssb-pxwebapi-v2 ikke har data så langt tilbake. Also trigger on "Norwegian historical statistics", "Statistics Norway historical", "Norway 19th century data".
+license: MIT. LICENSE has complete terms
 metadata:
   version: "0.9.0"
 ---

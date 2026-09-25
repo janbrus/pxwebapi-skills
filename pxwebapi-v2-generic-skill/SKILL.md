@@ -8,6 +8,7 @@ description: >
   or Swedish (SCB) statistics specifically, prefer the dedicated `ssb-pxwebapi-v2` or
   `scb-pxwebapi-v2` skills which include agency-specific examples and table catalogs.
   Covers table search, metadata, data queries, codelists, and saved queries.
+license: MIT. LICENSE has complete terms
 metadata:
   version: "0.11.0"
 ---

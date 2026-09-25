@@ -16,6 +16,7 @@ on:
       - 'pxwebapi-v1-generic-skill/scripts/**'
       - 'pxwebapi-v1-generic-skill/generic-pxweb-v1-skill.zip'
       - '.github/workflows/check-v1-zip.yaml'
+      - 'LICENSE'
   pull_request:
     paths:
       - 'pxwebapi-v1-generic-skill/SKILL.md'
@@ -25,6 +26,7 @@ on:
       - 'pxwebapi-v1-generic-skill/scripts/**'
       - 'pxwebapi-v1-generic-skill/generic-pxweb-v1-skill.zip'
       - '.github/workflows/check-v1-zip.yaml'
+      - 'LICENSE'
   workflow_dispatch:
 
 defaults:

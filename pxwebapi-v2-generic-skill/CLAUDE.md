@@ -50,7 +50,9 @@ scripts/build_zip.sh /tmp/fresh.zip   # write elsewhere, e.g. to diff against th
 4. If you added a file to `references/`, update the file tree in `README.md` too.
 5. If a factual claim changed, do the **sibling check** below and record its outcome in `CHANGELOG.md`, including when the answer is "does not apply".
 
-**The zip and the README file tree contain user-facing files only**: `SKILL.md`, `README.md`, `CHANGELOG.md`, `references/`. Never add `scripts/`, `evals/` or `CLAUDE.md` to either.
+**The zip and the README file tree contain user-facing files only**: `SKILL.md`, `README.md`, `CHANGELOG.md`, `references/`, plus `LICENSE` in the zip. Never add `scripts/`, `evals/` or `CLAUDE.md` to either.
+
+`LICENSE` (MIT) lives in the **repo root** and covers the whole repo; `build_zip.sh` copies it into the package because MIT requires the notice to travel with every copy, and the zip is the copy that gets handed out. Don't add a per-skill `LICENSE` — edit the root one, and rebuild **all six** zips when it changes (every zip-sync workflow has `LICENSE` in its `paths:` filter). `SKILL.md` frontmatter carries `license: MIT. LICENSE has complete terms` (the optional Agent Skills field — keep it short, it names the file beside `SKILL.md` in the zip); never put licence text in the body, which is loaded on every trigger.
 
 ## Related sibling skills
 

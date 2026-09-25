@@ -238,6 +238,9 @@ now notes that installations may add fields of their own.
   checklist, the corrected section order, the sibling-check rule, and a note that the repo folder
   (`pxwebapi-v1-generic-skill`) does not match the frontmatter name (`generic-pxweb-v1-skill`).
 
+- Addendum 2026-09-23, no version change: **the README is reworded to the open [Agent Skills](https://agentskills.io) standard.** ChatGPT and Codex now read skills in the same format, so "Claude Skill" became "Agent Skill", the intro names both Claude and ChatGPT, and the installation section gained its own `.agents/skills/` block (per OpenAI's documentation <https://developers.openai.com/codex/skills/>, read 2026-09-23 — untested here). README only; `SKILL.md` is unchanged, but the zip was rebuilt because the README ships inside it
+- Addendum 2026-09-24, no version change: **MIT licence.** The repository now has `LICENSE` (MIT, © 2026 Jan Bruusgaard) at its root, and `scripts/build_zip.sh` puts it in the zip — MIT requires the notice to travel with every copy. The README's licence section now separates the skill (MIT) from the data it fetches (each agency's own licence). `CLAUDE.md` and the CI workflow's `paths:` updated. `SKILL.md` frontmatter gained `license: MIT. LICENSE has complete terms` (the optional Agent Skills `license` field); the body is unchanged
+
 ## 0.11.0 — 2026-09-01
 
 One new section. It closes a failure mode that is specific to v1 being POST-only: an assistant can

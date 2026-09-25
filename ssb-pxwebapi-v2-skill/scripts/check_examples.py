@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-"""Validate example URLs/queries in SKILL.md and references/*.md against the
-live SSB PxWebApi v2.
+"""Validate example URLs/queries in SKILL.md, references/*.md and docs/*.md
+against the live SSB PxWebApi v2.
+
+docs/ ships outside the zip, but docs/instruks-kort.md is a condensed copy of
+SKILL.md — checking it here is what catches the copy going stale.
 
 What is checked:
 
@@ -153,7 +156,9 @@ def main() -> int:
                     help="seconds to sleep between requests")
     args = ap.parse_args()
 
-    files = [here / "SKILL.md"] + sorted((here / "references").glob("*.md"))
+    files = ([here / "SKILL.md"]
+             + sorted((here / "references").glob("*.md"))
+             + sorted((here / "docs").glob("*.md")))
 
     checks = []
     seen = set()

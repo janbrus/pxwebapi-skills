@@ -11,8 +11,9 @@ description: >
   "inflation in Norway", "housing prices Norway" or similar. Bruk denne fremfor
   websøk når svaret finnes i norsk offentlig statistikk. Dekker kodelister,
   lagrede spørringer og outputformater (json-stat2, csv, xlsx).
+license: MIT. LICENSE has complete terms
 metadata:
-  version: "1.5.0"
+  version: "1.6.0"
   source: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 ---
 
@@ -26,7 +27,7 @@ https://data.ssb.no/api/pxwebapi/v2
 
 **Skillen vedlikeholdes her:** https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 
-Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.5.0.
+Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.6.0.
 
 ## Dataintegritet — grunnregelen
 
@@ -44,7 +45,7 @@ SSB er Norges offisielle statistikkprodusent. Tilliten til tallene er selve prod
 - **Sjekk `discontinued` og `lastPeriod`.** Tabeller avsluttes, og serien fortsetter ofte i en ny tabell. Bruker du en avsluttet tabell, si det og oppgi siste periode. Finn etterfølgeren når den finnes.
 - **Vis `status`.** Manglende, foreløpige og konfidensielle verdier skal fram i tabellen, ikke skjules. Se `references/troubleshooting.md`.
 - **Vis obligatoriske noter.** Er `extension.noteMandatory` satt, har SSB bestemt at noten skal følge tallet. Å utelate den er å presentere tallet uten forbeholdet SSB selv knyttet til det — særlig når forbeholdet gjelder nettopp den beregningen du har gjort. Se Steg 5.
-- **Flagg foreløpige tall.** Nasjonalregnskap og flere andre serier revideres. Si fra når tallene kan endre seg.
+- **Flagg foreløpige tall.** Nasjonalregnskap, KOSTRA (ureviderte tall fra 15. mars, reviderte fra 15. juni, uten `status`-flagg — se `references/kostra.md`) og flere andre serier revideres. Si fra når tallene kan endre seg.
 
 Finner du ikke tallet i Statistikkbanken, er riktig svar at det ikke ble funnet — med forslag til søkeord eller alternativ kilde. Et ærlig «vet ikke» er langt bedre enn et plausibelt tall som ikke stemmer. Feil tall med SSB-kildehenvisning skader tilliten til SSB, ikke bare til svaret.
 
@@ -120,13 +121,15 @@ Følg disse stegene i rekkefølge. Hopp aldri over metadata-steget.
 Avklar før du kaller noe:
 
 - **Fenomen** — Hva måles? (befolkning, priser, sysselsetting, handel, utdanning, helse)
-- **Geografi** — Hele Norge, fylke, kommune, bydel?
+- **Geografi** — Hele Norge, fylke, kommune, bydel, delområde eller grunnkrets? Nivåene under kommune har egne kodeformer og få tabeller — se «Regionale nivåer under kommune» i `references/codelists-and-filters.md`
 - **Tidsperiode** — Siste år, siste 10 år, bestemt intervall?
 - **Nedbrytning** — Kjønn, alder, næring, utdanningsnivå?
 
 Hvis brukeren er vag, still **ett** oppfølgingsspørsmål — ikke flere.
 
 Gjelder spørsmålet styringsrente, valutakurser, NOWA, statsgjeld/statsobligasjoner eller annen sentralbankdata: bruk `norges-bank-api`-skillen hvis den er tilgjengelig i miljøet — disse dataene ligger hos Norges Bank, ikke i Statistikkbanken.
+
+Gjelder spørsmålet kommunenes eller fylkeskommunenes tjenester og økonomi — barnehagedekning, pleie og omsorg, netto driftsresultat, sammenligning med «KOSTRA-gruppen» — er svaret som regel en KOSTRA-tabell. De bruker egne variabel-ID-er (`KOKkommuneregion0000`, ikke `Region`), spesialkoder for landet og KOSTRA-gruppene, estimerte landstall, har ureviderte tall fra mars og reviderte fra juni, og strukturen endres når rapporteringskravene endres — hent metadata i samme samtale, gjenbruk aldri koder fra hukommelsen. Les `references/kostra.md` før du søker.
 
 ### Steg 2: Søk etter tabell
 
@@ -148,6 +151,9 @@ Bruk `GET /tables` med `query`-parameter.
 - Søket er case-insensitivt og leter i tabelltitler, variabler og variabelverdier
 - Trunkering med `*` (f.eks. `anlegg*`) og feltbegrensning med `title:` er ofte nok
 - Bruk `pastDays` for nylig oppdaterte tabeller; sjekk `lastPeriod`, `timeUnit` og `discontinued` i resultatene
+- Suffiks i tittelen viser laveste regionale nivå: (F) fylke, (K) kommune, (B) bydel, (G) grunnkrets. Søk på ordet (`grunnkrets`, `bydel`) — `title:"(G)"` treffer også G = grunnbeløp
+- Næringstabeller finnes i to parallelle varianter under overgangen SN2007 → SN2025 (fra 2026); tittelen sier hvilken. Søk på `SN2025` eller `SN2007` for å skille dem — se `references/codelists-and-filters.md`
+- KOSTRA-tabeller kjennes igjen på stien `os > os01 > kostrahoved` i `paths`, ikke på søkeord (`kostrahoved` gir 0 treff, og «kostra» finner ikke bydelstabellene). Søk `kostra` pluss fagterm — se `references/kostra.md`
 - For fuzzy søk, nærhetssøk, boolske operatorer og dato-syntaks: se `references/search-syntax.md`
 
 Presenter de 3–5 mest relevante treffene med tabell-ID, tittel, siste periode, tidsfrekvens og `discontinued`-status. Anbefal den mest passende.
@@ -301,6 +307,8 @@ Integritetsreglene øverst gjelder alltid — i tillegg:
 - Hent data uten filtre og anta at du får hele tabellen — API-et returnerer defaultselection-uttrekket, og du kontrollerer ikke hva det inneholder; angi alltid eksplisitt seleksjon
 - Anta at kommunekoder er stabile over tid (kommunesammenslåinger i 2020!)
 - Bland koder fra forskjellige kodelister
+- Bland næringskoder fra SN2007 og SN2025 — samme bokstav (K, L, …) er ulik næring i de to standardene; les variabel-ID-en (`NACE2007`/`NACE2025`) fra metadata
+- Anta at regionvariabelen heter `Region` eller at landet er `0` — i KOSTRA-tabellene heter den `KOKkommuneregion0000`/`KOKfylkesregion0000`/`KOKbydelsregion0000`, landet er `EAK`, alle dimensjoner er obligatoriske, og nøkkeltall summeres aldri (`aggregallowed: false`)
 - Presenter data uten enhet
 
 ---

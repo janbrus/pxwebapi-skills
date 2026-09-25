@@ -23,11 +23,11 @@ Ugyldig forespørsel. **Diagnostiser fra `title`, ikke fra `detail`** — `detai
 
 **Vanlige årsaker:**
 
-- **Ukjent variabelkode** — `variableCode` i selection matcher ikke metadata. Variabel- og verdikoder er *ikke* case-sensitive (`region`, `contentscode`, `personer1` og `TOP(1)` aksepteres — verifisert 2026-09-09), så feilen skyldes at koden ikke finnes, ikke stor/liten bokstav.
-- **Ugyldig verdikode** — Koden finnes ikke i tabellen. Sjekk `category.index` i metadata.
+- **Ukjent variabelkode** — `variableCode` i selection matcher ikke metadata. Variabel- og verdikoder er *ikke* case-sensitive (`region`, `contentscode`, `personer1` og `TOP(1)` aksepteres — verifisert 2026-09-09), så feilen skyldes at koden ikke finnes, ikke stor/liten bokstav. `Region` finnes ikke i KOSTRA-tabellene — der heter variabelen `KOKkommuneregion0000`/`KOKfylkesregion0000`/`KOKbydelsregion0000`, se `kostra.md`.
+- **Ugyldig verdikode** — Koden finnes ikke i tabellen. Sjekk `category.index` i metadata. I KOSTRA kan en `KOS…`-kode fra i fjor være borte, fordi variablene byttes ut når rapporteringskravene endres — hent metadata på nytt.
 - **Feil tidsformat** — Bruker `"2024"` i en månedlig tabell (skal være `"2024M01"`).
 - **For mange celler** — Resultatet overstiger `maxDataCells` fra `/config`.
-- **Manglende obligatorisk variabel** — Variabel med `elimination: false` mangler fra selection.
+- **Manglende obligatorisk variabel** — Variabel med `elimination: false` mangler fra selection. I KOSTRA-tabellene gjelder det nesten alle dimensjoner — også region (`KOKkommuneregion0000`), funksjon, art og regnskapsomfang.
 - **Ugyldig kodeliste-ID** — Kodelisten finnes ikke for denne variabelen. Kodeliste-ID-er *er* case-sensitive: `agg_kommfylker` gir `Non-existent codelist`.
 - **`range()`, `top(N, offset)` eller `bottom(N, offset)` i GET uten hakeparenteser** — komma er listeskilletegn i URL-en, så uttrykket deles i to. Skriv `valueCodes[Tid]=[range(2020,2022)]`. Gjelder ikke POST. Se `codelists-and-filters.md`.
 - **Manglende `OutputFormatParams` i `POST /savedqueries`** — feltet er obligatorisk i request-bodyen selv om verdien er tom. Send `"outputFormatParams": []` hvis du ikke trenger noen. Symptom: `400 — "The OutputFormatParams field is required."`
@@ -93,6 +93,7 @@ Tjenesten er nede eller under oppdatering. Metadata oppdateres kl. 05.00 og 11.3
 
 **Beregning:** Antall celler = produktet av antall verdier per variabel. Eksempel:
 - 400 kommuner × 2 kjønn × 100 aldre × 40 år = 3 200 000 celler
+- 34 097 grunnkretser × 28 år i 04317 = 954 716 celler — ett år går (34 097), alle år ikke. Filtrer på kommuneprefiks (`0301*`) eller bruk `agg_GrkretsNy`; se «Regionale nivåer under kommune» i `codelists-and-filters.md`
 
 **Løsning (i prioritert rekkefølge):**
 
@@ -131,6 +132,8 @@ Sjekk `status`-objektet i json-stat2-responsen. SSBs gjeldende standardtegn (fra
 - `".."` = tallgrunnlag mangler (ikke innkommet eller for usikre til å publiseres)
 - `":"` = vises ikke av konfidensialitetshensyn (for å unngå identifisering)
 
+KOSTRA prikker tall som bygger på færre enn 3 enheter (barnevern, sosialhjelp, kvalifiseringsstønad, bolig) eller færre enn 5 brukere (pleie og omsorg), og for enkelte økonomiske nøkkeltall er landsgjennomsnittet *med* Oslo prikket — bruk `EAKUO` (Landet uten Oslo). Se `kostra.md`.
+
 I eldre tabeller (før 2021) kan du også finne: `"..."` = oppgave mangler foreløpig, `"-"` = null, `"*"` = foreløpig tall.
 
 Se https://www.ssb.no/diverse/standardtegn-i-tabeller (engelsk: https://www.ssb.no/en/diverse/standardtegn-i-tabeller)
@@ -147,7 +150,8 @@ Se https://www.ssb.no/diverse/standardtegn-i-tabeller (engelsk: https://www.ssb.
 ### Data ser "feil ut" over tid
 
 - Kommunesammenslåinger i 2020 bryter tidsserier på kommunenivå
-- Næringsklassifisering (NACE) kan endre seg mellom revisjoner
+- Næringsklassifisering: SSB er i overgang fra SN2007 til SN2025 (fra 2026, statistikk for statistikk, begge varianter oppdateres parallelt). Samme bokstavkode er ulik næring i de to standardene — se «Næringskoder: SN2007 → SN2025» i `codelists-and-filters.md`
+- KOSTRA: KOSTRA-gruppene (`EKGnn`) ble revidert fra 2020 (brudd 2019/2020, ofte obligatorisk note); tabellene ble omstrukturert i 2015 (eldre serier ligger i avsluttede tabeller); variabler og tabeller byttes ut når rapporteringskravene endres (sosialtjenesten 2015–2021 → nye tabeller fra 2022) — tomme år for en variabel betyr ofte at den ikke fantes; mars-tall er ureviderte til juni uten `status`-flagg; Landet og Landet uten Oslo er estimerte og veide tall — se `kostra.md`
 - KPI-basisår endres periodisk (nå 2025=100)
 - Nasjonalregnskapet revideres (foreløpige → endelige tall)
 

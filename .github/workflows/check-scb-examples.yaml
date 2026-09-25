@@ -13,6 +13,7 @@ on:
       - 'scb-pxwebapi-v2-skill/scripts/**'
       - 'scb-pxwebapi-v2-skill/scb-pxwebapi-v2-skill.zip'
       - '.github/workflows/check-scb-examples.yaml'
+      - 'LICENSE'
   pull_request:
     paths:
       - 'scb-pxwebapi-v2-skill/SKILL.md'
@@ -20,6 +21,7 @@ on:
       - 'scb-pxwebapi-v2-skill/scripts/**'
       - 'scb-pxwebapi-v2-skill/scb-pxwebapi-v2-skill.zip'
       - '.github/workflows/check-scb-examples.yaml'
+      - 'LICENSE'
   schedule:
     - cron: '10 6 * * 1'  # mandag 06:10 UTC — fanger drift i SCB-tabeller
   workflow_dispatch:

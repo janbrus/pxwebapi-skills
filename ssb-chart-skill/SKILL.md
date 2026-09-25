@@ -10,6 +10,7 @@ description: >
   Bruk sammen med `ssb-pxwebapi-v2`-skillen for å hente data; denne skillen styrer
   hvordan dataene presenteres. Bruk IKKE denne skillen for visualisering av andre
   datakilder — da er en annen dataviz-skill riktig valg.
+license: MIT. LICENSE has complete terms
 metadata:
   version: "1.1"
   source: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-chart-skill

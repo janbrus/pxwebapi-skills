@@ -11,6 +11,9 @@ Har din kopi ingen `metadata.version`, er den fra før 2026-08-27 — last ned n
 - Tillegg 2026-09-09, ingen versjonsendring: `source:` i frontmatter og `CLAUDE.md` pekte til det gamle repo-navnet `ssb-api-v2-examples` (redirecter til `pxwebapi-skills`); `README.md`-lenken til `ssb-pxwebapi-v2` pekte til en mappe som ikke finnes (`../ssb-pxwebapi-v2-skill/` er riktig); installasjonsblokken har fått symlenke-alternativ
 - Søskenskill: `ssb-pxwebapi-v2` 1.4.1 og `scb-pxwebapi-v2` 0.10.0 slippes samtidig. Ett funn derfra er verdt å merke seg for diagrammer: **`timeUnit` finnes kun på `/tables`-treffet, ikke i json-stat2-dokumentet** — så aksefrekvensen (måned/kvartal/år) må bæres med fra søkesteget, den kan ikke leses av datasettet
 
+- Tillegg 2026-09-23, ingen versjonsendring: **README omskrevet til den åpne [Agent Skills](https://agentskills.io)-standarden.** ChatGPT og Codex leser nå skills i samme format, så «Claude Skill» er byttet til «Agent Skill», ingressen nevner både Claude og ChatGPT, og installasjonsavsnittet har fått en egen blokk for `.agents/skills/` (etter OpenAIs dokumentasjon <https://developers.openai.com/codex/skills/>, lest 2026-09-23 — ikke testet her). Kun README; `SKILL.md` er uendret, men zip-en er bygd på nytt fordi README ligger i den
+- Tillegg 2026-09-24, ingen versjonsendring: **MIT-lisens.** Repoet har fått `LICENSE` (MIT, © 2026 Jan Bruusgaard) i roten, og `scripts/build_zip.sh` legger den i zip-en — MIT krever at lisensteksten følger med i kopier. README-ens lisensavsnitt skiller nå mellom skillen (MIT) og dataene den henter (byråets egen lisens). `CLAUDE.md` og CI-workflowens `paths:` er oppdatert. `SKILL.md`-frontmatter har fått `license: MIT. LICENSE has complete terms` (det valgfrie `license`-feltet i Agent Skills-spesifikasjonen); brødteksten er uendret
+
 ## 1.0 — 2026-08-27
 
 Første versjonerte utgave. Hovedendringen er at skillen nå skiller mellom to rendringsmål som ikke deler stilregler.

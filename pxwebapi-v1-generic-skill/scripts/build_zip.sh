@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Bygg generic-pxweb-v1-skill.zip — distribusjonspakken med toppmappe generic-pxweb-v1-skill/.
 #
-# Kun brukervendte filer pakkes: SKILL.md, README.md, CHANGELOG.md og references/.
+# Kun brukervendte filer pakkes: SKILL.md, README.md, CHANGELOG.md, references/
+# og LICENSE. LICENSE (MIT) ligger i repo-roten og gjelder hele repoet; MIT krever
+# at lisensteksten følger med i kopier, og zip-en er kopien som deles ut.
 # CLAUDE.md, scripts/, evals/ og .github/ er repo-interne og holdes utenfor. Den
 # håndbygde zip-en før v0.12.0 inneholdt CLAUDE.md og hadde ingen toppmappe;
 # begge deler er rettet her, etter mønster fra ssb-pxwebapi-v2-skill.
@@ -32,6 +34,8 @@ for f in "${files[@]}"; do
   mkdir -p "$tmp/generic-pxweb-v1-skill/$(dirname "$f")"
   cp "$root/$f" "$tmp/generic-pxweb-v1-skill/$f"
 done
+cp "$root/../LICENSE" "$tmp/generic-pxweb-v1-skill/LICENSE"
+files+=(LICENSE)
 
 rm -f "$out"
 (cd "$tmp" && zip -X -q -r "$out" generic-pxweb-v1-skill)

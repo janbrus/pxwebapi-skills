@@ -14,6 +14,9 @@ Kurert liste over mye etterspurte tabeller, basert på faktisk bruk. Bruk alltid
 | 05184 | Innvandrere, etter kjønn og landbakgrunn                                | Årlig       | Innvandrerbefolkning etter kjønn og landbakgrunn (fra 1970) |
 | 06076 | Privathusholdninger og personer i privathusholdninger                   | Årlig       | Husholdningsstruktur, fylkesnivå                            |
 | 11342 | Areal og befolkning i kommuner, fylker og hele landet                   | Årlig       | Befolkningstetthet, areal per kommune                       |
+| 04317 | Grunnkretsenes befolkning (G)                                           | Årlig       | Folketall per grunnkrets (8-sifret kode); delområde = wildcard, f.eks. `030109*` for Majorstuen |
+| 04362 | Alders- og kjønnsfordeling for grunnkretsenes befolkning (G)            | Årlig       | Alder/kjønn per grunnkrets — 1- og 2-tall er endret til 0/3, summer avviker |
+| 06198 | Areal av land og ferskvatn, etter grunnkrets (km²) (G)                  | Årlig       | Areal per grunnkrets                                        |
 | 14746 | Framskrevet folkemengde kommuner, fylker og hele landet, 9 alternativer | Årlig       | Befolkningsprognoser til 2050                               |
 | 05375 | Forventet gjenstående levetid, etter kjønn og alder                     | Årlig       | Levealder, forventet gjenstående levetid                    |
 | 07995 | Døde, etter kjønn, alder og uke (foreløpige tall)                       | Ukentlig    | Overdødelighet, ukentlig dødsstatistikk                     |
@@ -80,6 +83,7 @@ Tabell 12880 er unik fordi den inneholder SSBs egne prognoser for makroøkonomis
 | ID    | Tittel                                                                | Frekvens | Typisk bruk                                                                                      |
 | ----- | --------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
 | 03068 | Skattepliktig inntekt, fradrag og skatt, bosatte 17+ år, gjennomsnitt | Årlig    | Gjennomsnittlig bruttoinntekt, lønn, fradrag og skatt for personer per kommune/fylke (fra 1993-) |
+| 06944 | Inntekt for husholdninger, etter husholdningstype. Antall og median. Delområder (K) (B) | Årlig | Medianinntekt per kommune, bydel **og delområde** (`vs_Delomraader01`) — eneste av de 90 bydel-tabellene med delområdenivå |
 
 ---
 
@@ -145,7 +149,7 @@ Tabell 12880 er unik fordi den inneholder SSBs egne prognoser for makroøkonomis
 
 | ID    | Tittel                             | Frekvens | Typisk bruk                 |
 | ----- | ---------------------------------- | -------- | --------------------------- |
-| 12255 | Utvalgte nøkkeltall for grunnskole | Årlig    | Elever, lærere, kommunenivå |
+| 12255 | Utvalgte nøkkeltall for grunnskole | Årlig    | Elever, lærere, kommunenivå (KOSTRA-tabell — `KOKkommuneregion0000`, se `kostra.md`) |
 
 ---
 
@@ -155,6 +159,10 @@ Tabell 12880 er unik fordi den inneholder SSBs egne prognoser for makroøkonomis
 | ----- | -------------------------------------------------- | -------- | ---------------------------- |
 | 07091 | Bedrifter, etter næring og antall ansatte          | Årlig    | Bedriftsstruktur per kommune |
 | 07218 | Føretakskonkursar, personlege konkursar, tvangssal | Månedlig | Konkurs- og tvangsstatistikk |
+| 10790 | Opna konkursar, etter konkurstype og 5-siffer næring (SN2007) | Kvartalsvis | Konkurser per næring og kommune, historikk fra 2009 (SN2007) |
+| 14729 | Opna konkursar, etter konkurstype og 5-siffer næring (SN2025) | Kvartalsvis | Samme statistikk på SN2025, fra 2026K1 — ikke skjøtbar med 10790 på næringsnivå |
+| 07322 | Aksjeselskaper, aksjekapital og utdelt utbytte, etter næring (SN2007) | Årlig | Antall AS, aksjekapital og utbytte per næring, 2008– (SN2007) |
+| 14758 | Aksjeselskaper, aksjekapital og utdelt utbytte, etter næring (SN2025) | Årlig | Samme statistikk på SN2025, fra 2025 |
 
 ---
 
@@ -194,8 +202,26 @@ Tabell 12880 er unik fordi den inneholder SSBs egne prognoser for makroøkonomis
 
 | ID    | Tittel                                      | Frekvens | Typisk bruk                                   |
 | ----- | ------------------------------------------- | -------- | --------------------------------------------- |
-| 13542 | Kommuneregnskap, nøkkeltall, KOSTRA         | Årlig    | Driftsresultat underskudd kommuner, ROBEK     |
 | 14668 | Offentlig forvaltning inntekter og utgifter | Årlig    | Stat og kommune, skatt, inntekter og utgifter |
+
+---
+
+## KOSTRA (kommune-stat-rapportering)
+
+Alle KOSTRA-tabeller er årlige, bruker `KOK…`-variabler i stedet for `Region` (`KOKkommuneregion0000` med `EAK` for landet, `EKG01`–`EKG17` for KOSTRA-gruppene), krever alle dimensjoner, og publiseres urevidert 15. mars og revidert 15. juni — se `kostra.md`. Utvalget under er økonomitabellene og én representant per variant (K/F/B); søk `kostra` + fagterm for de øvrige (385 aktive per 2026-09-20).
+
+| ID    | Tittel                                                                                                            | Frekvens | Typisk bruk                                                                                   |
+| ----- | ----------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------- |
+| 12134 | Utvalgte nøkkeltall for kommuneregnskap, kommunekonsern (K)                                                       | Årlig    | Netto driftsresultat i prosent m.fl. — 9 økonominøkkeltall per kommune, 2015–                 |
+| 13542 | Utvalgte nøkkeltall for kommuneregnskap, kasse og konsolidert, etter regnskapsomfang (K)                          | Årlig    | Som 12134 for kasse og konsolidert (`KOKregnskapsomfa0000`), 2020–; ROBEK                     |
+| 12367 | Detaljerte regnskapstall driftsregnskapet, kommunekonsern og -kasse, etter regnskapsomfang, funksjon og art (K)   | Årlig    | Grunnlagstall: beløp per funksjon × art — start fra defaultselection                          |
+| 12362 | Utgifter til tjenesteområdene, kommunekonsern, etter funksjon og art (K)                                          | Årlig    | Utgifter per tjenesteområde                                                                   |
+| 13551 | Økonomisk oversikt drift, kommunekonsern, etter art (K)                                                           | Årlig    | Driftsinntekter og -utgifter etter art, 2020–                                                 |
+| 12292 | Omsorgstjenester - supplerende grunnlagstall (K)                                                                  | Årlig    | Grunnlagstall (absolutte tall) for pleie og omsorg, 49 statistikkvariabler                    |
+| 14019 | Utvalgte nøkkeltall for sosialtjenesten (K)                                                                       | Årlig    | Sosialhjelp-nøkkeltall, 2022– (erstatter avsluttede 12210 m.fl., 2015–2021)                   |
+| 13526 | KOSTRA-nøkkeltall for miljøforvaltning (K)                                                                        | Årlig    | Miljø/plan-nøkkeltall; skillens verifiserte KOSTRA-eksempel (`EAK`, `EAKUO`, `EKG12`)         |
+| 13858 | KOSTRA-nøkkeltall for planforvaltning i fylkeskommunene  (F)                                                      | Årlig    | Fylkeskommune-variant (`KOKfylkesregion0000`, `EAFK…`)                                        |
+| 12433 | Korttidskontrakter, bydeler (B)                                                                                   | Årlig    | Oslo-bydelsvariant (`KOKbydelsregion0000`, `EAB`)                                             |
 
 ---
 

@@ -1,6 +1,6 @@
-# Claude Skill: SSB Historisk statistikk
+# Agent Skill: SSB Historisk statistikk
 
-En [Claude Skill](https://support.claude.com/en/articles/12512180-use-skills-in-claude) som lærer AI-verktøy som Claude å navigere SSBs digitaliserte historiske publikasjoner (1828–2010) under `https://www.ssb.no/a/histstat/`.
+En [Agent Skill](https://agentskills.io) — en `SKILL.md` med arbeidsflyt og regler pluss referansefiler. Den lærer AI-verktøy som Claude og ChatGPT å navigere SSBs digitaliserte historiske publikasjoner (1828–2010) under `https://www.ssb.no/a/histstat/`.
 
 ## Hva skillen gjør
 
@@ -22,7 +22,7 @@ ssb-histstat-skill/
 ├── SKILL.md                              # Hovedinstruksjoner: arbeidsflyt + decision tree
 ├── README.md                             # Denne filen
 ├── CHANGELOG.md                          # Endringslogg — versjon står i SKILL.md-frontmatter
-├── ssb-histstat-skill.zip                # Ferdigpakket skill for opplasting til Claude.ai
+├── ssb-histstat-skill.zip                # Ferdigpakket skill — last opp i Claude.ai, eller pakk ut i .agents/skills/ for ChatGPT/Codex
 └── references/
     └── structure.md                      # Annotering av huben /a/histstat/publikasjoner/: 25 emnesider, 12 serier, 9 periodika, bibliografi, filnavn-konvensjoner
 ```
@@ -52,6 +52,16 @@ ln -s "$PWD/ssb-histstat-skill" ~/.claude/skills/ssb-histstat
 cp -r ssb-histstat-skill .claude/skills/ssb-histstat
 ```
 
+### ChatGPT og Codex
+
+ChatGPT og Codex leser skills i samme format fra `.agents/skills/` (ifølge [OpenAIs dokumentasjon](https://developers.openai.com/codex/skills/); ikke testet her). Pakk ut zip-filen, eller kopier mappen fra repoet:
+
+```bash
+cp -r ssb-histstat-skill ~/.agents/skills/ssb-histstat
+```
+
+Frittstående skills er tilgjengelige i ChatGPT desktop-app, Codex CLI og IDE-utvidelsen; på web og mobil må skillen pakkes som plugin.
+
 ## Bruk sammen med søsken-skillen
 
 Skillen er **kompletterende til `ssb-pxwebapi-v2`**, ikke en erstatning. Tommelfingerregel:
@@ -60,7 +70,7 @@ Skillen er **kompletterende til `ssb-pxwebapi-v2`**, ikke en erstatning. Tommelf
 - Historiske tabeller, eldre folketellinger, NOS-publikasjoner, Statistisk årbok → denne skillen
 - Tidsserie som *starter* historisk men fortsetter til i dag → start her (sjekk `statbank-histu.html`), deleger så til `ssb-pxwebapi-v2`
 
-Last opp begge skillene i Claude.ai for komplett dekning av norsk offisiell statistikk fra 1769 til i dag.
+Installer begge skillene (Claude.ai, Claude Code eller ChatGPT) for komplett dekning av norsk offisiell statistikk fra 1769 til i dag.
 
 ## Hva skillen IKKE gjør
 
@@ -69,5 +79,7 @@ Last opp begge skillene i Claude.ai for komplett dekning av norsk offisiell stat
 - Ikke svensk eller dansk historisk statistikk
 
 ## Lisens
+
+Skillen (`SKILL.md`, `references/` og skriptene) er lisensiert under [MIT-lisensen](https://github.com/janbrus/pxwebapi-skills/blob/main/LICENSE), © 2026 Jan Bruusgaard. Lisensteksten ligger i repo-roten og følger med i zip-filen som `LICENSE`. MIT gjelder skillen, ikke dataene den henter — de har sin egen lisens, se under.
 
 Skillen er et hjelpemiddel for å navigere SSBs åpne historiske arkiv. Materialet under `/a/histstat/` er publikasjoner som SSB har gjort fritt tilgjengelig; eldre verk er typisk i public domain, mens nyere er dekket av SSBs lisens ([CC BY 4.0](https://www.ssb.no/diverse/lisens)). Sjekk den enkelte publikasjon for spesifikke vilkår.

@@ -1,6 +1,6 @@
-# Claude Skill: SSB Chart
+# Agent Skill: SSB Chart
 
-En [Claude Skill](https://support.claude.com/en/articles/12512180-use-skills-in-claude) som lærer AI-verktøy som Claude å presentere norsk offentlig statistikk fra SSB i SSBs offisielle visuelle stil — som diagram, tabell eller dashboard.
+En [Agent Skill](https://agentskills.io) — en `SKILL.md` med arbeidsflyt og regler pluss referansefiler — som lærer AI-verktøy som Claude og ChatGPT å presentere norsk offentlig statistikk fra SSB i SSBs visuelle stil — som diagram, tabell eller dashboard.
 
 Skillen styrer **hvordan** data vises, ikke hvordan de hentes. Bruk den sammen med [`ssb-pxwebapi-v2`](../ssb-pxwebapi-v2-skill/) som henter dataene; denne skillen tar JSON-Stat2-responsen og gjør den om til en korrekt, SSB-stilet visualisering.
 
@@ -23,7 +23,7 @@ ssb-chart-skill/
 ├── SKILL.md                       # Hovedinstruksjoner: prinsipper, rendringsmål, palett, typografi, diagramvalg, sjekkliste
 ├── README.md                      # Denne filen
 ├── CHANGELOG.md                   # Endringslogg — versjon står i SKILL.md-frontmatter
-├── ssb-chart-skill.zip            # Ferdigpakket skill for opplasting til Claude.ai
+├── ssb-chart-skill.zip            # Ferdigpakket skill — last opp i Claude.ai, eller pakk ut i .agents/skills/ for ChatGPT/Codex
 └── references/
     ├── chart-selection.md         # Beslutningsmatrise per diagramtype (linje, søyle, ring, kart, scorecard …)
     ├── color-system.md            # Komplett fargespesifikasjon i alle formater (CSS/JS/Python/Recharts/Chart.js/matplotlib)
@@ -35,9 +35,9 @@ ssb-chart-skill/
 
 ## Installasjon
 
-### For AI-plattformer som støtter skills
+### Claude.ai
 
-1. Last ned [ssb-chart-skill.zip](ssb-chart-skill.zip), eller bygg den fra repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger `CLAUDE.md` og `scripts/` med). Pakken har toppmappe `ssb-chart/` og inneholder kun `SKILL.md`, `README.md`, `CHANGELOG.md` og `references/`
+1. Last ned [ssb-chart-skill.zip](ssb-chart-skill.zip), eller bygg den fra repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger `CLAUDE.md` og `scripts/` med). Pakken har toppmappe `ssb-chart/` og inneholder kun `SKILL.md`, `README.md`, `CHANGELOG.md`, `references/` og `LICENSE`
 2. Gå til **Settings > Features > Skills** i Claude.ai
 3. Last opp ZIP-filen
 
@@ -56,6 +56,16 @@ ln -s "$PWD/ssb-chart-skill" ~/.claude/skills/ssb-chart-skill
 cp -r ssb-chart-skill .claude/skills/ssb-chart-skill
 ```
 
+### ChatGPT og Codex
+
+ChatGPT og Codex leser skills i samme format fra `.agents/skills/` (ifølge [OpenAIs dokumentasjon](https://developers.openai.com/codex/skills/); ikke testet her). Pakk ut zip-filen, eller kopier mappen fra repoet:
+
+```bash
+cp -r ssb-chart-skill ~/.agents/skills/ssb-chart-skill
+```
+
+Frittstående skills er tilgjengelige i ChatGPT desktop-app, Codex CLI og IDE-utvidelsen; på web og mobil må skillen pakkes som plugin.
+
 ## Bruk sammen med datakilde-skillen
 
 Denne skillen inneholder **ingen datahenting** — den forutsetter at du allerede har en JSON-Stat2-respons fra SSBs PxWebApi v2. Last derfor opp begge skillene sammen for komplett arbeidsflyt:
@@ -66,6 +76,8 @@ Denne skillen inneholder **ingen datahenting** — den forutsetter at du allered
 For svenske data finnes en parallell `scb-pxwebapi-v2`-skill; for vilkårlige PxWebApi v2-installasjoner finnes `generic-pxweb-v2-skill`. Chart-skillen er bevisst SSB-spesifikk (SSBs palett og kildelinje) og er ikke ment for andre datakilder.
 
 ## Lisens
+
+Skillen (`SKILL.md`, `references/` og skriptene) er lisensiert under [MIT-lisensen](https://github.com/janbrus/pxwebapi-skills/blob/main/LICENSE), © 2026 Jan Bruusgaard. Lisensteksten ligger i repo-roten og følger med i zip-filen som `LICENSE`. MIT gjelder skillen, ikke dataene den henter — de har sin egen lisens, se under.
 
 Skillen er et hjelpemiddel for visualisering av SSBs åpne data. Data fra SSB er lisensiert under [CC BY 4.0](https://www.ssb.no/diverse/lisens).
 

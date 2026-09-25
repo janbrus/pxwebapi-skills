@@ -1,0 +1,47 @@
+# Holder ssb-histstat-skill.zip synkron med arbeidstreet.
+#
+# Histstat-skillen peker på statiske PDF-er og HTML-sider hos SSB og kaller ingen
+# API, så det finnes ingen eksempelsjekker her; workflowen dekker bare zip-synk.
+# (URL-ene er skillens egentlige kontrakt — de verifiseres manuelt, se CLAUDE.md.)
+name: Validate ssb-histstat-skill
+
+on:
+  push:
+    paths:
+      - 'ssb-histstat-skill/SKILL.md'
+      - 'ssb-histstat-skill/README.md'
+      - 'ssb-histstat-skill/CHANGELOG.md'
+      - 'ssb-histstat-skill/references/**'
+      - 'ssb-histstat-skill/scripts/**'
+      - 'ssb-histstat-skill/ssb-histstat-skill.zip'
+      - '.github/workflows/check-histstat-zip.yaml'
+      - 'LICENSE'
+  pull_request:
+    paths:
+      - 'ssb-histstat-skill/SKILL.md'
+      - 'ssb-histstat-skill/README.md'
+      - 'ssb-histstat-skill/CHANGELOG.md'
+      - 'ssb-histstat-skill/references/**'
+      - 'ssb-histstat-skill/scripts/**'
+      - 'ssb-histstat-skill/ssb-histstat-skill.zip'
+      - '.github/workflows/check-histstat-zip.yaml'
+      - 'LICENSE'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ssb-histstat-skill
+
+jobs:
+  zip-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Verify ssb-histstat-skill.zip matches working tree
+        run: |
+          bash scripts/build_zip.sh /tmp/fresh.zip
+          mkdir /tmp/committed /tmp/fresh
+          unzip -q ssb-histstat-skill.zip -d /tmp/committed
+          unzip -q /tmp/fresh.zip -d /tmp/fresh
+          diff -r /tmp/committed /tmp/fresh \
+            || { echo '::error::ssb-histstat-skill/ssb-histstat-skill.zip er utdatert — kjør scripts/build_zip.sh i skillmappa og sjekk inn ny zip'; exit 1; }

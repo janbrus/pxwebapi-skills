@@ -85,3 +85,28 @@ før du antar at skillen er problemet.
 
 - **Forventet atferd:** `GET /savedqueries/10119120` for definisjonen (tabell 08655), deretter `/savedqueries/10119120/data` — ikke avvisning som «v1-stoff», ikke websøk
 - **Suksess:** Data levert; svaret opplyser at web-sq-lenken kun gir skjermvisning i PxWeb v2, og tilbyr en ekvivalent API-GET-URL med `from()`/`top()` som brukeren kan bruke i Power Query i stedet
+
+## 14. «Hvor mange konkurser var det i IT-bransjen i 2. kvartal 2026?»
+
+- **Forventet tabell:** 14729 eller 14727/14728 (SN2025-variantene) — ikke SN2007-forgjengeren 10790, som også har 2026K2
+- **Nøkkelvalg:** variabel-ID `NACE2025`; IT er hovedområde `K` i SN2025 (var del av `J` i SN2007, der `K` er finans) — labelen leses fra metadata, ikke antas fra bokstaven
+- **Suksess:** Tall fra `valueCodes[NACE2025]=K`; svaret sier at tabellen bruker SN2025 og at serien ikke kan skjøtes med SN2007-tabellene på næringsnivå
+
+## 15. «Hvor mange bor i delområde 03010900 Majorstuen i Oslo?»
+
+- **Forventet tabell:** 04317 (grunnkretsbefolkning, (G)) — ikke 07459, som stopper på kommune, og ikke 06944, som har Majorstuen som delområdekode men gir husholdningsinntekt, ikke folketall
+- **Nøkkelvalg:** delområdekoden `03010900` finnes ikke i 04317 (400 `Non-existent value`); `valueCodes[Grunnkretser]=030109*` gir de 13 grunnkretsene Majorstuen Rode 1–13, med `valueCodes[ContentsCode]=*` selv om tabellen har én statistikkvariabel. Summen til delområde er egen beregning og merkes slik (Dataintegritet)
+- **Suksess:** Tall per grunnkrets vist, summen merket som egen beregning bygd på de 13 hentede tallene, og svaret sier at SSB ikke publiserer folketall på delområdenivå — delområdet er avledet fra kodeprefikset
+
+## 16. «Netto driftsresultat i prosent for Bergen siste 5 år, sammenlignet med KOSTRA-gruppen og landet»
+
+- **Forventet tabell:** 12134 (Utvalgte nøkkeltall for kommuneregnskap, kommunekonsern (K)) — kjennes igjen på `kostrahoved` i `paths`; ikke 07459-logikk med `Region`
+- **Sekvens:** (`GET /tables?query=kostra kommuneregnskap` hvis ID ukjent) → `GET /tables/12134/metadata` → Klass-oppslag av Bergens gruppe (`correspondencetables/2840`: 4601 → `EKG12`, ikke gjettet) → data
+- **Nøkkelvalg:** `valueCodes[KOKkommuneregion0000]=4601,EKG12,EAKUO` (landet *uten* Oslo for økonominøkkeltall), `ContentsCode` valgt etter label «netto driftsresultat i prosent …» fra metadata (`KOSAGD230000` per 2026-09-20 — leses, ikke huskes), `Tid=top(5)`; ingen dimensjon utelatt
+- **Suksess:** fem årsverdier med enhet prosent og desimaler fra `category.unit.decimals`; den obligatoriske noten om brudd i KOSTRA-gruppene 2019/2020 vist; svaret sier at tallene er reviderte (juni-utgave) ut fra `updated`, at gruppe- og landstall er SSBs egne veide gjennomsnitt (ikke egen sum), og «Kilde: SSB, tabell 12134». Brukes en `KOS…`-kode uten forutgående metadata-kall i samme samtale, er scenarioet feilet
+
+## 17. «Hvor mye bruker kommunen min på administrasjon per innbygger?»
+
+- **Forventet tabell:** en KOSTRA-nøkkeltallstabell funnet via `kostra` + fagterm — ikke egen summering fra 12367 (`aggregallowed: false`)
+- **Nøkkelvalg:** kommunekode fra brukeren eller metadata; `KOK…`-variabler og `KOS…`-kode lest fra metadata *i samtalen* (KOSTRA-variabler byttes ut når rapporteringskravene endres); region aldri utelatt; kodeliste «Uttrekk for KOSTRA-grupperinger» valgt på label hvis gruppen skal med
+- **Suksess:** forholdstallet vist med enhet, urevidert/revidert oppgitt, og svaret formidler tallet uten å tolke «høyt» som «lav produktivitet» — SSBs egen advarsel (kan skyldes kvalitet, behov, smådriftsulemper)
