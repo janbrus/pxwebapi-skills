@@ -37,6 +37,11 @@ done
 cp "$root/../LICENSE" "$tmp/generic-pxweb-v1-skill/LICENSE"
 files+=(LICENSE)
 
+# Normaliser linjeslutt til LF. Filene kopieres fra disken, ikke fra git, og en
+# fil lagret med CRLF (f.eks. fra en Windows-editor) ville ellers gi en zip som
+# avviker fra CI-bygget — CI sjekker ut med LF (.gitattributes eol=lf).
+find "$tmp" -type f \( -name '*.md' -o -name LICENSE \) -exec sed -i 's/\r$//' {} +
+
 rm -f "$out"
 (cd "$tmp" && zip -X -q -r "$out" generic-pxweb-v1-skill)
 echo "Bygget $out (${#files[@]} filer)"
