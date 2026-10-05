@@ -13,7 +13,7 @@ description: >
   lagrede spørringer og outputformater (json-stat2, csv, xlsx).
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "1.6.0"
+  version: "1.6.1"
   source: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 ---
 
@@ -27,7 +27,7 @@ https://data.ssb.no/api/pxwebapi/v2
 
 **Skillen vedlikeholdes her:** https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 
-Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.6.0.
+Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.6.1.
 
 ## Dataintegritet — grunnregelen
 
@@ -158,7 +158,7 @@ Bruk `GET /tables` med `query`-parameter.
 
 Presenter de 3–5 mest relevante treffene med tabell-ID, tittel, siste periode, tidsfrekvens og `discontinued`-status. Anbefal den mest passende.
 
-Respons-strukturen for hvert treff inkluderer: `id`, `label`, `description`, `updated`, `firstPeriod`, `lastPeriod`, `timeUnit` (Annual/Quarterly/Monthly/Weekly), `variableNames`, `discontinued`, `subjectCode`, og `paths` (emneplassering i SSBs hierarki — en liste av stier, hver med noder). Tredje node i stien (`paths[0][2].id`) er statistikkens kortnavn, brukt i `ssb.no/<kortnavn>` og i RSS-feedene — se `references/klass-vardok.md`.
+Respons-strukturen for hvert treff inkluderer: `id`, `label`, `description`, `updated`, `firstPeriod`, `lastPeriod`, `timeUnit` (Annual/Quarterly/Monthly/Weekly), `variableNames`, `discontinued`, `subjectCode`, og `paths` (emneplassering i SSBs hierarki — en liste av stier, hver med noder). Tredje node i stien (`paths[i][2].id`) er statistikkens kortnavn, brukt i `ssb.no/<kortnavn>` og i RSS-feedene. Har stiene ulike kortnavn, er tabellen krysslistet og `paths[0]` ofte feil — da avgjør `extension.metaid` i metadata. Se `references/klass-vardok.md`.
 
 Se `references/common-tables.md` for en kurert liste over mye brukte tabeller.
 
@@ -236,7 +236,7 @@ GET-varianten er ideell for å lage URL-er som kan deles direkte. En GET helt ut
 
 Standard er `json-stat2`. Øvrige formater: `csv`, `xlsx`, `html`, `px`, `json-px` og `parquet`. Sjekk `dataFormats` i `GET /config` for gjeldende liste.
 
-`parquet` gir lang-format for pandas/DuckDB — `_symbol`-kolonnene bærer `status`. 
+`parquet` (beta) gir lang-format for pandas/DuckDB — `_symbol`-kolonnene bærer `status`. 
 
 For dette, `outputFormatParams` som `UseCodesAndTexts` og `IncludeTitle`, CSV-separatorer og `heading`/`stub`-pivotering: se `references/output-formats.md`.
 
@@ -259,7 +259,7 @@ Viktigste mønstre: `top(N)` = siste N verdier, `from(verdi)` = fra og med, `ran
 - **Skill hentede tall fra egne beregninger.** Kildehenvisningen dekker tallene fra API-et. Regner du ut vekst, andeler eller differanser, marker det — f.eks. «Endring i prosent er beregnet fra indeksverdiene over»
 - **Gjør uttrekket etterprøvbart.** Vis GET-URL-en eller POST-bodyen, eller tilby en lagret spørring (Steg 6). **Oppgi eksplisitt hvilke dimensjoner du utelot og hvilken kodeliste du brukte** — responsen registrerer ingen av delene, og `agg_KommFylker` og `agg_KommSummer` gir tall som ser like ut og ikke er det
 - **Vis obligatoriske noter.** Er `extension.noteMandatory` satt, skal noten fram i svaret — SSB har flagget den fordi tallet trenger forbeholdet. Den følger med i data-responsen, så den koster ingen ekstra kall. På KPI-tabellene treffer forbeholdet nettopp endringstall du regner ut selv — se `references/json-stat2.md`
-- **Vis `status`-merkede verdier som de er.** Bruk SSBs standardtegn i tabellen og forklar dem i en fotnote — ikke erstatt dem med tall, nuller eller tomme celler
+- **Vis `status`-merkede verdier som de er.** Bruk SSBs standardtegn i tabellen og forklar dem i en fotnote — ikke erstatt dem med tall, nuller eller tomme celler. Har cellen et tall (f.eks. `*` = foreløpig tall), vis tallet *med* tegnet
 - Tilby å visualisere dataene — bruk `ssb-chart-skill` hvis den er tilgjengelig i miljøet
 - Tilby å laste ned i annet format (csv, xlsx)
 

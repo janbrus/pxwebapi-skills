@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Validate example URLs/queries in SKILL.md, references/*.md and docs/*.md
-against the live SSB PxWebApi v2.
+"""Validate example URLs/queries in SKILL.md, references/*.md, docs/*.md and
+docs/*.txt against the live SSB PxWebApi v2.
 
 docs/ ships outside the zip, but docs/instruks-kort.md is a condensed copy of
-SKILL.md — checking it here is what catches the copy going stale.
+SKILL.md and docs/llms.txt a condensed proposal for SSB — checking them here is
+what catches the copies going stale.
 
 What is checked:
 
@@ -37,6 +38,7 @@ import sys
 import time
 import urllib.request
 import urllib.error
+from collections.abc import Iterator
 from pathlib import Path
 
 BASE = "https://data.ssb.no/api/pxwebapi/v2"
@@ -50,7 +52,7 @@ def encode(url: str) -> str:
 
 
 def strip_trailing(url: str) -> str:
-    while url and url[-1] in "`.,;>\"'":
+    while url and url[-1] in "`.,;:>\"'":
         url = url[:-1]
     # A trailing ')' is junk only if parentheses are unbalanced (top(5) is valid)
     while url.endswith(")") and url.count("(") < url.count(")"):
@@ -109,7 +111,7 @@ def extract_json_body(lines: list[str], start: int) -> tuple[str | None, int]:
     return None, start
 
 
-def collect_checks(path: Path):
+def collect_checks(path: Path) -> Iterator[tuple[int, str, str, str, str | None]]:
     """Yield (lineno, kind, method, url, body) checks for one file.
 
     kind: 'http' (perform request) or 'json' (validate body syntax only).
@@ -158,10 +160,11 @@ def main() -> int:
 
     files = ([here / "SKILL.md"]
              + sorted((here / "references").glob("*.md"))
-             + sorted((here / "docs").glob("*.md")))
+             + sorted((here / "docs").glob("*.md"))
+             + sorted((here / "docs").glob("*.txt")))
 
-    checks = []
-    seen = set()
+    checks: list[tuple[str, int, str, str, str, str | None]] = []
+    seen: set[tuple[str, str, str, str | None]] = set()
     for f in files:
         for lineno, kind, method, url, body in collect_checks(f):
             key = (kind, method, url, body)

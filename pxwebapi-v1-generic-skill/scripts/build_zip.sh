@@ -4,7 +4,7 @@
 # Kun brukervendte filer pakkes: SKILL.md, README.md, CHANGELOG.md, references/
 # og LICENSE. LICENSE (MIT) ligger i repo-roten og gjelder hele repoet; MIT krever
 # at lisensteksten følger med i kopier, og zip-en er kopien som deles ut.
-# CLAUDE.md, scripts/, evals/ og .github/ er repo-interne og holdes utenfor. Den
+# CLAUDE.md, DEVLOG.md, scripts/, evals/ og .github/ er repo-interne og holdes utenfor. Den
 # håndbygde zip-en før v0.12.0 inneholdt CLAUDE.md og hadde ingen toppmappe;
 # begge deler er rettet her, etter mønster fra ssb-pxwebapi-v2-skill.
 #

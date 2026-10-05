@@ -1,0 +1,54 @@
+# Statistics Finland — PxWeb database service API (PxWebApi v1)
+
+> Official statistics of Finland from Statistics Finland (Tilastokeskus). The PxWebApi v1 API at `https://pxdata.stat.fi/PxWeb/api/v1/{lang}`, where `{lang}` is `fi`, `sv` or `en`, needs no key and serves 11 databases, StatFin being the main one. Data are licensed CC BY 4.0. Table metadata is read with GET; data are fetched with POST only.
+
+Draft proposal, not published by Statistics Finland. Suggested location: https://pxdata.stat.fi/llms.txt. Condensed from the generic PxWebApi v1 agent skill (https://github.com/janbrus/pxwebapi-skills); every request and response described below was checked live on 2026-09-27.
+
+Rules for agents using this API:
+
+- Never state a figure you have not fetched from this API in the current session. Do not fill gaps from memory, other sources, interpolation or extrapolation. If a call fails or the table is not found, say so.
+- URLs are built as `https://pxdata.stat.fi/PxWeb/api/v1/{lang}/{database}/{level}/{table}.px`. A GET on any level lists its children (`type` `l` = level, `t` = table). A GET on a table URL returns its **metadata**; a POST to the same URL with a JSON query body returns **data**. There is no GET data endpoint. The level may be left out (`StatFin/11ra.px`), but the full path is the more reliable form.
+- Table IDs end in `.px`, and the extension is part of the URL. Use IDs exactly as returned.
+- Find tables with `?query=` on a database: `StatFin?query=population`. Hits carry `id`, `path` (relative to the database) and `title`. Add `&filter=codes` to search value codes instead, e.g. the Helsinki region code `KU091`. `?query=*&filter=*` returns every table in the database (about 285 KB for StatFin), so use it only when you need the whole structure. A series missing from StatFin is often in StatFin_Passiivi, the database of discontinued tables.
+- Variable codes are not the Nordic `Region`/`ContentsCode`/`Tid`. Table 11ra uses `alue_23_20260101` (area, with a classification date that changes between table versions), `contentscode` and `timeperiod_y`. Copy `variables[].code` from the metadata every time.
+- Read the enforced limits from `https://pxdata.stat.fi/PxWeb/api/v1/en/?config`: currently 120,000 values, 120,000 cells and 40 calls per 60 seconds. The API guide gives older figures (100,000 cells, 30 queries per 10 seconds); `?config` is what the server enforces.
+- Query body, verified against `StatFin/vaerak/11ra.px` (population of the whole country, latest year):
+
+```json
+{"query": [
+  {"code": "alue_23_20260101", "selection": {"filter": "item", "values": ["SSS"]}},
+  {"code": "contentscode", "selection": {"filter": "item", "values": ["vaerak-vaesto"]}},
+  {"code": "timeperiod_y", "selection": {"filter": "top", "values": ["1"]}}
+], "response": {"format": "json-stat2"}}
+```
+
+- Filters: `item` (listed codes), `all` (`["*"]` or a prefix such as `["202*"]`), `top` (the newest n periods, n as a string), `agg:{name}` and `vs:{name}` (aggregations and value sets, not listed in metadata).
+- A variable may be left out of the query. If metadata marks it `elimination: true` (the area in 11ra, where omitting it gives the same figure as `SSS`, whole country), you get the total; if `elimination` is false or absent (`contentscode` and `timeperiod_y` in 11ra), you get **all** its values. Eliminated variables vanish from the response, so say what was aggregated away.
+- Always set `"response": {"format": "json-stat2"}`. This server returns json-stat2 when `response` is omitted, but other PxWeb installations return PX or PX-JSON, so do not rely on it. Format names are hyphenated: `jsonstat2` gets 400.
+- Errors carry no JSON diagnostic. A wrong variable code, format name, table, level or database returns HTTP 400 with the plain text `Bad Request` (the API guide says 404; the server answers 400). A query over the cell or value limit returns 403 with an IIS HTML page. The guide also lists 429 for too many calls and 503 for a timeout after 60 seconds, mostly on large xlsx extracts. Treat every 4xx as a failed request, never as an empty result; narrow the query to find the fault.
+- Metadata has no units or `role`. The json-stat2 response has `role` (time, geo, metric), `updated`, `source` and a `note` that links to the documentation of the statistics.
+- Mark your own calculations (growth rates, shares, sums) as your own. The terms of use require at least "Source: Statistics Finland"; the json-stat2 `source` field names the statistics, e.g. "Source: Statistics Finland, population structure, table 11ra".
+
+## API documentation
+
+- [PxWeb API guide](https://pxdata.stat.fi/api1.html): Statistics Finland's own guide to URLs, search, limits, error codes and the paid databases
+- [PxWeb API description (PDF)](https://pxdata.stat.fi/API-description_SCB.pdf): the PxWeb API specification from Statistics Sweden; its table names omit `.px`, which Statistics Finland requires
+- [Step-by-step API help (PDF)](https://www.stat.fi/static/media/uploads/org_en/avoindata/px-web_api-help.pdf): a walkthrough with screenshots
+- [API limits](https://pxdata.stat.fi/PxWeb/api/v1/en/?config): enforced limits as JSON
+- [Terms of use](https://stat.fi/en/about-us/get-to-know-statistics-finland/legislation/terms-of-use): CC BY 4.0 and citation examples
+
+## Example requests
+
+- [Databases](https://pxdata.stat.fi/PxWeb/api/v1/en): the 11 databases on this server
+- [Search StatFin](https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin?query=population): tables whose titles or values match "population"
+- [Search by region code](https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin?query=KU091&filter=codes): tables with Helsinki (`KU091`) among their value codes
+- [Subject level](https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin/vaerak): the tables on population structure
+- [Table metadata](https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin/vaerak/11ra.px): key figures on population; POST the query body above to this same URL
+
+## Optional
+
+- [Statistical databases](https://stat.fi/en/services/statistical-data-services/statistical-databases): what each of the 11 databases contains
+- [Discontinued tables](https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin_Passiivi): the StatFin_Passiivi database
+- [PxWeb web interface](https://pxdata.stat.fi/PxWeb/pxweb/en/StatFin): the human-facing table browser; "Make this table available in your application" at the foot of a table shows a ready-made API query
+- [Paid databases](https://pxhopea2.stat.fi/PxWeb/pxweb/en/): the same API with credentials; see the API guide
+- [Generic PxWebApi v1 skill](https://raw.githubusercontent.com/janbrus/pxwebapi-skills/main/pxwebapi-v1-generic-skill/SKILL.md): full v1 mechanics, other installations and troubleshooting

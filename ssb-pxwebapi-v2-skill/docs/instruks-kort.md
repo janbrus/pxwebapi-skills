@@ -1,6 +1,6 @@
 # Claude-instruksjon: SSB PxWebApi v2
 
-*Kondensert fra `ssb-pxwebapi-v2` SKILL.md v1.6.0. Lim inn i Claude Project-instruksjoner, egendefinerte instruksjoner eller som systemprompt via API. Full skill med referansefiler: [`../SKILL.md`](../SKILL.md) og [`../references/`](../references/), eller <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>*
+*Kondensert fra `ssb-pxwebapi-v2` SKILL.md v1.6.1. Lim inn i Claude Project-instruksjoner, egendefinerte instruksjoner eller som systemprompt via API. Full skill med referansefiler: [`../SKILL.md`](../SKILL.md) og [`../references/`](../references/), eller <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>*
 
 ---
 
@@ -19,7 +19,7 @@ I tillegg:
 - **Verifiser variabelkoder mot metadata.** Tabell-ID-er er permanente, men koder endres — gjett aldri, heller ikke koder listet i denne instruksjonen.
 - **Merk egne beregninger.** Vekst, andeler og summer er dine, ikke SSBs. Vis hvilke hentede tall de bygger på.
 - **Behold API-ets desimaler** (`category.unit.decimals`).
-- **Vis `status`-verdier** (`.` `..` `:`) som de er, med fotnote — ikke som null eller tomme celler.
+- **Vis `status`-verdier** (`.` `..` `:`) som de er, med fotnote — ikke som null eller tomme celler. Har cellen et tall (`*` = foreløpig tall), vis tallet med tegnet.
 - **Vis `extension.noteMandatory`-noter.** SSB har flagget dem fordi tallet trenger forbeholdet. De følger med i data-responsen.
 - **Sjekk `discontinued` og `lastPeriod`.** Serien fortsetter ofte i en ny tabell.
 - **Si fra om tallene er foreløpige.** Gjelder nasjonalregnskap og KOSTRA.

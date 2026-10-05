@@ -12,7 +12,7 @@ description: >
   datakilder — da er en annen dataviz-skill riktig valg.
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "1.1"
+  version: "1.2"
   source: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-chart-skill
 ---
 
@@ -34,7 +34,7 @@ Denne skillen styrer visuell presentasjon av norsk offentlig statistikk fra SSB.
 
 5. **Kildeangivelse.** Hvert diagram skal inneholde kilde og tidsperiode. Se «Tekst og merking» → «Kilde» for fullstendig flerspråklig formulering.
 
-6. **Datakvalitet synliggjøres, ikke skjules.** Manglende verdier (status-koder `"."`, `".."`, `":"` — se `ssb-pxwebapi-v2`-skillen for full liste) rendres som visuelle hull (`null` i datasettet, ingen linje mellom kjente punkter). Aldri interpoler, drop, eller gjenta naboverdier for å «fylle» dataene — statistisk integritet veier mer enn visuell glatthet. For tabeller: vis statussymbolet (`..`, `:`) i cellen, ikke `0`.
+6. **Datakvalitet synliggjøres, ikke skjules.** Manglende verdier (`null` i `value`, med status-koder `"."`, `".."`, `":"` — se `ssb-pxwebapi-v2`-skillen for full liste) rendres som visuelle hull (`null` i datasettet, ingen linje mellom kjente punkter). Aldri interpoler, drop, eller gjenta naboverdier for å «fylle» dataene — statistisk integritet veier mer enn visuell glatthet. **En status på en celle som har tall** (f.eks. `"*"` = foreløpig tall) er et flagg, ikke et hull: tegn punktet, merk det og forklar tegnet i en fotnote. For tabeller: vis statussymbolet (`..`, `:`) i cellen, ikke `0`; et flagget tall vises med tegnet etter tallet.
 
 ---
 
@@ -42,7 +42,7 @@ Denne skillen styrer visuell presentasjon av norsk offentlig statistikk fra SSB.
 
 Denne skillen forutsetter at du har en JSON-Stat2-respons fra SSBs PxWebApi v2. **Dataintegritet-grunnregelen i `ssb-pxwebapi-v2` gjelder også her:** visualiser aldri et tall som ikke er hentet fra API-et i samme samtale. Et diagram gir tall mer autoritet enn en tabell gjør — en akse og en kildelinje får et husket tall til å se etterprøvbart ut. Kjerneprinsipp 2 og 6 dekker hvordan tallene skal *behandles*; grunnregelen dekker hvorvidt du har lov til å tegne dem i det hele tatt. For format-detaljer — row-major value-array, `role.time` / `role.metric` / `role.geo`, `dimension.{var}.category.index` og `category.unit.decimals`, status-koder `"."` / `".."` / `":"`, `extension.px.contents` — se `ssb-pxwebapi-v2`-skillens `references/json-stat2.md`. Ikke restate disse detaljene her; pek på dem.
 
-Selve oppskriften for å gå fra JSON-Stat2-respons til et chart-config (labels, datasets, decimals, status-koder som hull) ligger i `references/jsonstat-to-chart.md`.
+Selve oppskriften for å gå fra JSON-Stat2-respons til et chart-config (labels, datasets, decimals, status som hull eller flagg) ligger i `references/jsonstat-to-chart.md`.
 
 ---
 

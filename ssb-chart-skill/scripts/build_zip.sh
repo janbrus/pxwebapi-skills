@@ -4,7 +4,7 @@
 # Kun brukervendte filer pakkes: SKILL.md, README.md, CHANGELOG.md, references/
 # og LICENSE. LICENSE (MIT) ligger i repo-roten og gjelder hele repoet; MIT krever
 # at lisensteksten følger med i kopier, og zip-en er kopien som deles ut.
-# CLAUDE.md, scripts/ og .github/ er repo-interne og holdes utenfor. Fram til
+# CLAUDE.md, DEVLOG.md, scripts/ og .github/ er repo-interne og holdes utenfor. Fram til
 # 2026-09-09 ble zip-en bygd for hånd; skriptet gjør pakkingen reproduserbar og
 # lar CI-synksjekken (.github/workflows/check-chart-zip.yaml) fange en utdatert zip.
 #

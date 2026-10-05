@@ -29,30 +29,66 @@ Two things are specific to v1 and worth stating up front:
   "size": [1, 1, 3],
   "dimension": { … },
   "value": [724290, 728714, 731500],
-  "role": { "time": ["Tid"], "geo": ["Region"], "metric": ["ContentsCode"] },
-  "status": { "3": ".." }
+  "role": { "time": ["Tid"], "geo": ["Region"], "metric": ["ContentsCode"] }
 }
 ```
 
 ### Key elements
 
-- **`id`** — variable names in order.
+- **`id`** — variable names in order. This order governs all indexing: iterate `id`, never
+  `Object.keys(dimension)`. The two coincide at SSB (v1 and v2), SCB, Latvia and Eurostat
+  (verified 2026-10-02), but the specification does not promise it.
 - **`size`** — number of values per variable, same order as `id`.
 - **`value`** — flat array of all data values in **row-major order**: the last dimension in `id`
   varies fastest, the first varies slowest (the C/NumPy convention). For `size = [s₀, s₁, …, sₙ]`
   and category indices `(i₀, i₁, …, iₙ)`, the flat index is
-  `i₀·(s₁·s₂·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ`. Category positions come from
-  `dimension.{var}.category.index`.
+  `i₀·(s₁·s₂·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ` — each position times its dimension's *stride*, the
+  product of the sizes of every later dimension. Category positions come from
+  `dimension.{var}.category.index`. Worked example below.
 - **`dimension`** — per variable: codes (`category.index`), labels (`category.label`), units
   (`category.unit`), and `extension`.
 - **`role`** — which variables are `time`, `geo` and `metric`. **Start your analysis here.**
-- **`status`** — special values, keyed by index into `value`; the value itself is `null`.
+- **`status`** — flags on individual cells, keyed by index into `value`. Read it **alongside**
+  `value`: a missing-value symbol comes with a `null`, but a status can also flag a figure that
+  exists (provisional, estimated, a cell note). See "Status codes".
 - **`note`** — table-level caveats. Worth reading before interpreting a series; PxWeb often
   records boundary changes and coverage gaps here.
 - **`extension`** — agency-specific metadata.
 
 Older serializers may omit `"version": "2.0"` (Statistics Faroe Islands currently does). The rest
 of the structure is unaffected.
+
+### Worked example: two dimensions that vary
+
+`id = ["Region", "ContentsCode", "Tid"]`, `size = [2, 1, 3]` — two regions, one measure, three
+years. Strides: `Region` 1·3 = 3, `ContentsCode` 3, `Tid` 1.
+
+| Position in `value` | `Region` | `Tid` | Offset |
+|---|---|---|---|
+| 0, 1, 2 | index 0 | index 0, 1, 2 | `0·3 + 0·3 + t·1` |
+| 3, 4, 5 | index 1 | index 0, 1, 2 | `1·3 + 0·3 + t·1` |
+
+The second region's third year is `1·3 + 0·3 + 2·1 = 5`, so `value[5]`. A dimension of size 1
+still has a stride, but always contributes 0. To test an implementation, use
+https://json-stat.org/samples/order.json, where every value is a string naming its own position
+(`A2B1C3`) and `category.index` is in array form. Position 11 in that file reads `A1B1C4` where it
+should read `A2B1C4` (a typo, checked 2026-10-02), so correct code "fails" exactly there.
+
+### Shape variants
+
+The json-stat 2.0 specification allows several shapes for the same information. PxWeb sends the
+first column; other producers use the second, and code written against PxWeb alone breaks on them:
+
+| Field | PxWeb | Also allowed by the specification |
+|---|---|---|
+| `value` | array | object keyed by position — sparse, so a missing key means `null` (Eurostat) |
+| `status` | object keyed by position, or absent | a single string applying to every cell, or an array parallel to `value` (Eurostat uses the object form too) |
+| `category.index` | object `{code: position}` | array `[code0, code1, …]`; omitted when the dimension has only one category |
+
+Verified 2026-10-02 at SSB's v1, on 113 tables across the three v2 installations, and on Eurostat
+`nama_10_gdp` and `demo_pjan`; the other v1 installations were not swept. Eurostat's sparseness
+is real: `nama_10_gdp` for Albania, Montenegro and Norway 1990–1999 has 30 cells and 15 keys.
+Read `value[String(offset)]` there, and treat a missing key as `null`.
 
 ---
 
@@ -139,18 +175,35 @@ belong in a careful presentation of the numbers, and none of which appear in v1 
 
 ## Status codes
 
-`status` maps an index in `value` to a symbol; the corresponding `value` entry is `null`.
+`value` and `status` are two parallel channels. Read them separately:
+
+- **`value` is `null`** — the figure does not exist; `status` usually says why (table below).
+  Show the symbol, never a zero.
+- **`value` is a number and `status` is set** — the figure exists and carries a flag:
+  provisional, estimated, or a note on that cell. Show the number **with** the flag. Dropping
+  the flag hides a caveat; blanking the number discards data.
+
+PxWeb's json-stat2 serializer produces both (`PxTools/PCAxis.Serializers`,
+`JsonStat2Serializer.GetValueAndStatus`): a PX data symbol becomes `null` plus the symbol, while a
+cell with a data note (`DATANOTECELL`) keeps its number and gets the note as its status. Observed
+2026-10-02: SSB 09842 (GDP per capita) flags 2023–2024 with `"*"` on cells that have numbers, at
+both SSB's v1 and v2, and the table's `note` explains it as `* = Foreløpig tall` (provisional).
+In a v2 sweep of 113 tables at SSB, SCB and Latvia it was the only table that flagged numbers.
+Eurostat flags figures the same way (`nama_10_gdp`: `"p"` on cells that have values).
 
 | Symbol | Meaning |
 |---|---|
 | `.` | Not applicable — the category did not exist when the data was collected |
 | `..` | Data not available — not yet in the database |
 | `:` | Confidential — withheld to avoid identifying a person or business |
+| `-` | PX's nil symbol (`DATASYMBOLNIL`, value `null`). Its use varies, so show it and do not compute with it |
 
-These three are only the common defaults. In PxWeb each symbol is declared per PX file
+These are only the common defaults. In PxWeb each symbol is declared per PX file
 (`DATASYMBOL1`–`6`), so they vary between agencies and even between tables in one database — read
-what the response actually contains rather than matching against this list. Never treat any of
-them as zero.
+what the response actually contains rather than matching against this list, and look for a key
+in the table's `note`; PxWeb has no field for it, while Eurostat explains its symbols in
+`extension.status.label`. Never treat any of them as zero, and never filter `null`s out of
+`value` before indexing: a `null` holds its position, and removing it shifts every later cell.
 
 ---
 
@@ -186,3 +239,6 @@ Useful in practice:
   and decimal characters than the API's own CSV output.
 - **Browsing** — the json-stat explorer at https://json-stat.com/explorer, plus a JSON viewer
   extension (built into Firefox; jsonview.com for Chromium).
+- **Reading guide** — Idescat's JSON-stat skill
+  (https://www.idescat.cat/dev/api/taules/jsonstat/SKILL.md, CC BY 4.0): a short,
+  provider-neutral guide to reading a dataset.

@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" width="1040" height="356" viewBox="0 0 1040 356" role="img" aria-label="docs, SKILL.md og references sjekkes mot det levende SSB-API-et av check_examples.py og check_common_tables.py, ved push og hver mandag. SKILL.md, references, README, CHANGELOG og LICENSE pakkes av build_zip.sh til zip-filen. docs følger ikke med i zip. CLAUDE.md, DEVLOG.md, evals, scripts og .github er interne.">
+<title>docs, SKILL.md og references sjekkes mot det levende SSB-API-et av check_examples.py og check_common_tables.py, ved push og hver mandag. SKILL.md, references, README, CHANGELOG og LICENSE pakkes av build_zip.sh til zip-filen. docs følger ikke med i zip. CLAUDE.md, DEVLOG.md, evals, scripts og .github er interne.</title>
+<style>
+svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --ink2: #4C5765; --line: #C3CBD5; --accent: #0A6A88; --tag: #DDE3EA;
+  --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, "Liberation Sans", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+@media (prefers-color-scheme: dark) { svg.dg { --bg: #10151B; --surface: #18202A; --panel: #141B23; --ink: #E3E8EE; --ink2: #9AA6B3; --line: #3A4552; --accent: #5DB9D7; --tag: #27313C; } }
+.dg .bg { fill: var(--bg); }
+.dg .title { font-size: 15px; font-weight: 600; }
+.dg text { font-family: var(--sans); font-size: 12px; fill: var(--ink); }
+.dg .t { font-size: 13px; font-weight: 600; }
+.dg .n { fill: var(--ink2); font-weight: 500; }
+.dg .mn { font-family: var(--mono); font-size: 12px; }
+.dg .m { font-family: var(--mono); font-size: 11px; }
+.dg .r { font-family: var(--mono); font-size: 11px; fill: var(--ink2); }
+.dg .lbl { font-size: 11px; fill: var(--ink2); }
+.dg .cap { font-family: var(--mono); font-size: 11px; fill: var(--ink2); letter-spacing: .08em; font-weight: 600; }
+.dg .hot-t { fill: var(--accent); font-weight: 600; font-size: 11px; }
+.dg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.dg .ext { fill: var(--bg); stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .quiet { fill: none; stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .panel { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+.dg .pill { fill: var(--surface); stroke: var(--ink2); stroke-width: 1; }
+.dg .wire { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .route { stroke-dasharray: 5 4; }
+.dg .hot { stroke: var(--accent); stroke-width: 2.4; fill: none; }
+.dg .brk { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .mk { fill: var(--ink2); }
+.dg .mk-hot { fill: var(--accent); }
+.dg .tagbox { fill: var(--tag); stroke: var(--line); stroke-width: 1; }
+.dg .tagtx { font-family: var(--mono); font-size: 9.5px; font-weight: 600; fill: var(--ink2); }
+.dg .quiet-t { fill: var(--ink2); }
+</style>
+<rect width="1040" height="356" class="bg"/>
+<text x="16" y="24" class="title">ssb-pxwebapi-v2 · sjekk og pakking</text>
+<text x="1024" y="24" text-anchor="end" class="r">v1.6.1 · tegnet 2026-10-03</text>
+<g transform="translate(0 16)">
+          <defs>
+            <marker id="f2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+          </defs>
+
+          <!-- Source files -->
+          <rect x="16" y="40" width="270" height="40" rx="5" class="box"/>
+          <text x="30" y="57" class="mn">docs/</text>
+          <text x="30" y="72" class="lbl">brukerveiledning · instruks-kort · llms.txt</text>
+
+          <rect x="16" y="88" width="270" height="40" rx="5" class="box"/>
+          <text x="30" y="105" class="mn">SKILL.md</text>
+          <text x="30" y="120" class="lbl">arbeidsflyt, eksempler, innledning</text>
+
+          <rect x="16" y="136" width="270" height="40" rx="5" class="box"/>
+          <text x="30" y="153" class="mn">references/*.md</text>
+          <text x="30" y="168" class="lbl">10 referansefiler, lastes ved behov</text>
+
+          <rect x="16" y="184" width="270" height="40" rx="5" class="box"/>
+          <text x="30" y="201" class="mn">README.md · CHANGELOG.md</text>
+          <text x="30" y="216" class="lbl">installasjon og endringslogg</text>
+
+          <rect x="16" y="232" width="270" height="40" rx="5" class="box"/>
+          <text x="30" y="249" class="mn">LICENSE</text>
+          <text x="30" y="264" class="lbl">MIT, ligger i repo-roten</text>
+
+          <rect x="16" y="280" width="270" height="40" rx="5" class="quiet"/>
+          <text x="30" y="297" class="mn quiet-t">CLAUDE.md · DEVLOG.md · evals/</text>
+          <text x="30" y="312" class="lbl">+ scripts/ · .github/ · internt, aldri i zip</text>
+
+          <!-- Bracket: packed (items 2–5) -->
+          <path d="M292 92 H300 V268 H292" class="brk"/>
+          <line x1="300" y1="252" x2="394" y2="252" class="wire" marker-end="url(#f2a)"/>
+          <text x="348" y="246" text-anchor="middle" class="lbl">pakkes</text>
+
+          <!-- Bracket: checked (items 1–3) -->
+          <path d="M316 44 H324 V172 H316" class="brk"/>
+          <line x1="324" y1="100" x2="394" y2="100" class="wire" marker-end="url(#f2a)"/>
+          <text x="360" y="94" text-anchor="middle" class="lbl">eksempler</text>
+
+          <!-- Checkers -->
+          <rect x="396" y="40" width="300" height="156" rx="6" class="box"/>
+          <text x="412" y="62" class="t">Sjekkes mot SSB API</text>
+          <text x="412" y="84" class="m">check_examples.py</text>
+          <text x="412" y="100" class="lbl">URL-er, GET/POST-eksempler og tabell-ID-er</text>
+          <text x="412" y="124" class="m">check_common_tables.py</text>
+          <text x="412" y="140" class="lbl">hver rad i common-tables.md mot /tables/{id}</text>
+          <text x="412" y="168" class="lbl">POST /savedqueries sendes aldri:</text>
+          <text x="412" y="183" class="lbl">kun JSON-syntaks sjekkes</text>
+
+          <!-- Live API -->
+          <rect x="776" y="40" width="248" height="156" rx="6" class="panel"/>
+          <text x="792" y="62" class="t">data.ssb.no (live)</text>
+          <text x="792" y="84">Feil: HTTP 4xx eller 5xx</text>
+          <text x="792" y="102">Feil: discontinued: true</text>
+          <text x="792" y="120">Advarsel: tittel, lastPeriod</text>
+          <text x="792" y="152" class="lbl">kjøres ved push/PR og hver</text>
+          <text x="792" y="168" class="lbl">mandag 06:00 UTC (GitHub Actions)</text>
+          <line x1="696" y1="108" x2="774" y2="108" class="wire" marker-end="url(#f2a)"/>
+          <text x="736" y="102" text-anchor="middle" class="lbl">GET · POST</text>
+          <line x1="776" y1="124" x2="698" y2="124" class="wire" marker-end="url(#f2a)"/>
+          <text x="736" y="138" text-anchor="middle" class="lbl">200 / feil</text>
+
+          <!-- Build -->
+          <rect x="396" y="222" width="300" height="60" rx="6" class="box"/>
+          <text x="412" y="244" class="m">scripts/build_zip.sh</text>
+          <text x="412" y="262" class="lbl">kopierer brukerfiler + LICENSE</text>
+          <line x1="696" y1="252" x2="774" y2="252" class="wire" marker-end="url(#f2a)"/>
+          <text x="736" y="246" text-anchor="middle" class="lbl">bygger</text>
+
+          <rect x="776" y="222" width="248" height="60" rx="6" class="box"/>
+          <text x="792" y="244" class="m">ssb-pxwebapi-v2-skill.zip</text>
+          <text x="792" y="262" class="lbl">lastes opp i Claude.ai</text>
+          <text x="776" y="304" class="lbl">CI zip-sync bygger på nytt og kjører</text>
+          <text x="776" y="320" class="lbl">diff -r mot den committede zip-en</text>
+        
+</g>
+</svg>

@@ -49,7 +49,7 @@ generic-pxweb-v2-skill/
     └── troubleshooting.md         # The five 400 titles, PX-instead-of-JSON, default selection, search returning 0 hits
 ```
 
-`CLAUDE.md`, `scripts/` and `evals/` in the repository are maintainer-internal and are not part of the package.
+`CLAUDE.md`, `DEVLOG.md`, `scripts/` and `evals/` in the repository are maintainer-internal and are not part of the package.
 
 ## Installation
 
@@ -98,4 +98,4 @@ For Claude or ChatGPT to call the API directly, you need an MCP server or a tool
 
 The skill itself (`SKILL.md`, `references/` and the scripts) is licensed under the [MIT License](https://github.com/janbrus/pxwebapi-skills/blob/main/LICENSE), © 2026 Jan Bruusgaard. The licence text lives in the repository root and ships in the zip as `LICENSE`. MIT covers the skill, not the data it fetches, which is licensed by each agency (see below).
 
-PxWebApi v2 is open source: https://github.com/PxTools/PxWebApi. Data licensing depends on the individual agency — `GET /config` returns the licence URL in `license` (SSB: its own terms; SCB and Latvia: CC0 1.0).
+PxWebApi v2 is open source: https://github.com/PxTools/PxWebApi. PxTools' user guide (https://www.pxtools.net/PxWebApi/documentation/user-guide/) documents the query syntax, formats and error codes; links are collected in `references/api-details.md` under "Specification and documentation". Data licensing depends on the individual agency — `GET /config` returns the licence URL in `license` (SSB: its own terms; SCB and Latvia: CC0 1.0).

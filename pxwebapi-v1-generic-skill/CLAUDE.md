@@ -51,7 +51,23 @@ rather than presenting it as universal.
     structure, and the PX keywords behind the API's metadata (`ELIMINATION`, `AGGREGALLOWED`, …)
   - `v1-vs-v2.md` — endpoint/body/filter translation both directions, and using v2 to fill v1's
     discovery gaps
+- `CHANGELOG.md` and `DEVLOG.md` — two logs for two readers. `CHANGELOG.md` ships in the ZIP and
+  tells **users** what is different in the answers: a few bullets per version, no sweep counts,
+  no sibling checks. `DEVLOG.md` is the **maintainer's** record and is not shipped: what changed,
+  what was verified live, on which installations and when, and every sibling-check outcome. It is
+  the old `CHANGELOG.md`, split off on 2026-10-03. Every version appears in both. The
+  `CHANGELOG.md` header links to `DEVLOG.md` by full GitHub URL, because a relative link is dead
+  inside the ZIP.
 - `evals/eval-scenarios.md` — end-to-end scenarios. Repo-internal, not shipped.
+- `docs/` — material for **agencies**, not for the model, and not shipped: `llms-template.txt`
+  (an llms.txt any v1 installation can fill in), `llms-example-statfin.txt` (the template filled in
+  for Statistics Finland, every URL and the POST body checked live). Both follow the llmstxt.org
+  **v2** format: free-text rules go
+  *before* the first H2 with no heading of their own, every H2 section is a pure
+  `- [name](url): note` list, and links point to LLM-friendly content (raw GitHub, JSON, `.md`).
+  Percent-encode `(`/`)` inside link URLs, since llms.txt parsers end the link at the first `)`.
+  There is no checker for them; re-probe the Finland example by hand when you touch it, and keep
+  the template's rules in step with `SKILL.md` — it is a condensed copy.
 - `scripts/build_zip.sh` — builds `generic-pxweb-v1-skill.zip` from the user-facing files only
   (`SKILL.md`, `README.md`, `CHANGELOG.md`, `references/`) plus `LICENSE` from the repo root.
   `LICENSE` (MIT) lives in the **repo root** and covers the whole repo; `build_zip.sh` copies it into the package because MIT requires the notice to travel with every copy, and the zip is the copy that gets handed out. Don't add a per-skill `LICENSE` — edit the root one, and rebuild **all six** zips when it changes (every zip-sync workflow has `LICENSE` in its `paths:` filter). `SKILL.md` frontmatter carries `license: MIT. LICENSE has complete terms` (the optional Agent Skills field — keep it short, it names the file beside `SKILL.md` in the zip); never put licence text in the body, which is loaded on every trigger.
@@ -64,7 +80,9 @@ Every content change:
 
 1. Bump `metadata.version` in `SKILL.md` frontmatter (semver; stay below 1.0.0 while the skill has
    no published distribution). A version that isn't bumped lies about copies being current.
-2. Add a `CHANGELOG.md` entry — what changed, what was verified live, and on what date.
+2. Add a `DEVLOG.md` entry — what changed, what was verified live, and on what date. Then add the
+   user entry in `CHANGELOG.md`, derived from it: what is different in the answers, in a few
+   bullets, with corrections marked **Corrected:**. Same version and date in both files.
 3. Run `scripts/build_zip.sh` and commit the ZIP. CI will catch it if you forget.
 4. If a factual claim changed, do the **sibling check** below and record its outcome, including
    when the answer is "does not apply".
@@ -76,7 +94,7 @@ made in three places: `SKILL.md`, `README.md` and `references/installations.md`.
 ## Editing guidance
 
 - The **Data integrity — the base rule** section near the top of `SKILL.md` outranks everything else in the skill: never state a number not fetched from the API in that conversation, never blend other sources, never interpolate. Don't weaken, shorten or relocate it. It mirrors the same section in `generic-pxweb-v2-skill`, `ssb-pxwebapi-v2` (Norwegian) and `scb-pxwebapi-v2` (Swedish); a change to the rule belongs in all four. The v1 version deliberately differs on two points: the `status` bullet notes that symbols are per-PX-file (`DATASYMBOL1`–`6`), and the API-failure bullet notes that several v1 installations return a bare `Bad Request`, which makes a failed call easy to mistake for an empty result. There is no `discontinued` bullet — v1 has no such flag.
-- **Versioning:** `metadata.version` in `SKILL.md` frontmatter plus a `CHANGELOG.md` entry on every content change (semver; stay below 1.0.0 while the skill has no published distribution). A version that isn't bumped lies about copies being current.
+- **Versioning:** `metadata.version` in `SKILL.md` frontmatter plus a `DEVLOG.md` and a `CHANGELOG.md` entry on every content change (semver; stay below 1.0.0 while the skill has no published distribution). A version that isn't bumped lies about copies being current.
 - **Verify against a live installation before changing a factual claim.** Everything currently in
   these files was reproduced with `curl` against SSB and/or SCB on 2026-08-28. Where a claim
   contradicts published documentation, the file says so and states which one is right — keep that
@@ -90,6 +108,10 @@ made in three places: `SKILL.md`, `README.md` and `references/installations.md`.
     a JSON body).
   - The JSON error payloads (`{"error":"Parameter error"}` etc.) are **SSB-only**. SCB, Finland and
     Greenland all return a bare `Bad Request` with no diagnostic.
+  - **A table id or database that does not exist is a 400, not a 404**, at all seven verified
+    installations (2026-09-28). 404 comes only from segments above the language, an unknown
+    language at SSB, and a file extension on a table id at SCB. Agencies' own guides say 404
+    (Finland's does); until 0.12.1 this skill said so too.
   - `?config` reports limits that differ from the agencies' own published figures — SSB documents
     30 calls/60 s where `?config` says 300; Finland's help page says 100,000 cells where `?config`
     says 120,000 (confirmed by bisection). `?config` wins.
@@ -175,5 +197,5 @@ reflex introduces new errors while removing old ones:
 This skill's whole premise is that installations behave differently, so scope every finding to
 where it was actually measured — "verified at SSB v1" says nothing about Finland, Greenland or
 Iceland, and the wording in the file must show which reach the evidence has. Record the outcome in
-`CHANGELOG.md` with a date **even when the answer is "does not apply"**; a check that left no trace
-gets redone.
+`DEVLOG.md` with a date **even when the answer is "does not apply"**; a check that left no trace
+gets redone. It stays out of `CHANGELOG.md`, which is about this skill's answers.

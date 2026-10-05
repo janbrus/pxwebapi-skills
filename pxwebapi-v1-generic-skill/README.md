@@ -71,7 +71,8 @@ guides:
 generic-pxweb-v1-skill/
 ├── SKILL.md                  # Main skill entrypoint (loaded on trigger)
 ├── README.md                 # This file
-├── CHANGELOG.md              # Version history; every content change gets an entry
+├── CHANGELOG.md              # What changed for users, per version
+├── DEVLOG.md                 # Maintainer's log: what was verified live, where and when
 ├── CLAUDE.md                 # Guidance for Claude Code when editing this skill
 ├── references/               # Loaded on demand
 │   ├── query-syntax.md       # Query body, filters, elimination, aggregations, cURL
@@ -81,13 +82,15 @@ generic-pxweb-v1-skill/
 │   ├── troubleshooting.md    # HTTP codes and the three v1 error payloads
 │   ├── installations.md      # 50 known v1 installations: status, languages, ?config limits
 │   └── v1-vs-v2.md           # Translation guide, and using v2 to fill v1's gaps
+├── docs/                     # For agencies, not shipped: llms.txt template and a filled-in Finland example
 ├── evals/                    # Repo-internal: scenarios for testing the skill end to end
 └── scripts/
     └── build_zip.sh          # Builds the distribution ZIP (user-facing files only)
 ```
 
-The four files above `references/` plus `references/` itself are what ships, together with `LICENSE` from the repository root. `CLAUDE.md`,
-`evals/` and `scripts/` are repo-internal and deliberately excluded from the ZIP.
+`SKILL.md`, `README.md`, `CHANGELOG.md` and `references/` are what ships, together with `LICENSE` from the repository root. `DEVLOG.md`,
+`CLAUDE.md`, `evals/` and `scripts/` are repo-internal and deliberately excluded from the ZIP. `docs/` is written for agencies that publish an
+`llms.txt`, not for the model, so it stays out of the ZIP too.
 
 ## Installation
 

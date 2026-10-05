@@ -13,7 +13,7 @@ description: >
   sparade frågor och outputformat (json-stat2, csv, xlsx).
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.11.0"
+  version: "0.11.1"
 ---
 
 # SCB PxWebApi v2 — Komplett guide
@@ -353,6 +353,6 @@ Region `00` är «Riket». Behöver du en lång årsserie i stället, är TAB436
 Om API:et inte är tillgängligt:
 
 1. **Säg tydligt att data inte kunde hämtas.** Fyll aldrig tomrummet med siffror ur minnet — utan API-åtkomst levererar du vägledning, inte statistik
-2. Hänvisa till SCB:s Statistikdatabas: https://www.statistikdatabasen.scb.se
+2. Hänvisa till SCB:s Statistikdatabas: https://www.statistikdatabasen.scb.se, och för API:ets syntax till SCB:s handbok för PxWebApi v2 (PxTools-guiden, på engelska): https://www.pxtools.net/PxWebApi/documentation/user-guide/
 3. Föreslå relevanta sökord baserat på frågan
 4. Ge vägledning för manuell uppslagning (tabellnamn, variabler att leta efter)

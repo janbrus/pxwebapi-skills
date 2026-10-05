@@ -1,6 +1,6 @@
 # json-stat2 — formatreferanse
 
-json-stat2 er et åpent format for statistiske datasett (https://json-stat.org/). Det brukes av PxWebApi v2, men også av andre statistikkleverandører som Eurostat og World Bank. Denne referansen dokumenterer formatet selv — leverandørspesifikke detaljer (publiseringstider, grenser osv.) ligger i `api-details.md`.
+json-stat2 er et åpent format for statistiske datasett (https://json-stat.org/). Det brukes av PxWebApi v2, men også av andre statistikkleverandører som Eurostat og World Bank — Eurostat sender riktignok `value` og `status` som objekter nøklet på posisjon, ikke som array. Denne referansen dokumenterer formatet selv — leverandørspesifikke detaljer (publiseringstider, grenser osv.) ligger i `api-details.md`.
 
 ---
 
@@ -25,18 +25,47 @@ Både metadata (`/tables/{id}/metadata`) og data (`/tables/{id}/data`) returnere
 
 ### Nøkkelelementer
 
-- **`id`** — Variabelnavnene i rekkefølge
+- **`id`** — Variabelnavnene i rekkefølge. Det er denne rekkefølgen som styrer indekseringen: iterer over `id`, aldri over `Object.keys(dimension)`. De to sammenfaller hos SSB (88 tabeller, verifisert 2026-10-02), men spesifikasjonen lover det ikke
 - **`size`** — Antall verdier per variabel (i samme rekkefølge som `id`)
-- **`value`** — Flat array med alle dataverdier lagret i **row-major order** (siste dimensjon i `id` varierer raskest, første varierer saktest — samme konvensjon som C/NumPy). Indeksen beregnes fra `id`, `size` og `dimension.{var}.category.index`: for `size = [s₀, s₁, …, sₙ]` og kategori-indekser `(i₀, i₁, …, iₙ)` er flat-indeksen `i₀·(s₁·s₂·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ`.
+- **`value`** — Flat array med alle dataverdier lagret i **row-major order** (siste dimensjon i `id` varierer raskest, første varierer saktest — samme konvensjon som C/NumPy). Indeksen beregnes fra `id`, `size` og `dimension.{var}.category.index`: for `size = [s₀, s₁, …, sₙ]` og kategori-indekser `(i₀, i₁, …, iₙ)` er flat-indeksen `i₀·(s₁·s₂·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ` — hver posisjon ganget med dimensjonens *stride*, produktet av `size` for alle senere dimensjoner. Se utregnet eksempel under.
 - **`dimension`** — Detaljert info per variabel med koder (`category.index`), navn (`category.label`), enheter (`category.unit`) og metadata (`extension`)
 - **`role`** — Hvilke variabler som har rolle som `time`, `geo` eller `metric`. **Start analyse her:** `role.metric` viser hva som måles (sjekk `dimension.{metric}.category.unit` for enhet/desimaler), `role.time` er tidsdimensjonen, `role.geo` er geografi. Hvis `role.geo` mangler, gjelder dataene typisk hele landet/totalen — ikke spør brukeren. Variabler som er i `id` men ikke i `role` er nedbrytningsdimensjoner.
-- **`status`** — Markerer spesielle verdier. Nøkkelen er indeks i value-arrayet, f.eks. `"status": { "3": ".." }` betyr at `value[3]` mangler tallgrunnlag. Feltet utelates når alle verdier er ordinære. Symbolene er leverandørspesifikke — SSBs standardtegn, inkludert de eldre som forekommer i tabeller fra før 2021, står i `troubleshooting.md` under «NULL-verdier i data».
+- **`status`** — Flagg på enkeltceller, nøklet på indeks i value-arrayet. **Les `status` og `value` hver for seg.** `"status": { "3": ".." }` med `value[3] = null` betyr at tallet mangler, og symbolet sier hvorfor. Men en status kan også stå på en celle som **har** tall, og da er den et flagg, ikke et hull: `https://data.ssb.no/api/pxwebapi/v2/tables/09842/data?valueCodes[ContentsCode]=BNP&valueCodes[Tid]=2022,2023,2024` gir tall i alle tre cellene og `"status": {"1": "*", "2": "*"}`, og tabellens `note` forklarer `* = Foreløpig tall`. Vis tallet sammen med flagget. PxWebs serializer gjør dette for celler med datanote (`DATANOTECELL`; kilde: `PxTools/PCAxis.Serializers`, `JsonStat2Serializer.GetValueAndStatus`), mens et datasymbol alltid gir `null`. Observert i 1 av 88 SSB-tabeller i et sveip 2026-10-02 — alle andre statuser sto på `null`. `null` beholder plassen sin i `value`, så filtrer aldri bort null før du indekserer. Feltet utelates når alle verdier er ordinære. Symbolene er leverandørspesifikke — SSBs standardtegn, inkludert de eldre som forekommer i tabeller fra før 2021, står i `troubleshooting.md` under «NULL-verdier i data».
 - **`link`** — Standard json-stat2-mekanisme for relaterte ressurser, gruppert per relasjonstype. Kan i likhet med `extension` forekomme på både rot- og variabel-nivå. Hos SSB (kun i metadata-responser, ikke i data-responser): `link.describedby` med URN-er til Klass/VarDok, og `link.related` med ferdige menneskelesbare lenker — på rot-nivå til statistikksiden og «Om statistikken», på variabel-nivå til klassifikasjons-/definisjonssider med label. Se `klass-vardok.md`.
 - **`note`** — **Array** med tabellnoter. Finnes på de aller fleste tabeller (11 av 12 stikkprøvde) og skal leses før en serie tolkes: basisårsskifter, rettelser og etterfølgertabeller står her. Noen av dem er obligatoriske å vise — se «Obligatoriske noter» under.
 - **`extension`** — Leverandørspesifikk metadata. I json-stat2 kan `extension` forekomme på **to nivåer**:
   - **Dataset/rot-nivå** (`<root>.extension`) — metadata om hele tabellen. Hos SSB (verifisert 2026-08-30): `px`, `contact`, samt `noteMandatory` og `discontinued` når de er satt. **`firstPeriod` og `lastPeriod` ligger ikke her** — de er felter på `/tables`-treffet og `GET /tables/{id}`, ikke i datasettet. Det finnes ikke noe `nextUpdate`-felt.
   - **`extension.px`** — PX-filens nøkkelord: `subject-code`, `subject-area`, `decimals`, `heading`/`stub` (default-pivotering), `contents` (kort tabelltittel, f.eks. "07459: Befolkning,"), `tableid`, `matrix`, `official-statistics`, `copyright`, `language`, `infofile`, `descriptiondefault` — og **`aggregallowed`**, se under.
   - **Variabel-nivå** (`dimension.{var}.extension`) — metadata om den enkelte dimensjonen. Hos SSB: `elimination` (se fellen under), `eliminationValueCode` (kun i data-responser, se under), `show`, `codelists` (tilgjengelige `agg_`/`vs_`-kodelister), `noteMandatory`, `categoryNoteMandatory`. For statistikkvariabelen (`ContentsCode`) i tillegg: `measuringType` (Stock/Flow/Average), `priceType` (Current/Fixed/NotApplicable), `adjustment` (sesongjustering), `basePeriod` (basisperiode for indekser), `refperiod` (referansetidspunkt) og `alternativeText` — alle indeksert per ContentsCode-verdi.
+
+### Utregnet eksempel: to dimensjoner som varierer
+
+Eksempelet over har `size [1, 1, 5]`, så bare én dimensjon varierer og rekkefølgen kan ikke gå galt. Med to regioner blir den synlig:
+
+```
+GET /tables/07459/data?valueCodes[Region]=0301,4601&valueCodes[ContentsCode]=Personer1&valueCodes[Tid]=2024,2025,2026
+```
+
+gir (forkortet):
+
+```json
+{
+  "id": ["Region", "ContentsCode", "Tid"],
+  "size": [2, 1, 3],
+  "dimension": {
+    "Region":       { "category": { "index": { "0301": 0, "4601": 1 } } },
+    "ContentsCode": { "category": { "index": { "Personer1": 0 } } },
+    "Tid":          { "category": { "index": { "2024": 0, "2025": 1, "2026": 2 } } }
+  },
+  "value": [717710, 724290, 728714, 291940, 293709, 294860]
+}
+```
+
+Stride: `Region` 1·3 = 3, `ContentsCode` 3, `Tid` 1. Bergen (`4601`, indeks 1) i 2026 (indeks 2) er `1·3 + 0·3 + 2·1 = 5`, altså `value[5]`. En dimensjon med størrelse 1 har stride, men bidrar alltid med 0. Verifisert 2026-10-02 mot samme spørring som `outputFormat=csv`.
+
+`category.index` følger rekkefølgen i spørringen: API-et sorterer ikke. `valueCodes[Tid]=2026,2024,2025` gir `{"2026": 0, "2024": 1, "2025": 2}`, mens `top(n)` og `from(x)` gir stigende rekkefølge (verifisert 2026-10-02). Slå derfor alltid opp posisjonen i `category.index`, og anta aldri at tid stiger.
+
+For å teste egen kode: https://json-stat.org/samples/order.json, der hver verdi er en tekst som navngir sin egen posisjon (`A2B1C3`), og `category.index` er på listeform. Posisjon 11 i den filen har `A1B1C4` der det skulle stått `A2B1C4` (skrivefeil, sjekket 2026-10-02). Riktig kode «feiler» altså akkurat der.
 
 ---
 
@@ -95,3 +124,5 @@ Verifisert 2026-08-30. `dimension.{var}.extension.elimination` svarer på **ulik
 **JSON-stat Toolkit** (https://jsonstat.com/) — referanseimplementasjonen i JavaScript, med **JSON-stat Explorer** (http://jsonstat.com/explorer/) for å bla i et datasett interaktivt — nyttig når du vil forstå `id`/`size`/`value`-indekseringen på en konkret respons. Toolkiten har også kommandolinjeverktøy (https://github.com/jsonstat/conv/, krever node.js): `jsonstat2csv` (bedre tilpasset CSV enn API-ets eget csv-format), `jsonstat2arrow`, `jsonstat2array`/`jsonstat2arrobj`/`jsonstat2objarr` (ulike JS-strukturer), `jsonstatdice` (lag et nytt json-stat-datasett fra et utsnitt), `csv2jsonstat` og `sdmx2jsonstat` (OECD, UN, IMF → json-stat). Eksempler: https://observablehq.com/@jsonstat.
 
 For R finnes PxWebApiData, en API-klient som henter PxWeb-data direkte inn i R — se README.
+
+**Idescats JSON-stat-skill** (https://www.idescat.cat/dev/api/taules/jsonstat/SKILL.md, CC BY 4.0) — en kort, leverandørnøytral veiledning i å lese et datasett.

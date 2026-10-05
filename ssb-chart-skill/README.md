@@ -10,7 +10,7 @@ Skillen styrer **hvordan** data vises, ikke hvordan de hentes. Bruk den sammen m
 - Bruker SSBs **fargesystem** (kategorisk, sekvensiell og divergerende palett) med verdier i hex/RGB/CSS/JS/Python/openpyxl. Den kategoriske paletten gjelder alltid, uansett rendringsmål
 - Setter riktig **typografi** (Roboto Condensed for titler, Open Sans for brødtekst, med Arial-fallback)
 - Gir en **diagramvalg-matrise** — når man skal bruke linje, horisontal søyle, ring, kart, scorecard, scatter, histogram eller small multiples, og hva man skal unngå (3D, doble y-akser, kakediagram, avkortet y-akse)
-- Beskriver **JSON-Stat2 → chart-config**-oppskriften: riktig tids-sortering via `category.index`, desimaler per metric fra `category.unit`, status-koder som visuelle hull (aldri interpolert)
+- Beskriver **JSON-Stat2 → chart-config**-oppskriften: riktig tids-sortering via `category.index`, desimaler per metric fra `category.unit`, manglende verdier som visuelle hull (aldri interpolert) og status på et tall (f.eks. foreløpig) som et merket punkt
 - Dekker **stilregler per output-format**: React/HTML (Recharts, Chart.js), vanilla JS + Chart.js v4, PowerPoint, Excel, matplotlib og markdown-tabeller
 - Bygger **deklarative titler** fra `extension.px.contents` og en flerspråklig **kildelinje** (`Kilde: SSB, tabell {id}. Sist oppdatert: {dato}.`)
 - Håndhever **statistisk integritet**: y-akse fra 0 på søyler, jevne tidsintervaller, synlig enhet og periode, manglende data vist som hull — ikke skjult
@@ -28,10 +28,10 @@ ssb-chart-skill/
     ├── chart-selection.md         # Beslutningsmatrise per diagramtype (linje, søyle, ring, kart, scorecard …)
     ├── color-system.md            # Komplett fargespesifikasjon i alle formater (CSS/JS/Python/Recharts/Chart.js/matplotlib)
     ├── format-guidelines.md       # Stilregler per leveranseformat (React, vanilla JS, PPTX, Excel, matplotlib, markdown)
-    └── jsonstat-to-chart.md       # Oppskrift: JSON-Stat2-respons → chart-datasets (labels, decimals, status-hull)
+    └── jsonstat-to-chart.md       # Oppskrift: JSON-Stat2-respons → chart-datasets (labels, decimals, status som hull eller flagg)
 ```
 
-`CLAUDE.md` og `scripts/` i repoet er vedlikeholder-interne og følger ikke med i pakken.
+`CLAUDE.md`, `DEVLOG.md` og `scripts/` i repoet er vedlikeholder-interne og følger ikke med i pakken.
 
 ## Installasjon
 

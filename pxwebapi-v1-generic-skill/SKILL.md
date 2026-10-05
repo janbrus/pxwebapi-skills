@@ -14,7 +14,7 @@ description: >
   `ssb-pxwebapi-v2` or `scb-pxwebapi-v2` instead.
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.12.0"
+  version: "0.12.1"
 ---
 
 # PxWebApi v1 — Generic Skill

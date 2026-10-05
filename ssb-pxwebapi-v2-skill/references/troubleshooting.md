@@ -134,7 +134,10 @@ Sjekk `status`-objektet i json-stat2-responsen. SSBs gjeldende standardtegn (fra
 
 KOSTRA prikker tall som bygger på færre enn 3 enheter (barnevern, sosialhjelp, kvalifiseringsstønad, bolig) eller færre enn 5 brukere (pleie og omsorg), og for enkelte økonomiske nøkkeltall er landsgjennomsnittet *med* Oslo prikket — bruk `EAKUO` (Landet uten Oslo). Se `kostra.md`.
 
-I eldre tabeller (før 2021) kan du også finne: `"..."` = oppgave mangler foreløpig, `"-"` = null, `"*"` = foreløpig tall.
+I eldre tabeller (før 2021) kan du også finne:
+- `"..."` = oppgave mangler foreløpig
+- `"-"` = null. Tallet er 0, men bruken har vært tvetydig: vis `-`, og ikke regn med det som 0 (vedlikeholder, 2026-10-01). Verdien i `value` er `null`. Funnet i 4 av 88 tabeller i et sveip 2026-10-02, blant dem 08205
+- `"*"` = foreløpig tall. **Står på en celle som har tall**, så det er et flagg, ikke et hull: 09842 (BNP per innbygger) har `*` på 2023–2024 med tallene i `value`, og tabellens `note` forklarer tegnet. Vis tallet sammen med flagget. Se `json-stat2.md` under `status`
 
 Se https://www.ssb.no/diverse/standardtegn-i-tabeller (engelsk: https://www.ssb.no/en/diverse/standardtegn-i-tabeller)
 

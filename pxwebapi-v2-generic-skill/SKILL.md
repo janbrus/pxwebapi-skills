@@ -10,7 +10,7 @@ description: >
   Covers table search, metadata, data queries, codelists, and saved queries.
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.11.0"
+  version: "0.11.1"
 ---
 
 # PxWebApi v2 — Generic Skill

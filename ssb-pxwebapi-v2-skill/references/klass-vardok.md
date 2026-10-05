@@ -9,15 +9,18 @@ Metadata-responsen fra `/tables/{id}/metadata` kobler tabellen og variablene til
 
 ## Kortnavn før du har metadata
 
-I søkefasen (Steg 2) har du bare `/tables`-treffet, ikke metadata — og dermed ingen `link.related`. Kortnavnet kan likevel leses ut av `paths`.
+I søkefasen (Steg 2) har du bare `/tables`-treffet, ikke metadata — og dermed ingen `link.related`. Kortnavnet kan som regel leses ut av `paths`.
 
-`paths` er en **liste av stier**, der hver sti er en liste av noder med `id` og `label`. Statistikkens kortnavn er tredje node i stien, `paths[0][2].id`:
+`paths` er en **liste av stier**, der hver sti er en liste av noder med `id` og `label`. Tredje node i en sti, `paths[i][2].id`, er kortnavnet til en statistikk tabellen er plassert under:
 
 | Tabell | `paths[0]` (id-er)                           | Kortnavn      |
 | ------ | -------------------------------------------  | ------------- |
 | 07459  | `be` → `be01` → `folkemengde` → `SBMENU6924` | `folkemengde` |
 | 14700  | `if` → `if01` → `kpi` → `SBMENU12005`        | `kpi`         |
 | 07221  | `bb` → `bb01` → `bpi` → `SBMENU4008`         | `bpi`         |
+
+- **Samme tredje node i alle stiene:** det er kortnavnet. Gjelder 7 291 av 7 795 tabeller, avsluttede medregnet (sveip 2026-10-03); 80 av 80 i et kontrollutvalg stemte med `metaid`.
+- **Ulike tredje noder:** tabellen er krysslistet under flere statistikker, og `paths` sier ikke hvilken som eier den. `paths[0]` bommet på 76 av 450 aktive tabeller — 10484 har `kolltrans` først, men tilhører `jernbane`; 14662 har `valgdeltakelse` først, men tilhører `sametingsvalg`. Verken første sti, flest stier eller `subjectCode` avgjør det sikkert. Kortnavnet står i `extension.metaid` i metadata (se under), som du uansett henter i Steg 3 — vent med statistikklenken til da.
 
 Kortnavnet gir tre ting uten flere API-kall:
 
@@ -27,7 +30,7 @@ Kortnavnet gir tre ting uten flere API-kall:
 
 Har du først hentet metadata, trengs ikke utledningen: `<root>.link.related` gir de to første lenkene ferdig, og `extension.metaid` (`KORTNAVN:<kortnavn>`) gir kortnavnet direkte — se under.
 
-En tabell kan ha **flere stier**. KOSTRA-tabellene ligger både under sin fagstatistikk og under `os` → `os01` → `kostrahoved` (12134: `paths[0]` = `kommregnko`, `paths[1]` = `kostrahoved`), og et mindretall har bare kostrahoved-stien. Begge er gyldige kortnavn — `https://www.ssb.no/kostrahoved` redirecter til KOSTRA-siden — men fagstatistikkens kortnavn gir den mest spesifikke «Om statistikken». Se `kostra.md`.
+KOSTRA-tabellene er det vanligste krysslistede tilfellet: de ligger både under sin fagstatistikk og under `os` → `os01` → `kostrahoved` (12134: `kommregnko` og `kostrahoved`). `metaid` peker på fagstatistikken, med ett unntak (11805), og på `kostrahoved` for de 9 tabellene som bare har den stien. `https://www.ssb.no/kostrahoved` redirecter til KOSTRA-siden, men fagstatistikkens kortnavn gir den mest spesifikke «Om statistikken». Se `kostra.md`.
 
 ## Rot-nivå: statistikkside og «Om statistikken»
 
@@ -54,7 +57,7 @@ En tabell kan ha **flere stier**. KOSTRA-tabellene ligger både under sin fagsta
 
 - `relation: "statistics-homepage"` → statistikksiden (`ssb.no/<kortnavn>`)
 - `relation: "about-statistics"` → «Om statistikken»-siden med definisjoner og forklaringer
-- `extension.metaid` = `KORTNAVN:<kortnavn>` — gir statistikkens kortnavn direkte, uten å utlede det fra `paths` (utledningen over trengs kun i søkefasen, før du har hentet metadata)
+- `extension.metaid` = `KORTNAVN:<kortnavn>` — gir kortnavnet til statistikken som eier tabellen, uten å utlede det fra `paths`. Fasiten når `paths` har flere kortnavn; utledningen over er bare for søkefasen, før du har hentet metadata
 - Lenker og labels følger `lang`-parameteren: `lang=en` gir `/en/`-URL-er og engelske labels («Statistics page», «Definitions and explanations»)
 
 ## Variabel-nivå: definisjoner per variabel

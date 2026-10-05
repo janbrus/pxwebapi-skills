@@ -43,6 +43,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections.abc import Iterator
 from pathlib import Path
 
 BASE = "https://statistikdatabasen.scb.se/api/v2"
@@ -150,7 +151,7 @@ def extract_json_body(lines: list[str], start: int) -> tuple[str | None, int]:
     return None, start
 
 
-def collect_checks(path: Path):
+def collect_checks(path: Path) -> Iterator[tuple[int, str, str, str, str | None]]:
     """Yield (lineno, kind, method, url, body) checks for one file.
 
     kind: 'http' (perform request) or 'json' (validate body syntax only).
@@ -199,8 +200,8 @@ def main() -> int:
 
     files = [here / "SKILL.md"] + sorted((here / "references").glob("*.md"))
 
-    checks = []
-    seen = set()
+    checks: list[tuple[str, int, str, str, str, str | None]] = []
+    seen: set[tuple[str, str, str, str | None]] = set()
     for f in files:
         for lineno, kind, method, url, body in collect_checks(f):
             key = (kind, method, url, body)

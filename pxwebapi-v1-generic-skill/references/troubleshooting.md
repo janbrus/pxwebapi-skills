@@ -35,14 +35,39 @@ allowed" — see below.
 | Code | Meaning | Typical cause |
 |---|---|---|
 | 200 | OK | — |
-| 400 | Bad Request | Malformed JSON, unknown variable, bad value code, bad filter, unsupported format, unsupported `?query=` |
+| 400 | Bad Request | Malformed JSON, unknown variable, bad value code, bad filter, unsupported format, unsupported `?query=` — **and a table id or database that does not exist** |
 | 403 | Forbidden | **Result exceeds the cell limit** — not an authorisation problem |
-| 404 | Not Found | Wrong table id, path, language or database segment |
+| 404 | Not Found | Rare, and **not** the "wrong table" signal: a wrong segment *above* the language, an unknown language at SSB, or a file extension on a table id at SCB — see below |
 | 429 | Too Many Requests | Rate limit exceeded |
 | 503 | Service Unavailable | Timeout (60 s at SSB), or heavy load — common with large `xlsx` extracts |
 
 **403 is the surprise.** Most APIs signal an oversized result with 413 or 400. PxWeb v1 uses 403
 with the body `{"error":"Too many values selected"}`. Read it as "too big", not "not allowed".
+
+**A table that does not exist is a 400, not a 404.** Measured 2026-09-28 on all seven installations
+in the `SKILL.md` table: a GET on a non-existent table id returns 400 everywhere — SSB with
+`{"error":"Parameter error"}`, the other six with a bare `Bad Request` — and a POST to one does the
+same at the four where it was tried (SSB, SCB, Finland, Greenland). A non-existent database is a
+400 at all seven too. An earlier revision of this table mapped these cases to 404, which nothing
+measured supports. The practical consequence: a 400 can mean a wrong URL just as easily as a wrong
+body, which is why step 1 of "Debugging without diagnostics" GETs the URL before touching the query.
+
+404 does occur, in three places:
+
+- **Above the language segment.** A wrong `APIVERSION` returns 404 at six of the seven, and the
+  bare `…/{APIVERSION}` URL at four (Finland, Iceland, the Faroes, Estonia), as IIS's "File or
+  directory not found" page. The exceptions: SCB serves an HTML info page at `/OV0104/v1/`, SSB
+  answers `/api/v0` with **410** (a notice about its retired ready-made datasets API, which
+  shares the path), and Statistics Greenland answers `/api/v1` with **500** and an unknown version
+  with **200** and an HTML page reading "Filen findes ikke - File not found" — one more reason to
+  check that a body parses as JSON before trusting a 200.
+- **An unknown language at SSB** (`/api/v0/xx/table`): 404 with an empty body. The other six
+  answer 400.
+- **A file extension on a table id at SCB.** IIS rejects any last segment ending in `.px`, `.PX` or
+  `.json` with a 404 HTML page before PxWeb sees the request — a real table included
+  (`BefolkManadCKM.px`). SCB's ids carry no extension, so this is what the `.px` habit from
+  file-based installations produces there; without the extension, an unknown id at SCB is an
+  ordinary 400.
 
 ---
 
@@ -60,6 +85,8 @@ The request never reached value validation. Causes, in order of likelihood:
 - An unsupported `"response": {"format": …}` value. **Most often: `jsonstat2` or `jsonstat`
   instead of `json-stat2` / `json-stat`.**
 - Missing or wrong `Content-Type: application/json`.
+- A table id or database that does not exist — the URL is wrong, not the body. SSB gives the same
+  message on a GET of that URL, which tells the two apart.
 
 Fix: validate the JSON, then re-fetch metadata with a GET on the same URL and compare every
 `code` character for character.
@@ -105,8 +132,10 @@ breached while the cell count still looks safe.
 On SCB, Finland, Greenland and most other installations a 400 is opaque. Bisect instead of
 guessing — each step is one cheap request:
 
-1. **GET the table URL.** If that fails, the path or table id is wrong (a missing `.px`, or the
-   wrong language/database segment), not the query.
+1. **GET the table URL.** If that fails — usually with 400, not 404 (see "HTTP status codes") —
+   the path or table id is wrong, not the query: a missing `.px` (Finland, Greenland and the Faroes
+   reject the bare id; Estonia accepts it), a `.px` added at SCB, or a wrong language or database
+   segment.
 2. **POST the minimal legal body**, `{"query": [], "response": {"format": "json-stat2"}}`. If this
    400s, the problem is the envelope or the format name — check the hyphen in `json-stat2`. If it
    403s, the table is simply too big to take whole (see below); that is not a syntax error.
@@ -200,8 +229,9 @@ cases the figures cover the whole country or area — do not ask the user to dis
 ### Nulls in `value` with symbols in `status`
 
 Not missing data in the transport sense — deliberate markers, and the symbols are defined per PX
-file, so read them rather than assuming. The table of symbols is in `json-stat2.md`. Never treat
-any of them as zero.
+file, so read them rather than assuming. A status can also sit on a cell that **has** a number
+(SSB 09842: `*` = provisional); that is a flag to show with the number, not a gap. The table of
+symbols is in `json-stat2.md`. Never treat any of them as zero.
 
 ---
 

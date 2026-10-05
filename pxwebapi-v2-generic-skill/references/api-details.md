@@ -119,7 +119,7 @@ Set `outputFormat` explicitly on every data call — the default is per installa
 | HTML | `html` | Table for display |
 | PX | `px` | Traditional PX format |
 | JSON-PX | `json-px` | JSON variant of PX |
-| Parquet | `parquet` | Columnar binary, for large extracts into pandas/Arrow — SSB only among the known installations |
+| Parquet | `parquet` | Columnar binary, for large extracts into pandas/Arrow — SSB only among the known installations. Beta at PxTools; dimension columns are named by the variable's *label* in `lang` (`quarter` / `kvartal`), not its code (verified 2026-10-02) |
 
 The value is the hyphenated form. Latvia's `dataFormats` also advertises underscore forms (`json_stat2`, `json_stat`) and v1-era names (`csv3`, `html5_table`, `relational_table`); `json_stat2` returns 400 on the same installation that lists it. Trust `/config` for *which* formats exist, and the hyphenated spelling for *how* to ask.
 
@@ -128,3 +128,13 @@ The value is the hyphenated form. Latvia's `dataFormats` also advertises undersc
 **CSV charset is per installation:** SSB and SCB serve `text/csv; charset=iso-8859-1` (Latin-1); Latvia serves `utf-8` **with a byte-order mark** at the start of the first line — strip it before parsing, or `pd.read_csv(..., encoding="utf-8-sig")`. Read the `Content-Type` header rather than assuming.
 
 **`heading` and `stub`** (comma-separated lists of variable codes) control the pivot for csv/html/xlsx; `extension.px.heading`/`stub` in metadata is the layout the agency itself intends. Putting *every* variable in `stub` gives one row per observation — the long, pivot-friendly shape pandas and Power BI want. In a POST body the same goes in `placement: {"heading": [], "stub": [...]}` next to `selection`.
+
+---
+
+## Specification and documentation
+
+- **User guide** — PxTools' PxWebApi v2 guide: https://www.pxtools.net/PxWebApi/documentation/user-guide/ (Markdown source, easier to read programmatically: https://raw.githubusercontent.com/PxTools/pxtools.github.io/main/docs/PxWebApi/documentation/user-guide.md). Query syntax, output formats including parquet, codelists, error codes. SCB publishes the same guide as its *Handbok om att använda PxWebApi v2*.
+- **OpenAPI specification** — https://raw.githubusercontent.com/PxTools/PxApiSpecs/master/PxAPI-2.yml, the contract every installation implements.
+- **Source code and issues** — https://github.com/PxTools/PxWebApi.
+
+The guide's examples are SSB's. Limits, formats, defaults and spellings vary by installation — the comparison table above is what holds for each, and `/config` outranks both.

@@ -1,0 +1,202 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" width="1040" height="1040" viewBox="0 0 1040 1040" role="img" aria-label="Arbeidsflyt i seks steg: forstå behovet, søk etter tabell, utforsk metadata, bygg og kjør query, presenter, lagret spørring. Steg 2, 3, 4 og 6 kaller SSBs PxWebApi v2. Tall i svaret kommer bare fra data-responsen i steg 4. Sentralbankdata, v1-bodyer, visualisering og historisk statistikk rutes til andre skills uten at tall kommer tilbake.">
+<title>Arbeidsflyt i seks steg: forstå behovet, søk etter tabell, utforsk metadata, bygg og kjør query, presenter, lagret spørring. Steg 2, 3, 4 og 6 kaller SSBs PxWebApi v2. Tall i svaret kommer bare fra data-responsen i steg 4. Sentralbankdata, v1-bodyer, visualisering og historisk statistikk rutes til andre skills uten at tall kommer tilbake.</title>
+<style>
+svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --ink2: #4C5765; --line: #C3CBD5; --accent: #0A6A88; --tag: #DDE3EA;
+  --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, "Liberation Sans", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+@media (prefers-color-scheme: dark) { svg.dg { --bg: #10151B; --surface: #18202A; --panel: #141B23; --ink: #E3E8EE; --ink2: #9AA6B3; --line: #3A4552; --accent: #5DB9D7; --tag: #27313C; } }
+.dg .bg { fill: var(--bg); }
+.dg .title { font-size: 15px; font-weight: 600; }
+.dg text { font-family: var(--sans); font-size: 12px; fill: var(--ink); }
+.dg .t { font-size: 13px; font-weight: 600; }
+.dg .n { fill: var(--ink2); font-weight: 500; }
+.dg .mn { font-family: var(--mono); font-size: 12px; }
+.dg .m { font-family: var(--mono); font-size: 11px; }
+.dg .r { font-family: var(--mono); font-size: 11px; fill: var(--ink2); }
+.dg .lbl { font-size: 11px; fill: var(--ink2); }
+.dg .cap { font-family: var(--mono); font-size: 11px; fill: var(--ink2); letter-spacing: .08em; font-weight: 600; }
+.dg .hot-t { fill: var(--accent); font-weight: 600; font-size: 11px; }
+.dg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.dg .ext { fill: var(--bg); stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .quiet { fill: none; stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .panel { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+.dg .pill { fill: var(--surface); stroke: var(--ink2); stroke-width: 1; }
+.dg .wire { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .route { stroke-dasharray: 5 4; }
+.dg .hot { stroke: var(--accent); stroke-width: 2.4; fill: none; }
+.dg .brk { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .mk { fill: var(--ink2); }
+.dg .mk-hot { fill: var(--accent); }
+.dg .tagbox { fill: var(--tag); stroke: var(--line); stroke-width: 1; }
+.dg .tagtx { font-family: var(--mono); font-size: 9.5px; font-weight: 600; fill: var(--ink2); }
+.dg .quiet-t { fill: var(--ink2); }
+</style>
+<rect width="1040" height="1040" class="bg"/>
+<text x="16" y="34" class="title">ssb-pxwebapi-v2 · arbeidsflyt</text>
+<text x="1024" y="34" text-anchor="end" class="r">v1.6.1 · tegnet 2026-10-03</text>
+          <defs>
+            <marker id="f1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+            <marker id="f1h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-hot"/></marker>
+          </defs>
+
+          <!-- Question -->
+          <rect x="316" y="18" width="280" height="36" rx="18" class="pill"/>
+          <text x="456" y="41" text-anchor="middle">Spørsmål: «Hvor mange bor i Oslo?»</text>
+          <line x1="456" y1="54" x2="456" y2="88" class="wire" marker-end="url(#f1a)"/>
+
+          <!-- Left column: routing out -->
+          <text x="16" y="66" class="cap">RUTES TIL ANNEN SKILL</text>
+          <text x="16" y="82" class="lbl">stiplet: ingen tall kommer tilbake</text>
+
+          <rect x="16" y="96" width="190" height="44" rx="6" class="ext"/>
+          <text x="30" y="115" class="mn">norges-bank-api</text>
+          <text x="30" y="131" class="lbl">styringsrente · valuta · NOWA</text>
+          <line x1="276" y1="118" x2="208" y2="118" class="wire route" marker-end="url(#f1a)"/>
+
+          <rect x="16" y="150" width="190" height="44" rx="6" class="ext"/>
+          <text x="30" y="169" class="mn">generic-pxweb-v1-skill</text>
+          <text x="30" y="185" class="lbl">gamle v1-POST-bodyer</text>
+          <line x1="276" y1="172" x2="208" y2="172" class="wire route" marker-end="url(#f1a)"/>
+
+          <rect x="16" y="711" width="190" height="44" rx="6" class="ext"/>
+          <text x="30" y="730" class="mn">ssb-chart-skill</text>
+          <text x="30" y="746" class="lbl">visualiser uttrekket</text>
+          <line x1="276" y1="733" x2="208" y2="733" class="wire route" marker-end="url(#f1a)"/>
+
+          <rect x="16" y="968" width="190" height="44" rx="6" class="ext"/>
+          <text x="30" y="987" class="mn">ssb-histstat</text>
+          <text x="30" y="1003" class="lbl">tall fra før Statistikkbanken</text>
+          <line x1="276" y1="990" x2="208" y2="990" class="wire route" marker-end="url(#f1a)"/>
+
+          <!-- Steg 1 -->
+          <rect x="276" y="90" width="360" height="110" rx="6" class="box"/>
+          <text x="292" y="112" class="t"><tspan class="n">Steg 1</tspan> · Forstå behovet</text>
+          <text x="292" y="132">Fenomen · geografi · tidsperiode · nedbrytning</text>
+          <text x="292" y="150">Vag? Ett oppfølgingsspørsmål, ikke flere</text>
+          <text x="292" y="168">KOSTRA: egne variabel-ID-er og koder</text>
+          <text x="292" y="188" class="r">kostra.md · codelists-and-filters.md</text>
+
+          <line x1="456" y1="200" x2="456" y2="238" class="wire" marker-end="url(#f1a)"/>
+          <text x="466" y="223" class="lbl">søkeord</text>
+
+          <!-- Steg 2 -->
+          <rect x="276" y="240" width="360" height="90" rx="6" class="box"/>
+          <text x="292" y="262" class="t"><tspan class="n">Steg 2</tspan> · Søk etter tabell</text>
+          <text x="292" y="282">Fagtermer: «folkemengde», ikke «befolkning»</text>
+          <text x="292" y="300">Vis 3–5 treff, anbefal ett</text>
+          <text x="292" y="320" class="r">search-syntax.md · common-tables.md</text>
+
+          <line x1="456" y1="330" x2="456" y2="368" class="wire" marker-end="url(#f1a)"/>
+          <text x="466" y="353" class="lbl">tabell-ID</text>
+
+          <!-- Steg 3 -->
+          <rect x="276" y="370" width="360" height="110" rx="6" class="box"/>
+          <text x="292" y="392" class="t"><tspan class="n">Steg 3</tspan> · Utforsk metadata</text>
+          <text x="292" y="412">Hoppes aldri over: koder bekreftes her</text>
+          <text x="292" y="430">Les role (metric · time · geo) og elimination</text>
+          <text x="292" y="448">elimination: false betyr at variabelen må med</text>
+          <text x="292" y="468" class="r">json-stat2.md · klass-vardok.md</text>
+
+          <line x1="456" y1="480" x2="456" y2="518" class="wire" marker-end="url(#f1a)"/>
+          <text x="466" y="503" class="lbl">koder + kodeliste</text>
+
+          <!-- Steg 4 -->
+          <rect x="276" y="520" width="360" height="110" rx="6" class="box"/>
+          <text x="292" y="542" class="t"><tspan class="n">Steg 4</tspan> · Bygg og kjør spørring</text>
+          <text x="292" y="562">Tid og ContentsCode er alltid med</text>
+          <text x="292" y="580">Tid: top(N) eller from() framfor faste år</text>
+          <text x="292" y="598">GET: uttrykk med komma i [ ] · curl -g</text>
+          <text x="292" y="618" class="r">codelists-and-filters.md · output-formats.md</text>
+
+          <line x1="456" y1="630" x2="456" y2="668" class="hot" marker-end="url(#f1h)"/>
+          <text x="466" y="653" class="hot-t">eneste kilde til tall i svaret</text>
+
+          <!-- Steg 5 -->
+          <rect x="276" y="670" width="360" height="126" rx="6" class="box"/>
+          <text x="292" y="692" class="t"><tspan class="n">Steg 5</tspan> · Presenter</text>
+          <text x="292" y="712">Tabell med enhet og «Kilde: SSB, tabell 07459»</text>
+          <text x="292" y="730">Status-tegn og obligatoriske noter vises</text>
+          <text x="292" y="748">Egne beregninger merkes som dine</text>
+          <text x="292" y="766">Viser URL/body, utelatte dimensjoner, kodeliste</text>
+          <text x="292" y="786" class="r">troubleshooting.md · json-stat2.md</text>
+
+          <line x1="456" y1="796" x2="456" y2="834" class="wire" marker-end="url(#f1a)"/>
+          <text x="466" y="819" class="lbl">valgfritt</text>
+
+          <!-- Steg 6 -->
+          <rect x="276" y="836" width="360" height="78" rx="6" class="box"/>
+          <text x="292" y="858" class="t"><tspan class="n">Steg 6</tspan> · Lagret spørring</text>
+          <text x="292" y="878">Delbar ID; top(N) holder den oppdatert</text>
+          <text x="292" y="896">SSB anbefaler vanlig URL til automatisering</text>
+
+          <!-- Fallback -->
+          <rect x="276" y="958" width="360" height="64" rx="6" class="box"/>
+          <text x="292" y="980" class="t">Fallback · API-et svarer ikke</text>
+          <text x="292" y="998">Si fra, ingen tall fra minnet → ssb.no/statbank</text>
+          <text x="292" y="1014" class="r">troubleshooting.md</text>
+
+          <!-- API column -->
+          <rect x="716" y="90" width="308" height="830" rx="8" class="panel"/>
+          <text x="732" y="114" class="t">SSB PxWebApi v2</text>
+          <text x="732" y="132" class="m">data.ssb.no/api/pxwebapi/v2</text>
+          <text x="732" y="154">Kanal: pxweb-mcp eller HTTP</text>
+          <rect x="732" y="166" width="38" height="16" rx="3" class="tagbox"/>
+          <text x="751" y="178" text-anchor="middle" class="tagtx">HTTP</text>
+          <text x="778" y="178" class="lbl">kun HTTP, ikke i pxweb-mcp</text>
+          <text x="732" y="204" class="r">mcp-tools.md · api-details.md</text>
+
+          <!-- Row: Steg 2 -->
+          <rect x="728" y="244" width="284" height="82" rx="5" class="box"/>
+          <text x="740" y="266" class="m">GET /tables?query=…</text>
+          <text x="740" y="286" class="m">GET /tables/{id}</text>
+          <text x="740" y="310" class="lbl">lastPeriod · timeUnit · discontinued</text>
+          <line x1="636" y1="277" x2="726" y2="277" class="wire" marker-end="url(#f1a)"/>
+          <text x="681" y="271" text-anchor="middle" class="lbl">søk</text>
+          <line x1="728" y1="293" x2="638" y2="293" class="wire" marker-end="url(#f1a)"/>
+          <text x="681" y="307" text-anchor="middle" class="lbl">treff</text>
+
+          <!-- Row: Steg 3 -->
+          <rect x="728" y="374" width="284" height="102" rx="5" class="box"/>
+          <text x="740" y="396" class="m">GET /tables/{id}/metadata</text>
+          <text x="740" y="416" class="m">GET /codelists/{id}</text>
+          <text x="740" y="436" class="m">GET /tables/{id}/defaultselection</text>
+          <rect x="966" y="425" width="38" height="16" rx="3" class="tagbox"/>
+          <text x="985" y="437" text-anchor="middle" class="tagtx">HTTP</text>
+          <text x="740" y="460" class="lbl">svar i json-stat2-format</text>
+          <line x1="636" y1="417" x2="726" y2="417" class="wire" marker-end="url(#f1a)"/>
+          <text x="681" y="411" text-anchor="middle" class="lbl">tabell-ID</text>
+          <line x1="728" y1="433" x2="638" y2="433" class="wire" marker-end="url(#f1a)"/>
+          <text x="681" y="447" text-anchor="middle" class="lbl">metadata</text>
+
+          <!-- Row: Steg 4 -->
+          <rect x="728" y="524" width="284" height="102" rx="5" class="box"/>
+          <text x="740" y="546" class="m">POST /tables/{id}/data</text>
+          <text x="740" y="566" class="m">GET /tables/{id}/data?valueCodes[…]</text>
+          <text x="740" y="586" class="m">GET /config</text>
+          <rect x="966" y="575" width="38" height="16" rx="3" class="tagbox"/>
+          <text x="985" y="587" text-anchor="middle" class="tagtx">HTTP</text>
+          <text x="740" y="610" class="lbl">maxDataCells (typisk 800 000)</text>
+          <line x1="636" y1="567" x2="726" y2="567" class="wire" marker-end="url(#f1a)"/>
+          <text x="681" y="561" text-anchor="middle" class="lbl">selection</text>
+          <line x1="728" y1="583" x2="639" y2="583" class="hot" marker-end="url(#f1h)"/>
+          <text x="681" y="599" text-anchor="middle" class="hot-t">json-stat2</text>
+
+          <!-- Row: Steg 6 -->
+          <rect x="728" y="840" width="284" height="70" rx="5" class="box"/>
+          <text x="740" y="862" class="m">POST /savedqueries</text>
+          <rect x="966" y="851" width="38" height="16" rx="3" class="tagbox"/>
+          <text x="985" y="863" text-anchor="middle" class="tagtx">HTTP</text>
+          <text x="740" y="882" class="m">GET /savedqueries/{id}/data</text>
+          <rect x="966" y="871" width="38" height="16" rx="3" class="tagbox"/>
+          <text x="985" y="883" text-anchor="middle" class="tagtx">HTTP</text>
+          <text x="740" y="902" class="lbl">virker også for gamle sq-ID-er</text>
+          <line x1="636" y1="865" x2="726" y2="865" class="wire" marker-end="url(#f1a)"/>
+          <text x="681" y="859" text-anchor="middle" class="lbl">selection</text>
+          <line x1="728" y1="881" x2="638" y2="881" class="wire" marker-end="url(#f1a)"/>
+          <text x="681" y="895" text-anchor="middle" class="lbl">ID + lenke</text>
+
+          <!-- API failure to fallback -->
+          <polyline points="870,920 870,990 638,990" class="wire" marker-end="url(#f1a)"/>
+          <text x="880" y="958" class="lbl">4xx · 5xx · nede</text>
+        
+</svg>

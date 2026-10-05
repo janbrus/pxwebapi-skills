@@ -13,8 +13,8 @@ For the request body see `query-syntax.md`; for the response see `json-stat2.md`
 
 | Segment | Meaning |
 |---|---|
-| `APINAME` | Root name of the API. Often `api`; SCB uses `OV0104`. A GET here returns an info page or 404. |
-| `APIVERSION` | `v1` on most installations, **`v0` at SSB**. A GET here returns an info page or 404. |
+| `APINAME` | Root name of the API. Often `api`; SCB uses `OV0104`. A GET here returns HTML, never JSON — a redirect, an info page or an error. |
+| `APIVERSION` | `v1` on most installations, **`v0` at SSB**. A GET here returns HTML, never JSON — an info page or an error, not always 404 (see `troubleshooting.md`). |
 | `LANGUAGE` | Language id. A GET lists the available databases. |
 | `DATABASEID` | The PC-Axis database. A GET lists its first level. |
 | `LEVEL1…LEVELN` | Zero or more subject levels. A GET lists children. |

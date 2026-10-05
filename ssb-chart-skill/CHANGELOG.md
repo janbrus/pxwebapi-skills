@@ -1,31 +1,24 @@
 # Endringslogg — ssb-chart
 
-Gjeldende versjon står i `SKILL.md`-frontmatter under `metadata.version`.
-Har din kopi ingen `metadata.version`, er den fra før 2026-08-27 — last ned ny.
+Hva som er annerledes for deg som bruker skillen, nyeste først. Gjeldende versjon står i `SKILL.md`-frontmatter under `metadata.version`; har din kopi ingen `metadata.version`, er den fra før 2026-08-27 — last ned ny.
+
+Hvorfor og hvordan endringene ble gjort, står i vedlikeholderens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/ssb-chart-skill/DEVLOG.md). Den ligger i repoet, ikke i zip-en.
+
+## 1.2 — 2026-10-02
+
+- **Rettet: foreløpige tall ble tegnet som hull.** `readValue` returnerte `null` for alle celler med `status`. En celle med datanote beholder tallet (09842 har `*` = foreløpig tall), og tegnes nå med merke. Det er `null` i `value` som gir hull.
+- **Nytt: oppskriften i `references/jsonstat-to-chart.md` er komplett.** `calculateFlatIndex` og `allCombinations` ble brukt, men var aldri definert. Nå er de skrevet ut.
+- Nytt: x-aksen følger rekkefølgen i spørringen (`category.index`). Skriv eksplisitte tidslister stigende.
 
 ## 1.1 — 2026-08-30
 
-- **Kryssreferanse til dataintegritet-grunnregelen** lagt inn i «Avhengigheter til datakilden»: visualiser aldri et tall som ikke er hentet fra API-et i samme samtale. Begrunnelsen er visualiseringsspesifikk — et diagram gir tall mer autoritet enn en tabell gjør, fordi en akse og en kildelinje får et husket tall til å se etterprøvbart ut. Kjerneprinsipp 2 og 6 dekker hvordan tallene skal *behandles*; grunnregelen dekker om du har lov til å tegne dem i det hele tatt
-- Bevisst **ingen egen integritetsliste** her. Kjerneprinsipp 2 og 6 dekker allerede presisjon, y-akse fra 0 og status-koder som hull, og prinsipp 6 er skarpere formulert enn tilsvarende punkt i `ssb-pxwebapi-v2`. Regelen eies av datakilde-skillen; denne skillen peker på den
-- Tillegg 2026-09-09, ingen versjonsendring: **skillen har fått `scripts/build_zip.sh` og en CI-workflow** (`.github/workflows/check-chart-zip.yaml`) som holder `ssb-chart-skill.zip` synkron med arbeidstreet. Zip-en ble bygd for hånd fram til nå; skriptet pakker de samme fire filgruppene under toppmappa `ssb-chart/` og globber `references/*.md`, så en ny referansefil ikke stille faller utenfor. Verifisert ved å pakke ut den håndbygde zip-en og den skriptbygde og `diff -r`-e dem: eneste forskjeller var dagens tekstendringer. README-en ber ikke lenger brukeren pakke mappen selv (det ville tatt med `CLAUDE.md`), og filtreet viser zip-en
-- Tillegg 2026-09-09, ingen versjonsendring: `source:` i frontmatter og `CLAUDE.md` pekte til det gamle repo-navnet `ssb-api-v2-examples` (redirecter til `pxwebapi-skills`); `README.md`-lenken til `ssb-pxwebapi-v2` pekte til en mappe som ikke finnes (`../ssb-pxwebapi-v2-skill/` er riktig); installasjonsblokken har fått symlenke-alternativ
-- Søskenskill: `ssb-pxwebapi-v2` 1.4.1 og `scb-pxwebapi-v2` 0.10.0 slippes samtidig. Ett funn derfra er verdt å merke seg for diagrammer: **`timeUnit` finnes kun på `/tables`-treffet, ikke i json-stat2-dokumentet** — så aksefrekvensen (måned/kvartal/år) må bæres med fra søkesteget, den kan ikke leses av datasettet
-
-- Tillegg 2026-09-23, ingen versjonsendring: **README omskrevet til den åpne [Agent Skills](https://agentskills.io)-standarden.** ChatGPT og Codex leser nå skills i samme format, så «Claude Skill» er byttet til «Agent Skill», ingressen nevner både Claude og ChatGPT, og installasjonsavsnittet har fått en egen blokk for `.agents/skills/` (etter OpenAIs dokumentasjon <https://developers.openai.com/codex/skills/>, lest 2026-09-23 — ikke testet her). Kun README; `SKILL.md` er uendret, men zip-en er bygd på nytt fordi README ligger i den
-- Tillegg 2026-09-24, ingen versjonsendring: **MIT-lisens.** Repoet har fått `LICENSE` (MIT, © 2026 Jan Bruusgaard) i roten, og `scripts/build_zip.sh` legger den i zip-en — MIT krever at lisensteksten følger med i kopier. README-ens lisensavsnitt skiller nå mellom skillen (MIT) og dataene den henter (byråets egen lisens). `CLAUDE.md` og CI-workflowens `paths:` er oppdatert. `SKILL.md`-frontmatter har fått `license: MIT. LICENSE has complete terms` (det valgfrie `license`-feltet i Agent Skills-spesifikasjonen); brødteksten er uendret
+- **Nytt: visualiser aldri et tall som ikke er hentet fra API-et i samme samtale.** Et diagram gir tall mer autoritet enn en tabell.
+- Verdt å vite: aksefrekvensen (måned, kvartal, år) må bæres med fra søkesteget, siden `timeUnit` ikke står i json-stat2-responsen.
+- Zip-en har MIT-`LICENSE`, og README beskriver installasjon i ChatGPT og Codex.
 
 ## 1.0 — 2026-08-27
 
-Første versjonerte utgave. Hovedendringen er at skillen nå skiller mellom to rendringsmål som ikke deler stilregler.
-
-- **Ny seksjon «Rendringsmål: widget vs. frittstående leveranse» i SKILL.md**, plassert før alle stilseksjonene: rendringsmål skal avgjøres *før* farger, typografi og layout velges. I **inline chat-widget** er kun data-blekket SSB-styrt — akser, rutenett, bakgrunn, tekst og mørk modus følger vertens tokens, tittel og kildelinje skrives i chat-svarteksten i stedet for inn i widgeten, og tabeller leveres som vanlig markdown. I **frittstående leveranse** (nedlastbar HTML, PDF, Excel) gjelder skillen uavkortet som før
-- **Fargesystemet omorganisert rundt data-blekk vs. chrome.** Rendringsmålet avgjøres av hva fargen brukes på, ikke av hvilken palett den kommer fra: alt som koder en verdi (linjer, søyler, punkter, kartflater, heatmap-celler) bruker SSB-farger i begge rendringsmål, mens chrome (akser, rutenett, bakgrunn, tekst, tooltip, kort) kun er SSB-styrt i frittstående leveranse. Gjelder også den sekvensielle rampen og den divergerende paletten: fyller de en kartflate er de data-blekk, toner de et kort er de chrome
-- **Rettet legend-posisjon fra `bottom` til `top`** i `references/color-system.md` (per diagram-type-reglene) og `references/format-guidelines.md` (Chart.js-eksempelet). Begge motsa SKILL.md-regelen «Plasser legend over eller til høyre — aldri under». En legend under diagrammet kolliderer med kildelinjen og blir lest som en del av den
-- **Tema-objektene delt** i `references/color-system.md`: Recharts-temaet er nå `SSB_SERIES` (data-blekk, begge rendringsmål) + `SSB_CHROME` (kun frittstående), satt sammen til `SSB_THEME` for frittstående bruk. Chart.js-seksjonen har fått en widget-variant som leser vertens tokens via `getComputedStyle` med nøytrale fallbacks, slår av `title`/`subtitle` og beholder seriefargene uendret. Et samlet tema brukt rått i en widget overstyrer vertens design og bryter mørk modus
-- **Scope-notat på hver seksjon i `references/format-guidelines.md`**, med en oversiktstabell øverst: tallformat og markdown-tabeller gjelder begge rendringsmål, React/HTML og Chart.js gjelder begge men med eksplisitte widget-avvik, mens PowerPoint, Excel og matplotlib kun gjelder frittstående leveranse. Matplotlib brenner lys bakgrunn inn i en bildefil og er derfor ikke et widget-format
-- **Mørk modus dekket i sjekklisten** og i kontrastadvarslene: `#ECFEED` (sekvensielt trinn 1), `#F0F8F9` (divergerende nøytralpol) og `#C3DCDC` (nedtoning) er lys-modus-farger som må kontrastsjekkes mot vertens bakgrunn i widget. Nedtoning av serier bør gjøres med opasitet på seriefargen i stedet
-- **Semantiske farger presisert:** på selve datamerket (søyle, pil, ikon) gjelder de begge rendringsmål; på tall og tekst i scorecards er kravet kontrast (≥4.5:1 mot vertens bakgrunn), ikke nøyaktig hex. `▲`/`▼` er obligatorisk uansett
-- `metadata.version` og `metadata.source` lagt inn i SKILL.md-frontmatter — https://github.com/janbrus/ssb-api-v2-examples/tree/main/ssb-chart-skill
-- Uendret i denne versjonen: den kategoriske paletten og rekkefølgen, maks 5 linjer i linjediagram (mot 6–7 kategorier ellers), y-akse fra 0 på søyler, status-koder som visuelle hull, desimaler lest per ContentsCode fra `category.unit`, og den obligatoriske flerspråklige kildelinjen
-- ZIP-en pakker nå alt under én toppmappe, `ssb-chart/`, i stedet for å legge filene på rot — samme struktur som `ssb-pxwebapi-v2`. `CHANGELOG.md` følger med i pakken; `CLAUDE.md` (vedlikeholdsveiledning) gjør det ikke
-- Ingen søskenskill berørt: det finnes ingen SCB- eller generisk motpart til denne skillen, siden SSB-paletten og «Kilde: SSB»-linjen er SSB-spesifikke by design
+- **Nytt: rendringsmål.** Skillen skiller mellom inline chat-widget og frittstående leveranse. I en widget styrer SSB bare seriefargene; akser, bakgrunn, tekst og mørk modus følger verten, og tittel og kildelinje står i chat-teksten.
+- **Rettet: legend over eller til høyre, aldri under.** To referansefiler hadde `bottom`.
+- Nytt: tema-objektene er delt i seriefarger og chrome, og hver seksjon i `references/format-guidelines.md` sier hvilket rendringsmål den gjelder. Mørk modus er med i sjekklisten.
+- Zip-en har én toppmappe, `ssb-chart/`.

@@ -43,6 +43,7 @@ scripts/build_zip.sh /tmp/fresh.zip   # write elsewhere, e.g. to diff against th
   - `search-syntax.md` — Lucene query parser reference for `/tables?query=`, plus the default-`pageSize`-is-20 trap. Swedish term choice and the non-Lucene parameters (`pastDays`, `includeDiscontinued`) belong in `SKILL.md` Steg 2, not here
 
   The SCB skill is still sparser than `ssb-pxwebapi-v2`: codelist syntax, filter expressions, output formats and troubleshooting live inline in `SKILL.md`, each stated once. There is no `common-tables.md` — SCB table IDs (`TAB6471`, `TAB6596`) appear only in the worked examples.
+- `CHANGELOG.md` and `DEVLOG.md` — two logs for two readers, both in Swedish. `CHANGELOG.md` ships in the zip and tells **users** what is different in the answers: a few bullets per version, no sweep counts, no sibling checks. `DEVLOG.md` is the **maintainer's** record and is not shipped: what changed, what was verified live and when, and every sibling-check outcome. It is the old `CHANGELOG.md`, split off on 2026-10-05. Every version appears in both. The `CHANGELOG.md` header links to `DEVLOG.md` by full GitHub URL, because a relative link is dead inside the zip.
 - `evals/eval-scenarios.md` — maintainer-internal behavioural fixtures: typical user questions with the expected table ID and endpoint sequence, success criteria stated as *form*, never as a concrete figure. Run via the `skill-creator` skill after larger edits — as actual runs with tools, not read-throughs. Catches *routing* regressions (TAB5737 instead of TAB6596, TAB638 instead of TAB6471); the checker catches *factual* ones. The run log at the bottom of that file records what each scenario found — keep appending to it.
 - `scripts/`, `evals/`, `.github/` (repo root) — repo-internal tooling, deliberately excluded from the distribution.
 
@@ -64,12 +65,12 @@ scripts/build_zip.sh /tmp/fresh.zip   # write elsewhere, e.g. to diff against th
 ### Release checklist (every content change)
 
 1. Bump `metadata.version` in `SKILL.md` frontmatter (semver; stay below 1.0.0 while the skill is marked BETA). A version that isn't bumped lies about copies being current.
-2. Add a `CHANGELOG.md` entry (Swedish) — what changed, what was verified live, on what date.
+2. Add a `DEVLOG.md` entry (Swedish) — what changed, what was verified live, on what date. Then add the user entry in `CHANGELOG.md` (Swedish), derived from it: what is different in the answers, in a few bullets, with corrections marked **Rättat:**. Same version and date in both files.
 3. Rebuild the zip with `scripts/build_zip.sh` — the `zip-sync` CI job fails otherwise.
 4. If you added a file to `references/`, update the file tree in `README.md` too (hand-maintained; `build_zip.sh` globs `references/*.md` so the file ships either way).
-5. If a factual claim changed, do the **sibling check** below and record its outcome in `CHANGELOG.md`, including when the answer is "does not apply".
+5. If a factual claim changed, do the **sibling check** below and record its outcome in `DEVLOG.md`, including when the answer is "does not apply". It stays out of `CHANGELOG.md`, which is about this skill's answers.
 
-**The zip and the README file tree contain user-facing files only**: `SKILL.md`, `README.md`, `CHANGELOG.md`, `references/`, plus `LICENSE` in the zip. Never add `scripts/`, `evals/` or `CLAUDE.md` to either.
+**The zip and the README file tree contain user-facing files only**: `SKILL.md`, `README.md`, `CHANGELOG.md`, `references/`, plus `LICENSE` in the zip. Never add `scripts/`, `evals/`, `CLAUDE.md` or `DEVLOG.md` to either.
 
 `LICENSE` (MIT) lives in the **repo root** and covers the whole repo; `build_zip.sh` copies it into the package because MIT requires the notice to travel with every copy, and the zip is the copy that gets handed out. Don't add a per-skill `LICENSE` — edit the root one, and rebuild **all six** zips when it changes (every zip-sync workflow has `LICENSE` in its `paths:` filter). `SKILL.md` frontmatter carries `license: MIT. LICENSE has complete terms` (the optional Agent Skills field — keep it short, it names the file beside `SKILL.md` in the zip); never put licence text in the body, which is loaded on every trigger.
 

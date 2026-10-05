@@ -82,7 +82,7 @@ Cell count = product of number of values per variable. Solution: limit time with
 
 ### Special values in data
 
-`status` maps an index in `value` to a symbol and the value is `null` — symbols and their meanings are in `json-stat2.md`. They vary per agency and per PX file; never treat one as zero.
+`status` maps an index in `value` to a symbol. Read the two separately: a `null` value is a missing figure and the symbol says why, but a status on a cell that **has** a number is a flag (provisional, estimated, a cell note) — show the number with it, do not blank it. Symbols and the evidence are in `json-stat2.md`. They vary per agency and per PX file; never treat one as zero, and treat `-` (PX's nil symbol) as something to show, not to compute with.
 
 ### The response is not JSON
 

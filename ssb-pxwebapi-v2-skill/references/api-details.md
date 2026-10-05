@@ -26,7 +26,7 @@ Praktisk driftsinformasjon for SSBs PxWebApi v2. For json-stat2-formatet (Datase
 | SSBs brukerveiledning (norsk / engelsk)   | https://www.ssb.no/api/pxwebapiv2 · https://www.ssb.no/en/api/pxwebapiv2 |
 | OpenAPI-spesifikasjon (interaktiv)        | https://data.ssb.no/api/pxwebapi/v2/index.html                       |
 | PxApiSpecs (YAML, felles for PxWeb-miljøet) | https://github.com/PxTools/PxApiSpecs/blob/master/PxAPI-2.yml      |
-| PxTools' generelle brukerguide            | https://www.pxtools.net/PxWebApi/documentation/user-guide/           |
+| PxTools' generelle brukerguide            | https://www.pxtools.net/PxWebApi/documentation/user-guide/ · Markdown-kilden: https://raw.githubusercontent.com/PxTools/pxtools.github.io/main/docs/PxWebApi/documentation/user-guide.md |
 | Kodeeksempler (Python, R, JS) og skillene | https://github.com/janbrus/pxwebapi-skills (SSBs veiledning lenker til det gamle navnet `ssb-api-v2-examples`, som redirecter hit) |
 | Spørsmål om tabeller eller API-et         | statistikkbanken@ssb.no                                              |
 | Feil og forslag til API-et                | https://github.com/PxTools/PxApiSpecs · https://github.com/PxTools/PxWebApi |
@@ -60,7 +60,7 @@ Komplement til `/tables?pastDays=…` når du vil overvåke publiseringer uten �
 | `https://www.ssb.no/rss/statbank/{kortnavn}`        | Siste 90 dagers oppdaterte tabeller for ett statistikk-kortnavn  |
 | `https://www.ssb.no/rss/statkal`                    | Kommende statistikkpubliseringer (publiseringskalender)          |
 
-`{kortnavn}` er statistikkens kortnavn — samme som 3. nivå i `paths` fra `/tables`-respons, siste ledd i `ssb.no/<kortnavn>`-URL-er, og verdien av `<ssbrss:shortname>`-elementet i RSS-itemene (f.eks. `arblonn`, `kpi`).
+`{kortnavn}` er statistikkens kortnavn — samme som `extension.metaid` i metadata og som regel 3. nivå i `paths` fra `/tables`-respons (krysslistede tabeller: se `klass-vardok.md`), siste ledd i `ssb.no/<kortnavn>`-URL-er, og verdien av `<ssbrss:shortname>`-elementet i RSS-itemene (f.eks. `arblonn`, `kpi`).
 
 Bruksområder:
 

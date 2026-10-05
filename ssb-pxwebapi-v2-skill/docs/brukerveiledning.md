@@ -2,16 +2,16 @@
 
 Denne veiledningen forklarer hvordan du bruker Claude-skillen for SSBs Statistikkbank.
 
-Skillen vedlikeholdes på <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>; denne veiledningen ligger i `docs/` der. Denne veiledningen dekker **v1.6.0**. Sjekk repoet for nyere versjon og endringslogg.
+Skillen vedlikeholdes på <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>; denne veiledningen ligger i `docs/` der. Denne veiledningen dekker **v1.6.1**. Sjekk repoet for nyere versjon og endringslogg.
 
 ## Forutsetninger
 
 Du trenger:
 
 1. **Claude Pro, Max, Team eller Enterprise** — skills krever betalt plan
-2. **Skillen installert** — lastet opp som ZIP under Settings > Capabilities > Skills
+2. **Skillen installert** — lastet opp som ZIP under Settings > Skills
 3. **Code execution aktivert** — under Settings > Capabilities
-4. **`*.ssb.no` tillatt i nettverksinnstillingene** — se under
+4. **`*.ssb.no` tillatt i nettverksinnstillingene** (domain allowlist) se under
 
 Valgfritt, men anbefalt:
 
@@ -70,6 +70,10 @@ Når du spør «Hvor mange bor i Oslo?», skjer dette:
 
 Steg 3 er grunnen til at skillen bruker noen sekunder ekstra. Det er også grunnen til at den treffer riktig kode.
 
+![Arbeidsflyten i ssb-pxwebapi-v2: Steg 1–6, API-kallene i hvert steg og ruting til andre skills](skillkart-arbeidsflyt.svg)
+
+Diagrammet viser de samme stegene med API-kallene i hvert steg. Det viser også når skillen sender deg videre til en annen skill, og at tallene i svaret bare kommer fra datauttrekket.
+
 ### Uten MCP-server
 
 Skillen fungerer også uten MCP-server, men da kan ikke Claude hente data direkte. I stedet vil Claude:
@@ -90,7 +94,7 @@ Skillen fungerer også uten MCP-server, men da kan ikke Claude hente data direkt
 
 ### Med tidsperiode
 
-- «Vis KPI siste 5 år, månedlig»
+- «Vis måndelig KPI siste 5 år»
 - «Befolkningsutviklingen i Bergen fra 2010»
 - «Boligprisindeksen siste 20 kvartaler»
 
@@ -120,7 +124,7 @@ KOSTRA-tabellene har egen struktur, egne regionkoder og egen publiseringsrytme. 
 - «Hvor mange konkurser var det i IT-bransjen forrige kvartal?»
 - «Antall aksjeselskaper per næring»
 
-Merk at SSB er i overgang fra SN2007 til SN2025. Skillen sier hvilken standard tallene bygger på, og skjøter aldri de to på næringsnivå.
+Merk at SSB er i overgang fra SN2007 til ny næringsgruppering SN2025. Skillen sier hvilken standard tallene bygger på, og skjøter aldri de to på næringsnivå.
 
 ### Avanserte spørsmål
 

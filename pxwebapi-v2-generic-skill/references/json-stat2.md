@@ -19,7 +19,7 @@ In v2, **both** `/tables/{id}/metadata` and `/tables/{id}/data` return a json-st
   "id": ["Region", "ContentsCode", "Tid"],
   "size": [1, 1, 5],
   "dimension": { … },
-  "value": [100, 200, 300, 400, 500],
+  "value": [100, 200, 300, null, 500],
   "status": { "3": ".." },
   "role": { "time": ["Tid"], "geo": ["Region"], "metric": ["ContentsCode"] },
   "extension": { "px": { … }, "contact": [ … ] },
@@ -29,17 +29,42 @@ In v2, **both** `/tables/{id}/metadata` and `/tables/{id}/data` return a json-st
 
 ### Key elements
 
-- **`id`** — variable names in order.
+- **`id`** — variable names in order. This order governs all indexing: iterate `id`, never `Object.keys(dimension)` — the two coincide at SSB, SCB, Latvia and Eurostat (verified 2026-10-02), but the specification does not promise it.
 - **`size`** — number of values per variable, same order as `id`.
-- **`value`** — flat array of all data values in **row-major order**: the last dimension in `id` varies fastest, the first varies slowest (the C/NumPy convention). For `size = [s₀, s₁, …, sₙ]` and category indices `(i₀, i₁, …, iₙ)`, the flat index is `i₀·(s₁·s₂·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ`. Category positions come from `dimension.{var}.category.index`. **Use the `id` of the response you are indexing** — a default-selection response can order dimensions differently from the metadata (Latvia IRS010m: metadata `["ContentsCode", "TIME"]`, default data `["TIME", "ContentsCode"]`).
+- **`value`** — flat array of all data values in **row-major order**: the last dimension in `id` varies fastest, the first varies slowest (the C/NumPy convention). For `size = [s₀, s₁, …, sₙ]` and category indices `(i₀, i₁, …, iₙ)`, the flat index is `i₀·(s₁·s₂·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ` — each position times its dimension's *stride*, the product of the sizes of every later dimension. Category positions come from `dimension.{var}.category.index`. Worked example below. **Use the `id` of the response you are indexing** — a default-selection response can order dimensions differently from the metadata (Latvia IRS010m: metadata `["ContentsCode", "TIME"]`, default data `["TIME", "ContentsCode"]`).
 - **`dimension`** — per variable: codes (`category.index`), labels (`category.label`), units (`category.unit`), per-value notes (`category.note`), and `extension`.
 - **`role`** — which variables are `time`, `geo` and `metric`. **Start your analysis here** (see below).
-- **`status`** — special values, keyed by index into `value`; the corresponding `value` entry is `null`.
+- **`status`** — flags on individual cells, keyed by index into `value`. Read it **alongside** `value`, not instead of it: a missing-value symbol comes with a `null`, but a status can also flag a figure that exists (provisional, estimated, a cell note). See "Status codes".
 - **`note`** — an **array** of table-level caveats. Read it before interpreting a series: boundary changes, base-year changes and coverage gaps are recorded here. See "Notes" below — some of them are mandatory to display.
 - **`extension`** — installation-specific metadata, at two levels. See below.
 - **`link`** — classification and definition references. See below.
 
 Older serializers may omit `"version": "2.0"`. The rest of the structure is unaffected.
+
+### Worked example: two dimensions that vary
+
+`id = ["Region", "ContentsCode", "Tid"]`, `size = [2, 1, 3]` — two regions, one measure, three years. Strides: `Region` 1·3 = 3, `ContentsCode` 3, `Tid` 1.
+
+| Position in `value` | `Region` | `Tid` | Offset |
+|---|---|---|---|
+| 0, 1, 2 | index 0 | index 0, 1, 2 | `0·3 + 0·3 + t·1` |
+| 3, 4, 5 | index 1 | index 0, 1, 2 | `1·3 + 0·3 + t·1` |
+
+The second region's third year is `1·3 + 0·3 + 2·1 = 5`, so `value[5]`. A dimension of size 1 still has a stride, but always contributes 0. Positions follow the order of the request, not a sorted one: `valueCodes[Tid]=2026,2024,2025` returns `{"2026": 0, "2024": 1, "2025": 2}` at SSB, and SCB does the same (verified 2026-10-02; Latvia not tested). Always look the position up in `category.index`. To test an implementation, use https://json-stat.org/samples/order.json, where every value is a string naming its own position (`A2B1C3`) and `category.index` is in array form. Position 11 in that file reads `A1B1C4` where it should read `A2B1C4` (a typo, checked 2026-10-02), so correct code "fails" exactly there.
+
+---
+
+## Shape variants
+
+The json-stat 2.0 specification allows several shapes for the same information. PxWebApi always sends the first column; other producers use the second, and code written against PxWeb alone breaks on them:
+
+| Field | PxWebApi (SSB, SCB, Latvia) | Also allowed by the specification |
+|---|---|---|
+| `value` | array | object keyed by position — sparse, so a missing key means `null` (Eurostat) |
+| `status` | object keyed by position, or absent | a single string applying to every cell, or an array parallel to `value` (Eurostat uses the object form too) |
+| `category.index` | object `{code: position}` | array `[code0, code1, …]`; omitted when the dimension has only one category |
+
+Verified 2026-10-02 on 88 SSB, 13 SCB and 12 Latvian tables, and on Eurostat `nama_10_gdp` and `demo_pjan`. Eurostat's sparseness is real: `nama_10_gdp` for Albania, Montenegro and Norway 1990–1999 has 30 cells and 15 keys. Read `value[String(offset)]` there, and treat a missing key as `null`.
 
 ---
 
@@ -161,15 +186,21 @@ Mandatory notes are how an agency warns that a figure needs a caveat — a chang
 
 ## Status codes
 
-`status` maps an index in `value` to a symbol; the corresponding `value` entry is `null`.
+`value` and `status` are two parallel channels. Read them separately:
+
+- **`value` is `null`** — the figure does not exist; `status` usually says why (table below). Show the symbol, never a zero.
+- **`value` is a number and `status` is set** — the figure exists and carries a flag: provisional, estimated, or a note on that cell. Show the number **with** the flag. Dropping the flag hides a caveat; blanking the number discards data.
+
+PxWebApi's serializer produces both (`PxTools/PCAxis.Serializers`, `JsonStat2Serializer.GetValueAndStatus`): a PX data symbol (`DATASYMBOL1`–`6`, the sum symbol, `DATASYMBOLNIL`) becomes `null` plus the symbol, while a cell with a data note (`DATANOTECELL`) keeps its number and gets the note as its status. Observed 2026-10-02 in a sweep of 88 SSB, 13 SCB and 12 Latvian tables: one table flags numbers — SSB 09842 marks 2023–2024 with `"*"`, explained in the table's `note` as `* = Foreløpig tall` (provisional). Every other status sat on a `null`. Eurostat flags figures the same way (`nama_10_gdp`: `"p"` on cells that have values).
 
 | Symbol | Meaning |
 |---|---|
 | `.` | Not applicable — the category did not exist when the data was collected |
 | `..` | Data not available — not yet in the database |
 | `:` | Confidential — withheld to avoid identifying a person or business |
+| `-` | PX's nil symbol (`DATASYMBOLNIL`, value `null`). Its use varies, so show it and do not compute with it |
 
-Exact symbols vary by installation, because they come from the source PX file's `DATASYMBOL1`–`6` keywords and each file may override the defaults. Check the response. **Never treat any of them as zero**, and never silently drop the row.
+Exact symbols vary by installation, because they come from the source PX file's `DATASYMBOL1`–`6` keywords and each file may override the defaults (Latvia sends `…` where SSB sends `..`). Check the response, and look for a key to the symbols in the table's `note` — PxWeb has no field for it, while Eurostat explains its symbols in `extension.status.label`. **Never treat any symbol as zero**, never silently drop the row, and never filter `null`s out of `value` before indexing: a `null` holds its position, and removing it shifts every later cell.
 
 ---
 
@@ -205,3 +236,4 @@ Client libraries exist for JavaScript, Python, R, Java and Julia — see https:/
 - **R** — `rjstat`. SSB additionally publishes `PxWebApiData` on CRAN, which reads PxWeb data from Statistics Norway, Statistics Sweden and Statistics Finland. It supports **both API versions** (1.9.0, 2026-02-02) and ships a separate vignette for each. The v2 interface is snake_case — `api_data()`, `get_api_data()`, `query_url()`, plus `meta_frames()`, `meta_code_list()` and `meta_data()`, each with `_1`/`_2`/`_12` variants returning labels, codes or both — against v1's camelCase `ApiData()`.
 - **Node.js** — the json-stat Toolkit's command-line converters (`jsonstat2csv`, `csv2jsonstat`, `jsonstat2arrow`, `sdmx2jsonstat`, …). `jsonstat2csv` gives better control over separators and decimal characters than the API's own CSV output.
 - **Browsing** — the json-stat explorer at https://json-stat.com/explorer, plus a JSON viewer extension (built into Firefox; jsonview.com for Chromium).
+- **Reading guide** — Idescat's JSON-stat skill (https://www.idescat.cat/dev/api/taules/jsonstat/SKILL.md, CC BY 4.0): a short, provider-neutral guide to reading a dataset.

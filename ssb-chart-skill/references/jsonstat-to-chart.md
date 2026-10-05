@@ -32,27 +32,56 @@ const xLabels = timeCodes.map(code => timeDimObj.category.label?.[code] || code)
 
 **Hvorfor ikke alfabetisk:** `"2020M2"` og `"2020M10"` sorterer feil alfabetisk (M10 før M2). SSB returnerer alltid riktig index — bruk den.
 
+**Men index følger rekkefølgen i *spørringen*:** API-et sorterer ikke. `valueCodes[Tid]=2026,2024,2025` gir x-aksen 2026, 2024, 2025, mens `top(n)` og `from(x)` gir stigende rekkefølge (verifisert 2026-10-02). Skriver du en eksplisitt liste med tidskoder, skriv den stigende.
+
 ---
 
 ## Steg 3 — Bygg datasets (serier) fra øvrige dimensjoner
 
-Hver kombinasjon av non-time dimensjonsverdier blir én serie (linje). Beregn flat-index inn i `data.value`-arrayet med formelen i `json-stat2.md` (row-major, `id` + `size` + `category.index`).
+Hver kombinasjon av non-time dimensjonsverdier blir én serie (linje). Beregn flat-index inn i `data.value`-arrayet med formelen i `json-stat2.md` (row-major, `id` + `size` + `category.index`): hver posisjon ganges med dimensjonens stride, produktet av `size` for alle senere dimensjoner i `data.id`. Iterer alltid over `data.id`, aldri over `Object.keys(data.dimension)`.
 
 ```js
-const nonTimeDims = data.id.filter(d => d !== timeDim);
+// Kodene i en dimensjon, i category.index-rekkefølge (objektform hos SSB)
+function codesInOrder(data, dim) {
+  const idx = data.dimension[dim].category.index;
+  return Object.keys(idx).sort((a, b) => idx[a] - idx[b]);
+}
 
-// For hver kombinasjon av non-time verdier (kartesisk produkt):
+// codes: én kode per dimensjon, i samme rekkefølge som data.id
+function calculateFlatIndex(data, codes) {
+  let flatIdx = 0, stride = 1;
+  for (let k = data.id.length - 1; k >= 0; k--) {   // siste dimensjon varierer raskest
+    flatIdx += data.dimension[data.id[k]].category.index[codes[k]] * stride;
+    stride *= data.size[k];
+  }
+  return flatIdx;
+}
+
+// Kartesisk produkt av dimensjonene, i category.index-rekkefølge
+function* allCombinations(dims, data) {
+  if (dims.length === 0) { yield { codes: [] }; return; }
+  const [first, ...rest] = dims;
+  for (const code of codesInOrder(data, first))
+    for (const tail of allCombinations(rest, data)) yield { codes: [code, ...tail.codes] };
+}
+
+const nonTimeDims = data.id.filter(d => d !== timeDim);
+const datasets = [];
+
 for (const combo of allCombinations(nonTimeDims, data)) {
-  const values = timeCodes.map(timeCode => {
-    const timeIdx = timeDimObj.category.index[timeCode];
-    // Kombinér combo-indekser med timeIdx i samme rekkefølge som data.id,
-    // og beregn flat-index. Se json-stat2.md.
-    const flatIdx = calculateFlatIndex(/* … */);
-    return readValue(data, flatIdx);  // se Steg 5 for status-håndtering
-  });
-  datasets.push({ label: /* steg 4 */, data: values });
+  const values = [], flags = [];
+  for (const timeCode of timeCodes) {
+    // Kodene i data.id-rekkefølge: tidskoden der tidsdimensjonen står, ellers fra combo
+    const codes = data.id.map(d => d === timeDim ? timeCode : combo.codes[nonTimeDims.indexOf(d)]);
+    const flatIdx = calculateFlatIndex(data, codes);
+    values.push(readValue(data, flatIdx));   // Steg 5: null → hull
+    flags.push(readStatus(data, flatIdx));   // Steg 5: status på et tall → flagg
+  }
+  datasets.push({ label: /* steg 4 */, data: values, flags });
 }
 ```
+
+Verifisert 2026-10-02 i node mot 07459 (2 regioner × 3 år, sammenlignet med samme uttrekk som csv) og 09842 (flagg på foreløpige tall).
 
 ---
 
@@ -75,21 +104,27 @@ const seriesLabel = labelParts.join(' · ');
 
 ---
 
-## Steg 5 — Status-koder rendres som hull
+## Steg 5 — Status: hull eller flagg
 
-`data.status` markerer celler med spesielle koder (`"."`, `".."`, `":"` — se `json-stat2.md` for full liste). I diagrammet skal disse vises som hull, ikke som null/0:
+`data.value` og `data.status` er to kanaler. Les dem hver for seg:
+
+- **`value` er `null`** → hull. Status-koden (`"."`, `".."`, `":"`, `"-"` — se `json-stat2.md` og `troubleshooting.md` for full liste) forklarer hvorfor. Vis aldri hullet som 0.
+- **`value` har tall og `status` er satt** → flagg, ikke hull. 09842 (BNP per innbygger) har `"*"` = foreløpig tall på 2023–2024, og tallene står i `value`. Tegn punktet og merk det.
 
 ```js
 function readValue(data, flatIdx) {
-  if (data.status && data.status[String(flatIdx)] != null) return null;
   const v = data.value[flatIdx];
-  return (v == null || !Number.isFinite(v)) ? null : v;
+  return (v == null || !Number.isFinite(v)) ? null : v;   // hull bare når tallet mangler
+}
+
+function readStatus(data, flatIdx) {
+  return data.status?.[String(flatIdx)] ?? null;          // flagg, f.eks. "*" = foreløpig tall
 }
 ```
 
-I Chart.js: sett `spanGaps: false` på datasettet slik at `null` faktisk lager hull i stedet for å trekke linjer mellom kjente punkter.
+I Chart.js: sett `spanGaps: false` på datasettet slik at `null` faktisk lager hull i stedet for å trekke linjer mellom kjente punkter. Flaggene ligger i `dataset.flags` (Steg 3). Bruk dem i en scriptable `pointStyle` (f.eks. hult punkt der `ctx.dataset.flags[ctx.dataIndex]` er satt) og i tooltip-callbacken, og forklar tegnet i en fotnote under diagrammet. SSB forklarer tegnet i tabellens `note` (09842: «* = Foreløpig tall»).
 
-**Hvorfor:** Statistisk integritet. Antall innbyggere kan ikke interpoleres — at vi *ikke vet* tallet er en observasjon i seg selv. Aldri drop, interpoler, eller gjenta nabopunkter for å «fylle» dataene.
+**Hvorfor:** Statistisk integritet. Antall innbyggere kan ikke interpoleres — at vi *ikke vet* tallet er en observasjon i seg selv. Aldri drop, interpoler, eller gjenta nabopunkter for å «fylle» dataene. Det motsatte er like galt: å blanke et foreløpig tall fordi cellen har en status, kaster et publisert tall. Tidligere versjoner av `readValue` gjorde nettopp det.
 
 ---
 
@@ -108,7 +143,7 @@ const decimals = data.dimension[metricDim]?.category.unit?.[metricCode]?.decimal
 Lagre `decimals` på datasettet (custom-property — Chart.js bevarer ukjente felter):
 
 ```js
-datasets.push({ label, data: values, decimals });
+datasets.push({ label, data: values, flags, decimals });
 ```
 
 Bruk det i tooltip-callback og som y-akse-presisjon:

@@ -30,15 +30,19 @@ import urllib.request
 import urllib.error
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from typing import Any
 
 API = "https://data.ssb.no/api/pxwebapi/v2/tables/{id}?lang=no"
 
 # Rows look like: | 07459 | Title ... | Årlig | ... |
 ROW_RE = re.compile(r"^\|\s*(\d{4,6})\s*\|\s*(.+?)\s*\|\s*([^|]+?)\s*\|")
 
+Row = tuple[int, str, str, str]  # (lineno, tid, title, freq)
+Result = tuple[str, int, list[str], list[str], dict[str, Any]]  # (tid, lineno, errors, warnings, info)
 
-def parse_md(path: Path):
-    rows = []
+
+def parse_md(path: Path) -> list[Row]:
+    rows: list[Row] = []
     for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         m = ROW_RE.match(line)
         if not m:
@@ -48,7 +52,7 @@ def parse_md(path: Path):
     return rows
 
 
-def fetch(tid: str, retries: int = 4) -> dict:
+def fetch(tid: str, retries: int = 4) -> dict[str, Any]:
     req = urllib.request.Request(
         API.format(id=tid), headers={"Accept": "application/json"}
     )
@@ -56,7 +60,8 @@ def fetch(tid: str, retries: int = 4) -> dict:
     for attempt in range(retries):
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
-                return json.load(r)
+                data: dict[str, Any] = json.load(r)
+                return data
         except urllib.error.HTTPError as e:
             if e.code in (429, 503) and attempt < retries - 1:
                 wait = float(e.headers.get("Retry-After") or delay)
@@ -100,8 +105,10 @@ def staleness_warning(time_unit: str, last_period: str) -> str | None:
     return None
 
 
-def check_row(lineno, tid, md_title, md_freq):
-    errors, warnings, info = [], [], {}
+def check_row(lineno: int, tid: str, md_title: str, md_freq: str) -> Result:
+    errors: list[str] = []
+    warnings: list[str] = []
+    info: dict[str, Any] = {}
     try:
         data = fetch(tid)
     except urllib.error.HTTPError as e:
@@ -139,7 +146,7 @@ def check_row(lineno, tid, md_title, md_freq):
     return tid, lineno, errors, warnings, info
 
 
-def main():
+def main() -> int:
     ap = argparse.ArgumentParser()
     here = Path(__file__).resolve().parent.parent
     ap.add_argument("--md", default=str(here / "references" / "common-tables.md"))
@@ -157,7 +164,7 @@ def main():
 
     total_errors = 0
     total_warnings = 0
-    results = []
+    results: list[Result] = []
     if args.workers <= 1:
         for r in rows:
             results.append(check_row(*r))

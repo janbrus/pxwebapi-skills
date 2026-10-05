@@ -29,6 +29,17 @@ Kolonnenavn avhenger av hvor mange statistikkvariabler uttrekket har:
 
 Parquet bruker alltid koder, aldri tekst: `outputFormatParams=UseCodesAndTexts` gir HTTP 400 mot dette formatet.
 
+**Dimensjonskolonnene heter etter variabelens *label* på valgt `lang`, ikke etter koden.** 04475 med `lang=en` gir kolonnene `type of beverage` og `quarter`, og med `lang=no` gir den `type drikkevare` og `kvartal`, ikke `Alkohol` og `Tid`. Verdiene i kolonnene er fortsatt koder (`03`, `2025K1`). Statistikkvariabel-kolonnene bruker koden (`ContentsCode_Areal`). Et skript som leser kolonner ved navn, må altså bruke samme `lang` hver gang.
+
+**`timestamp` er periodens startdato:** `2025K2` → `2025-04-01`, `2025` → `2025-01-01`.
+
+**Formatet er beta hos PxTools** («We may have to change the format»), så kolonnekontrakten over kan endre seg. Åpne feil per 2026-10-02:
+- [PxWebApi #595](https://github.com/PxTools/PxWebApi/issues/595): HTTP 500 på tabeller med egendefinert tidsskala (`timeUnit: Other`, for eksempel den avsluttede 07314). Fall tilbake til `json-stat2` eller `csv`.
+- [#596](https://github.com/PxTools/PxWebApi/issues/596): filen har ingen desimalmetadata. Ta antall desimaler fra `unit.decimals` i metadata.
+- [#597](https://github.com/PxTools/PxWebApi/issues/597): lastes ikke i Onyxia Data Explorer.
+
+Feilen med rekkefølgen ved flere statistikkvariabler ([#511](https://github.com/PxTools/PxWebApi/issues/511)) ble lukket 2026-04-22. 14216 med `Areal,Bosatte` gir nå én rad per år, med riktige tall også når årene er bestilt synkende. Verifisert med pyarrow 2026-10-02.
+
 ## OutputFormatParams (kan kombineres)
 
 Gjelder kun `csv`, `html` og `xlsx`. Mot `json-stat2` gir enhver `outputFormatParams` HTTP 400 (verifisert 2026-09-09), og mot `parquet` gir `UseCodesAndTexts` 400 (se over).

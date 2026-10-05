@@ -14,7 +14,7 @@ SSB-tilpassede regler for hvert leveranseformat.
 | Python / Matplotlib      | Kun frittstående leveranse                                      |
 | Markdown-tabeller        | Begge — og eneste tillatte tabellform i widget                  |
 
-Uavhengig av rendringsmål: seriefarger fra SSB-paletten, `beginAtZero` på søyler, status-koder som hull og desimaler fra data er alltid påkrevd.
+Uavhengig av rendringsmål: seriefarger fra SSB-paletten, `beginAtZero` på søyler, manglende verdier som hull (og flaggede tall som merkede punkter) og desimaler fra data er alltid påkrevd.
 
 ---
 
@@ -134,7 +134,7 @@ new Chart(canvas, {
 });
 ```
 
-**Status-koder som hull:** `spanGaps: false` på hver dataset slik at `null`-verdier (fra status-koder, se `jsonstat-to-chart.md`) faktisk vises som hull, ikke som rette linjer mellom kjente punkter.
+**Status-koder som hull:** `spanGaps: false` på hver dataset slik at `null`-verdier (fra status-koder, se `jsonstat-to-chart.md`) faktisk vises som hull, ikke som rette linjer mellom kjente punkter. En status på et tall (f.eks. `*` = foreløpig) er et flagg, ikke et hull — se `jsonstat-to-chart.md` Steg 5.
 
 **Embedded i en eksisterende app:** Hvis appen allerede har sin egen typografi (header, knapper), behold appens fonter i diagrammet i stedet for å overstyre med Roboto Condensed/Open Sans. SSB-paletten, kildelinjen og beginAtZero-reglene er fortsatt obligatoriske; fontvalg er fleksibelt.
 

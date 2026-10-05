@@ -1,0 +1,56 @@
+# Statistics Norway (SSB) — StatBank API (PxWebApi v2)
+
+> Official statistics for Norway from Statistics Norway (Statistisk sentralbyrå, SSB). The StatBank (Statistikkbanken) API at https://data.ssb.no/api/pxwebapi/v2 is open, needs no key, and serves several thousand tables on population, prices (CPI), labour, wages, national accounts, trade, education, health, housing and municipal finances (KOSTRA). Data are licensed CC BY 4.0. Every endpoint takes `lang=no` or `lang=en`; the default output format is json-stat2.
+
+Draft proposal, not published by SSB. Condensed from the `ssb-pxwebapi-v2` agent skill (https://github.com/janbrus/pxwebapi-skills), where each fact below is checked against the live API.
+
+Rules for agents using this API:
+
+- Never state a figure you have not fetched from the API in the current session. Do not fill gaps from memory, other sources, interpolation or extrapolation. If the API fails or the table is not found, say so.
+- Workflow: search (`GET /tables?query=`) → inspect metadata (`GET /tables/{id}/metadata`) → fetch data (`GET` or `POST /tables/{id}/data`). Do not skip the metadata step: variable codes and value codes must be read from metadata, never guessed. Table IDs are permanent; codes and codelists are not.
+- Search with Norwegian subject terms, even when answering in English: `konsumprisindeks` rather than `KPI`, `folkemengde` rather than `befolkning`. The search engine is Lucene, so `title:`, wildcards and `AND`/`OR` work.
+- Check `discontinued` and `lastPeriod` on `GET /tables/{id}`. Series often continue in a new table (CPI: 14700 replaces 03013/03014).
+- A variable may be left out of a query only if its metadata says `elimination: true`. `Tid` (time) and `ContentsCode` (the measure) can never be left out.
+- Aggregating codelists change the value codes: `codelist[Region]=agg_KommFylker` uses `F-` prefixed county codes, `agg_KommSummer` uses `K-` prefixed municipality codes. `top(n)`, `from(x)`, `range(a,b)` and `*` work in `valueCodes`.
+- Limits: 800,000 cells per request (read the current value from `GET /config`) and a rate limit announced in the `x-ratelimit-*` response headers (40 requests per minute at the time of writing). GET URLs over about 2,100 characters fail; use POST instead.
+- New figures are released at 08:00 Oslo time. Metadata is refreshed at 05:00 and 11:30, when tables may be briefly unavailable.
+- Show the `status` symbols (`.` not applicable, `..` not available, `:` confidential) and any note flagged `noteMandatory`. A symbol can also flag a figure that exists (`*` provisional): show the figure with it. Say when figures are preliminary; national accounts and KOSTRA are revised.
+- KOSTRA tables differ from the rest: `KOK…`/`KOS…` variable IDs instead of `Region`, special group codes (`EAK`, `EKG…`), and no eliminable variables.
+- Mark your own calculations (growth rates, shares, sums) as your own. Keep the precision given by `category.unit.decimals`. The API always uses a decimal point.
+- Cite as "Source: Statistics Norway, table {id}" (Norwegian: "Kilde: SSB, tabell {id}").
+
+## API documentation
+
+- [User guide (English)](https://www.ssb.no/en/api/pxwebapiv2): SSB-specific limits, release times, symbols and saved queries
+- [User guide (Norwegian)](https://www.ssb.no/api/pxwebapiv2): the complete guide
+- [Interactive OpenAPI specification](https://data.ssb.no/api/pxwebapi/v2/index.html): all endpoints and parameters
+- [PxAPI-2 OpenAPI YAML](https://raw.githubusercontent.com/PxTools/PxApiSpecs/master/PxAPI-2.yml): the shared PxWebApi v2 contract, also used by Statistics Sweden and others
+- [PxWebApi user guide (PxTools)](https://raw.githubusercontent.com/PxTools/pxtools.github.io/main/docs/PxWebApi/documentation/user-guide.md): query syntax, output formats incl. parquet, codelists, error codes
+- [API configuration](https://data.ssb.no/api/pxwebapi/v2/config): current cell limit, output formats and languages
+
+## Example requests
+
+- [Search for tables](https://data.ssb.no/api/pxwebapi/v2/tables?query=folkemengde&lang=en): table IDs, titles, `firstPeriod`/`lastPeriod`, subject paths
+- [Table info](https://data.ssb.no/api/pxwebapi/v2/tables/07459?lang=en): population by region, sex and age; check `discontinued`
+- [Table metadata](https://data.ssb.no/api/pxwebapi/v2/tables/07459/metadata?lang=en): variables, value codes, codelists, elimination flags and notes
+- [Population of Oslo, latest year](https://data.ssb.no/api/pxwebapi/v2/tables/07459/data?lang=en&valueCodes[Region]=0301&valueCodes[ContentsCode]=Personer1&valueCodes[Tid]=top%281%29): a json-stat2 response
+- [Population by county as CSV](https://data.ssb.no/api/pxwebapi/v2/tables/07459/data?lang=en&valueCodes[Region]=*&codelist[Region]=agg_KommFylker&valueCodes[ContentsCode]=Personer1&valueCodes[Tid]=top%281%29&outputFormat=csv): an aggregating codelist with `outputFormat`
+- [CPI, 12-month change, last 12 months](https://data.ssb.no/api/pxwebapi/v2/tables/14700/data?lang=en&valueCodes[ContentsCode]=Tolvmanedersendring&valueCodes[Tid]=top%2812%29): the product group variable is eliminated, which returns the all-items total
+
+## Metadata and classifications
+
+- [Klass API](https://data.ssb.no/api/klass/v1/classifications/131.json): SSB's classification system (this example: municipalities); URNs in `link.describedby` in table metadata point here
+- [Standard symbols in tables](https://www.ssb.no/en/diverse/standardtegn-i-tabeller): the meaning of `.`, `..`, `:` and older symbols
+- [Changes to StatBank tables](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller): structural changes and discontinued tables
+- [KOSTRA documentation](https://www.ssb.no/offentlig-sektor/kostra/statistikk/kostra-kommune-stat-rapportering/om-kostra/dokumentasjon-av-kostra): municipal reporting, group codes and revision schedule
+- [json-stat format](https://json-stat.org/): the response format specification
+- [Licence](https://www.ssb.no/en/diverse/lisens): CC BY 4.0 terms
+
+## Optional
+
+- [Release calendar (RSS)](https://www.ssb.no/rss/statkal): upcoming releases
+- [Updated tables (RSS)](https://www.ssb.no/rss/statbank): recently updated StatBank tables
+- [StatBank web interface](https://www.ssb.no/statbank): the human-facing table browser
+- [PxWebApi v1](https://data.ssb.no/api/v0/en/table): the older POST-based API, still running in parallel; request bodies differ from v2
+- [pxweb-mcp](https://raw.githubusercontent.com/jarib/pxweb-mcp/master/README.md): an MCP server wrapping PxWebApi v2
+- [ssb-pxwebapi-v2 agent skill](https://raw.githubusercontent.com/janbrus/pxwebapi-skills/main/ssb-pxwebapi-v2-skill/SKILL.md): full workflow guide; reference files on codelists, KOSTRA and troubleshooting sit in `references/` beside it

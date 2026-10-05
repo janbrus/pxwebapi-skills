@@ -24,7 +24,7 @@ scb-pxwebapi-v2/
     └── search-syntax.md      # Lucene-baserad söksyntax för /tables?query=
 ```
 
-`CLAUDE.md`, `scripts/` och `evals/` i repot är underhållarinterna och ingår inte i paketet.
+`CLAUDE.md`, `DEVLOG.md`, `scripts/` och `evals/` i repot är underhållarinterna och ingår inte i paketet.
 
 ## Installation
 
@@ -69,6 +69,14 @@ För att Claude eller ChatGPT faktiskt ska kunna *anropa* API:et behövs ett ver
 - **@jarib/pxweb-mcp** (https://www.npmjs.com/package/@jarib/pxweb-mcp) — open source, fungerar med PxWeb-installationer inklusive SCB. Måste startas med `--url https://statistikdatabasen.scb.se/api/v2` (standard är norska SSB) — se `references/mcp-tools.md`
 - Egen MCP-server med FastMCP eller liknande
 - Utan MCP räcker ett verktyg som kan göra HTTP GET och POST (t.ex. `curl` via Bash)
+
+## Dokumentation
+
+- **Handbok om att använda PxWebApi v2** — SCB hänvisar till PxTools-guiden (engelska): https://www.pxtools.net/PxWebApi/documentation/user-guide/. Exemplen där är SSB:s; gränser och format skiljer sig hos SCB (se `SKILL.md`)
+- **OpenAPI, interaktiv** — https://statistikdatabasen.scb.se/api/v2/index.html
+- **PxApiSpecs** (YAML, gemensam för PxWeb-miljön) — https://raw.githubusercontent.com/PxTools/PxApiSpecs/master/PxAPI-2.yml
+- **Konverterare från v1 till v2** — https://pxapiconverter.scb.se/ översätter en v1-fråga mot `api.scb.se/OV0104/v1/doris/` (URL plus POST-body) till en v2-fråga, som GET-URL eller POST
+- **Frågor om API:et** — px@scb.se
 
 ## Licens
 

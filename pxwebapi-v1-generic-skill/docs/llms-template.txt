@@ -1,0 +1,44 @@
+# {Agency} — {StatBank name} API (PxWebApi v1)
+
+> {One sentence: who the agency is and what the database covers.} The PxWebApi v1 API at `{api_root}/{lang}`, where `{lang}` is {language codes, e.g. `da` or `en`}, needs no key and serves {number} database(s). Data are licensed {licence}. Table metadata is read with GET; data are fetched with POST only.
+
+[Template for an agency running PxWebApi v1, in the llmstxt.org v2 format. Replace every {placeholder}; `{api_root}` runs through the API version (e.g. `https://bank.stat.gl/api/v1`), and it may not answer until a language is added (Finland and Greenland both return errors without one). Delete lines and sections that do not apply, and delete this paragraph. Publish the file where it covers the pages agents need: {api_root}/llms.txt covers the API alone, the StatBank origin root covers the API and the web interface as well. A site-wide llms.txt on the agency's main domain can link to it, as Statistics Greenland does. Filled-in example: llms-example-statfin.txt beside this file.]
+
+Rules for agents using this API:
+
+- Never state a figure you have not fetched from this API in the current session. Do not fill gaps from memory, other sources, interpolation or extrapolation. If a call fails or the table is not found, say so.
+- URLs are built as `{api_root}/{LANGUAGE}/{DATABASEID}/{LEVEL…}/{TABLEID}`. A GET on any level lists its children (`type` `l` = level, `t` = table). A GET on a table URL returns its **metadata**; a POST to the same URL with a JSON query body returns **data**. There is no GET data endpoint.
+- Find tables with `?query={term}` on a database or level URL. Hits carry `id`, `path` and `title`; append `path` and `id` to the database URL to get the table URL. {Delete if search is not supported: this installation does not support `?query=`, so navigate the levels instead.}
+- Use table IDs exactly as returned, including any `.px` extension. Copy variable codes from `variables[].code` in the metadata, verbatim. Codes differ between tables and between installations{, e.g. installation-specific examples}.
+- `time: true` marks the time variable, but its codes are not always years: some tables use sequence numbers (`0`, `1`, …) with the years only in `valueTexts`. Select periods with `top`, or by codes read from metadata, never by typing a year.
+- Read the enforced limits from `?config` on the language level: `{api_root}/{lang}/?config` returns `maxValues`, `maxCells`, `maxCalls` and `timeWindow`. Values count selected codes across variables, cells their product; the tighter ceiling applies. Do not take limits from any other source.
+- Query body: `{"query": [{"code": "…", "selection": {"filter": "item", "values": ["…"]}}], "response": {"format": "json-stat2"}}`. Filters: `item` (listed codes), `all` (`["*"]` or a prefix such as `["202*"]`), `top` (the newest n periods, n as a string: `["5"]`), `agg:{name}` and `vs:{name}` (aggregations and value sets, not listed in metadata).
+- A variable may be left out of the query. If metadata marks it `elimination: true`, you get a total (or all values aggregated); if `elimination` is false or absent, you get **all** its values. Eliminated variables vanish from the response, so say what was aggregated away.
+- Always set `"response": {"format": "json-stat2"}`. When `response` is omitted, this installation returns {default format}, and the default differs between PxWeb installations. Format names are hyphenated: `jsonstat2` is rejected.
+- Errors: {describe the error payload, e.g. "a bad request returns HTTP 400 with the plain text `Bad Request` and no JSON"}. A table id or database that does not exist also gives 400, not 404, so GET the table URL first to tell a wrong URL from a wrong query. Treat any 4xx without a JSON body as a failed request, not as an empty result. A query over the cell or value limit returns 403, which means "too big", not "not authorised"; too many calls return 429.
+- Metadata has no units, decimals or `role`. Read them from the json-stat2 response (`role`, `dimension.{metric}.category.unit`), or from the table title when they are missing. Show missing, provisional and confidential values with the symbols the response gives.
+- Mark your own calculations (growth rates, shares, sums) as your own. Cite as "{citation format, e.g. Source: {Agency}, table {id}}". {Agency-specific source-link rule, if any.}
+
+## API documentation
+
+- [{Agency} API guide]({api_docs_url}): {what it covers}
+- [API limits]({api_root}/{lang}/?config): enforced limits as JSON
+- [Databases]({api_root}/{lang}): the databases on this server
+- [Terms of use]({licence_url}): {licence} and how to cite
+
+## Example requests
+
+- [Search]({database_url}?query={term}): tables whose titles or values match `{term}`
+- [Subject level]({database_url}/{level}): the tables under one subject
+- [Table metadata]({database_url}/{level}/{table_id}): variables, codes, `elimination` and `time` flags; POST the query body to this same URL
+
+## Agent guidance
+
+- [{Agency} agent profile]({profile_md_url}): agency-specific rules such as source links and language choice
+- [{Client package}]({package_docs_url}): {language} package for search, metadata and data
+
+## Optional
+
+- [{StatBank name} web interface]({web_url}): the human-facing table browser; most PxWeb front ends show a ready-made API query for each table
+- [PxWebApi v2]({v2_url}): {delete unless the agency also runs v2; prefer v2 where it exists}
+- [Generic PxWebApi v1 skill](https://raw.githubusercontent.com/janbrus/pxwebapi-skills/main/pxwebapi-v1-generic-skill/SKILL.md): full v1 mechanics, verified behaviour at other installations, troubleshooting
