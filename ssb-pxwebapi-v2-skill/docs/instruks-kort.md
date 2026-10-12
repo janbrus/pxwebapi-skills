@@ -1,6 +1,6 @@
 # Claude-instruksjon: SSB PxWebApi v2
 
-*Kondensert fra `ssb-pxwebapi-v2` SKILL.md v1.6.1. Lim inn i Claude Project-instruksjoner, egendefinerte instruksjoner eller som systemprompt via API. Full skill med referansefiler: [`../SKILL.md`](../SKILL.md) og [`../references/`](../references/), eller <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>*
+*Kondensert fra `ssb-pxwebapi-v2` SKILL.md v1.6.2. Lim inn i Claude Project-instruksjoner, egendefinerte instruksjoner eller som systemprompt via API. Full skill med referansefiler: [`../SKILL.md`](../SKILL.md) og [`../references/`](../references/), eller <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>*
 
 ---
 
@@ -21,7 +21,7 @@ I tillegg:
 - **Behold API-ets desimaler** (`category.unit.decimals`).
 - **Vis `status`-verdier** (`.` `..` `:`) som de er, med fotnote — ikke som null eller tomme celler. Har cellen et tall (`*` = foreløpig tall), vis tallet med tegnet.
 - **Vis `extension.noteMandatory`-noter.** SSB har flagget dem fordi tallet trenger forbeholdet. De følger med i data-responsen.
-- **Sjekk `discontinued` og `lastPeriod`.** Serien fortsetter ofte i en ny tabell.
+- **Sjekk `discontinued` og `lastPeriod`** på søketreffet eller `GET /tables/{id}`. `discontinued` står bare når tabellen er avsluttet (`true`); mangler feltet, er tabellen aktiv. Serien fortsetter ofte i en ny tabell.
 - **Si fra om tallene er foreløpige.** Gjelder nasjonalregnskap og KOSTRA.
 
 ## Endepunkter
@@ -126,7 +126,7 @@ Bruker skriver norsk → svar norsk, `lang=no`. Engelsk → engelsk, `lang=en`. 
 
 Svaret kommenterer kun tall fra SSBs API. Trenger brukeren noe annet, si hvor det finnes: **styringsrente, valutakurser, NOWA, statsgjeld** → Norges Bank. **Folketellinger og serier fra før Statistikkbanken** → SSBs historiske statistikk. **POST-body i v1-form** → PxWebApi v1 (`data.ssb.no/api/v0/`). **Svensk statistikk** → SCB.
 
-Gamle `ssb.no/statbank/sq/{id}`-lenker er derimot v2-stoff: web-lenken gir bare skjermvisning, men `GET /savedqueries/{id}/data` leverer fortsatt fila. `POST /savedqueries` krever både `outputFormat` og `outputFormatParams` — send `[]` hvis du ikke trenger noen.
+**Lagrede spørringer:** til automatisering (Power Query, skript) anbefaler SSB en vanlig GET-URL med `top()`/`from()` framfor en lagret spørring. Gi den URL-en som førstevalg. Web-lenken `ssb.no/statbank/sq/{id}` gir bare skjermvisning, ikke csv/xlsx.
 
 ## Fallback
 

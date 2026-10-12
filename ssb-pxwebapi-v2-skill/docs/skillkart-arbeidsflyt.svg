@@ -33,7 +33,7 @@ svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --
 </style>
 <rect width="1040" height="1040" class="bg"/>
 <text x="16" y="34" class="title">ssb-pxwebapi-v2 · arbeidsflyt</text>
-<text x="1024" y="34" text-anchor="end" class="r">v1.6.1 · tegnet 2026-10-03</text>
+<text x="1024" y="34" text-anchor="end" class="r">v1.6.2 · oppdatert 2026-10-11</text>
           <defs>
             <marker id="f1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
             <marker id="f1h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-hot"/></marker>
@@ -124,10 +124,11 @@ svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --
           <text x="466" y="819" class="lbl">valgfritt</text>
 
           <!-- Steg 6 -->
-          <rect x="276" y="836" width="360" height="78" rx="6" class="box"/>
+          <rect x="276" y="836" width="360" height="92" rx="6" class="box"/>
           <text x="292" y="858" class="t"><tspan class="n">Steg 6</tspan> · Lagret spørring</text>
-          <text x="292" y="878">Delbar ID; top(N) holder den oppdatert</text>
-          <text x="292" y="896">SSB anbefaler vanlig URL til automatisering</text>
+          <text x="292" y="878">SSB anbefaler vanlig URL med top()/from()</text>
+          <text x="292" y="896">Lagret spørring bare når brukeren ber om det</text>
+          <text x="292" y="916" class="r">saved-queries.md</text>
 
           <!-- Fallback -->
           <rect x="276" y="958" width="360" height="64" rx="6" class="box"/>

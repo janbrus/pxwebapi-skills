@@ -18,7 +18,7 @@ Det kaller ikke API-et selv. For det trengs et verktøy som kan sende HTTP GET o
 
 | Skill (installert navn) | Mappe i repoet | Dekker | Språk | Versjon | Status |
 | --- | --- | --- | --- | --- | --- |
-| `ssb-pxwebapi-v2` | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/) | SSBs Statistikkbank via PxWebApi v2. Søk, metadata, kodelister, lagrede spørringer, outputformater, Klass/VarDok, ~90 kuraterte tabeller | norsk, engelsk | 1.6.1 | stabil |
+| `ssb-pxwebapi-v2` | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/) | SSBs Statistikkbank via PxWebApi v2. Søk, metadata, kodelister, lagrede spørringer, outputformater, Klass/VarDok, ~90 kuraterte tabeller | norsk, engelsk | 1.6.2 | stabil |
 | `scb-pxwebapi-v2` | [scb-pxwebapi-v2-skill/](scb-pxwebapi-v2-skill/) | SCB:s Statistikdatabas via PxWebApi v2 | svensk, engelsk | 0.11.1 | beta |
 | `generic-pxweb-v2-skill` | [pxwebapi-v2-generic-skill/](pxwebapi-v2-generic-skill/) | Alle PxWebApi v2-installasjoner. Verifisert mot SSB, SCB og Latvia (CSP), med tabell over hva som varierer mellom dem | engelsk | 0.11.1 | beta |
 | `generic-pxweb-v1-skill` | [pxwebapi-v1-generic-skill/](pxwebapi-v1-generic-skill/) | Alle PxWebApi v1-installasjoner (den eldre, POST-baserte PxWeb 1.0-API-en). Sju verifisert, 50 kjente | engelsk | 0.12.1 | beta |
@@ -43,7 +43,7 @@ Alle seks deler samme grunnregel, skrevet øverst i hver `SKILL.md`: **oppgi ald
 
 ## Installasjon
 
-**Claude.ai:** last ned zip-filen fra skillens mappe (bygget av `scripts/build_zip.sh` — ikke zip mappen selv, da følger repo-interne filer med) og last den opp under **Settings › Features › Skills**.
+**Claude.ai:** last ned zip-filen fra skillens mappe (bygget av `scripts/build_zip.sh` — ikke zip mappen selv, da følger repo-interne filer med) og last den opp under **Settings › Skills**.
 
 **Claude Code:** kopier mappen til skills-katalogen under det *installerte* navnet fra tabellen over. For fire av skillene er det litt forskjellig fra mappenavnet:
 
@@ -123,7 +123,7 @@ A *skill* is knowledge only: a `SKILL.md` with workflow and rules, and reference
 
 | Skill (installed name) | Folder | Covers | Language | Version | Status |
 | --- | --- | --- | --- | --- | --- |
-| `ssb-pxwebapi-v2` | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/) | Statistics Norway's Statbank via PxWebApi v2, incl. search, codelists, saved queries, output formats and ~90 curated tables | Norwegian, English | 1.6.1 | stable |
+| `ssb-pxwebapi-v2` | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/) | Statistics Norway's Statbank via PxWebApi v2, incl. search, codelists, saved queries, output formats and ~90 curated tables | Norwegian, English | 1.6.2 | stable |
 | `scb-pxwebapi-v2` | [scb-pxwebapi-v2-skill/](scb-pxwebapi-v2-skill/) | Statistics Sweden's Statistikdatabasen via PxWebApi v2 | Swedish, English | 0.11.1 | beta |
 | `generic-pxweb-v2-skill` | [pxwebapi-v2-generic-skill/](pxwebapi-v2-generic-skill/) | Any PxWebApi v2 installation; verified against SSB, SCB and Latvia (CSP), with a table of what differs between them | English | 0.11.1 | beta |
 | `generic-pxweb-v1-skill` | [pxwebapi-v1-generic-skill/](pxwebapi-v1-generic-skill/) | Any PxWebApi v1 installation (the older POST-only PxWeb 1.0 API); seven verified, 50 known | English | 0.12.1 | beta |

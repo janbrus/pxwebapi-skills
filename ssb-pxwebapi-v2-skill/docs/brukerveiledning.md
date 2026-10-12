@@ -2,7 +2,7 @@
 
 Denne veiledningen forklarer hvordan du bruker Claude-skillen for SSBs Statistikkbank.
 
-Skillen vedlikeholdes på <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>; denne veiledningen ligger i `docs/` der. Denne veiledningen dekker **v1.6.1**. Sjekk repoet for nyere versjon og endringslogg.
+Skillen vedlikeholdes på <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>; denne veiledningen ligger i `docs/` der. Denne veiledningen dekker **v1.6.2**. Sjekk repoet for nyere versjon og endringslogg.
 
 ## Forutsetninger
 
