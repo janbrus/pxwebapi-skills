@@ -2,6 +2,136 @@
 
 Vedlikeholderens logg: hva som er endret, hva som er verifisert mot live API, hvor og når, og utfallet av hver søskensjekk. Den er repo-intern og følger ikke med i zip-en. Brukerne leser den korte [`CHANGELOG.md`](CHANGELOG.md); hver versjon står i begge filene. Fram til 2026-10-05 *var* denne fila `CHANGELOG.md`, så eldre oppføringer sier «denne loggen» eller «changelog» der de mener denne fila.
 
+## 1.6.2 — 2026-10-11
+
+Tre ting: `references/codelists-and-filters.md` er bygd om, slik at de generelle reglene og filteruttrykkene kommer først, `references/json-stat2.md` er bygd om med reglene først og formatet etterpå, og lagrede spørringer er flyttet ut av `SKILL.md` til ny `references/saved-queries.md`. En grundig gjennomlesing med live-sjekk 2026-10-10 fant samtidig feil som hadde stått siden første versjon. Vedlikeholderens egne ucommittede endringer etter 1.6.1 er også med (se nederst). Alle kall er GET eller POST mot `/tables/{id}/data` og `/codelists` — ingen `POST /savedqueries`.
+
+### `codelists-and-filters.md` bygd om
+
+Fila var 359 linjer. De første 58 handlet om bydel, delområde og grunnkrets, de generelle kodelistereglene begynte på linje 59 og filteruttrykkene på linje 263. En agent som bare leser starten av en fil (`head -100`), så verken `top()`/`range()`, hakeparentesregelen eller prefiksregelen. Anthropics råd for skill-forfattere er innholdsliste øverst i referansefiler over 100 linjer.
+
+* **Ny rekkefølge:** innholdsliste → «Kodelister — prinsipper» (fem regler) → «Finne, slå opp og bruke en kodeliste» → «Filteruttrykk i valueCodes» (fra linje 59; GET/POST-tabellen slutter på linje 86) → «Regionkoder» → «Regionale nivåer under kommune: bydel, delområde, grunnkrets» → «Næringskoder: SN2007 → SN2025» → «Andre vanlige kodelister». De to overskriftene andre filer peker til (SKILL.md:124, troubleshooting.md:97/157, klass-vardok.md:122/130), står ordrett
+* **359 → 225 linjer.** Kuttet som dobbeltomtale: Tid/ContentsCode er aldri eliminerbare (primærforekomst SKILL.md Steg 3), tre utgaver av «relativ eller fast periode», tre forklaringer av `agg_KommFylker`/`agg_KommSummer`, `*` med kodeliste to steder, curl `-g` (SKILL.md Verktøyvalg), `title:"(G)"` (SKILL.md Steg 2), KOSTRA-bydelskodene (`kostra.md`). `extension.codelists`-utdraget (26 linjer JSON) og `/codelists`-svaret er beskrevet i prosa. `outputValues` (29 linjer) er én regel; testtallene står i 1.4.1 under. Tabellen «Vanlige kodelister» er oppløst — radene står nå i seksjonen de hører til
+* **Sjekkdekning:** POST-eksempelet hadde ingen `POST /tables/…`-linje og ble aldri kalt; nå er det `POST /tables/07459/data` med kompakt body og sjekkes. De tre `codeLists`-href-ene i JSON-utdraget er borte; `agg_Fylker2024` sjekkes nå via en data-URL, `agg_KommFylker` via `GET /codelists/…`, mens `vs_Fylker` ikke lenger kalles noe sted. Moss-eksempelet (`K-3103`) står uten `outputValues`. Ny URL for `105%2B`
+
+### `json-stat2.md` bygd om
+
+Fila var 129 linjer og 13,4 kB, uten innholdsliste. Beskrivelse og handling sto i samme punkt (`role`, `status`, `note`, `aggregallowed`, `elimination`, «Det json-stat2 ikke bærer»), og `status`-punktet alene var på cirka 1 300 tegn.
+
+* **Ny rekkefølge:** innholdsliste → «Slik leser du et uttrekk» → «Dataset-struktur og indeksering» → felttabell → `dimension` og `extension` per variabel → rot-`extension` og `extension.px` → `status`, `note` og `link` → «Det json-stat2 ikke bærer» → verktøy. «Slik leser du et uttrekk» har sju nummererte regler, bare med handlinger, og peker til formatseksjonen og til `SKILL.md` der regelen har primærforekomst. Row-major står med formelen i regel 2, siden den er essensiell (vedlikeholder, 2026-10-11). Formatseksjonene beskriver bare
+* **13,4 → 11,4 kB, 129 → 176 linjer.** Målet var under 10 kB og rundt 120 linjer. Tabellene, med én rad per felt og en kolonne for PX-nøkkelordet, tar plassen. Kuttet: serializer-metodenavnet og sveiptellingene i `status` (står under 1.6.1), formålsavsnittene om obligatoriske noter, «8 av 12» og v1-parentesen om `agg:` under `aggregallowed`, CLI-lista til JSON-stat Toolkit, dateringene ved row-major-faktaene og «88 tabeller» om `id` og `dimension`
+* **PX-opphavet:** hvert felt som kommer fra PX-filen, har nøkkelordet i parentes, og `extension.px` er en tabell med betydningen av hver nøkkel. PxWebApi-spesifikasjonen (`PxTools/PxApiSpecs`, `PxAPI-2.yml`) sier om `extension.px`: *«Properties corresponds to keywords in the px-file»*. Serializeren (`PxTools/PCAxis.Serializers`, `JsonStat2Serializer.cs`) gir koblingene: `measuringType` ← `STOCKFA`, `priceType` ← `CFPRICES`, `adjustment` ← `DAYADJ`/`SEASADJ`, `basePeriod` ← `BASEPERIOD`, `refperiod` ← `REFPERIOD`, `show` ← `PRESTEXT`, `elimination`/`eliminationValueCode` ← `ELIMINATION`, `noteMandatory` ← `NOTEX`, `status` ← `DATASYMBOL1`–`6`, `DATASYMBOLSUM`, `DATASYMBOLNIL` og `DATANOTECELL`. Betydningene er hentet fra SCBs PX-spesifikasjon (2013-utgaven, PDF), som er lenket fra https://www.scb.se/en/services/statistical-programs-for-px-files/px-file-format/ (200). Den siden er lenket i fila
+* **Sjekkdekning:** 07459-eksempelet med `top(5)` sto inne i en setning og ble aldri kalt. Nå står det på egen linje, og `collect_checks()` gir 3 sjekker, mot 2 før
+* `SKILL.md` Steg 3: `categoryNoteMandatory` er tatt ut av lista over feltene i `dimension`. `CLAUDE.md` beskriver den nye rekkefølgen og PX-opphavet
+
+### Rettet og nytt i `json-stat2.md` (verifisert 2026-10-11)
+
+Grunnlaget er et sveip av metadata for alle 89 tabellene i `common-tables.md`.
+
+* **Rettet: noter per variabel og per verdi er aldri obligatoriske hos SSB.** `noteMandatory` og `categoryNoteMandatory` på variabelnivå: 0 av 89, selv om PxWebApi-spesifikasjonen har begge. 26 tabeller har noter per variabel og 51 noter per verdi (`category.note`). Fila listet begge feltene i `dimension.{var}.extension` og sa at `category.note` var «styrt av `categoryNoteMandatory`», med Rindal-noten i 07459 som eksempel. Den noten står på fylkene `15` og `50`, og er ikke obligatorisk. `SKILL.md` Steg 3 hadde samme liste
+* **Rettet: `link.describedby` per variabel står også i data-responsen.** Bare `link.related` og rot-`link` står bare i metadata. Fila sa «kun i metadata-responser, ikke i data-responser» om hele `link`; `klass-vardok.md` sa det riktig. Sjekket på 07459 og 14700
+* **Rettet: PX-elimineringsformene** er `ELIMINATION("<variabel>")=YES` og `ELIMINATION("<variabel>")="<verdinavn>"` (PX-spesifikasjonen, 3.3.32), ikke `ELIMINATION=YES` og `ELIMINATION("<verdi>")`
+* **Rettet peker:** «Data ser rare ut over tid» heter «Data ser "feil ut" over tid» i `troubleshooting.md`
+* **Nytt:** `measuringType` kan også være `Other` (33 av 434 statistikkvariabler). `adjustment` er `None` (416), `SesOnly` (7, f.eks. 07221) eller `WorkAndSes` (11, f.eks. 09190). `category.unit` har `base` og `decimals` i alle 434
+* **Nytt:** `extension.px` har de samme 14 nøklene i alle 89 tabellene. `official-statistics` er `true`, `copyright` og `descriptiondefault` er `false`, og `infofile` er `"None"` i alle. `official-statistics` er også `true` i alle 67 treffene på `query=nøkkeltall`, blant dem 54 KOSTRA-tabeller (sjekket fordi vedlikeholder spurte). `language` følger `lang` (`en` for 07459 med `lang=en`)
+* Uendret: `noteMandatory` er `{"1": true}` i 14700, `{"0": true}` i 14710 og `{"2": true, "3": true}` i 03013. Sitatet fra noten på 14700/14710 er ordrett. `aggregallowed` er `false` i 14700, 14710, 03013 og 07221, og i 59 av 89 tabeller
+
+* **Nytt (funnet av eval 04):** `adjustment` gjelder statistikkvariabelen, ikke serien. 13760 har en egen dimensjon `Justering` (`T`, `3MGG`, `S`, `IS`), og `ArbledProsArbstyrk` står som `WorkAndSes` uansett hvilken av dem du velger, også `IS` (ikke sesongjustert). Én setning under feltabellen
+* **Rettet (funnet av eval 02):** regel 4 sa «På KPI-tabellene» om forbeholdet om egne endringstall. I 14701 (årlig KPI) peker `noteMandatory` `{"1": true}` på «Denne tabellen erstatter tabell 03014.», og forbeholdet står i `note[2]`, som ikke er obligatorisk. Nå står det «På 14700 og 14710», både i regel 4 og i `SKILL.md` Steg 5. `docs/brukerveiledning.md`:161 sier fortsatt «KPI-tabellene har for eksempel en note om …» — ikke endret, siden `docs/` var utenfor denne oppgaven
+
+**Ikke rettet:** I data-responsen for 07459 med enkeltkoder for `Region` står variabelnoten («Se liste over endringer i de regionale inndelingene») i rot-`note`, ikke på `Region`. I 04362, 06198, 14746 og 11654, hentet uten parametre, står variabelnotene på variabelen også i data. Ikke undersøkt videre. Fila sier ikke hvor variabelnoter står i data-responsen
+
+### Rettet (verifisert 2026-10-10)
+
+* **«Uten kodeliste … API-et finner riktig kode automatisk» var feil** (siden e1c9cc9). `F-03`, `K-3103` og `F00-04` uten `codelist[…]` gir 400 `Non-existent value` i 07459. Bare koder som også står i tabellens egen verdiliste (`03`, `0301`, KOSTRAs `EAK`), virker uten. Ny regel under prinsippene, og en setning under «Ugyldig verdikode» i `troubleshooting.md`
+* **`agg_RegHFRHF` og `agg_Nace17` finnes ikke** (begge siden e1c9cc9). `GET /codelists/{id}` gir 500 med tom body for dem, som for enhver ukjent ID. Helseregioner er tabellspesifikke valuesets (`vs_Helseregion330b` i 14825, `vs_HelseReg18` i 13982); «17 næringer» er en variabel i 07984 uten kodeliste, og SN2007-tabellene har egne lister (`agg_NACE2007FemsifferBokstav` i 10790, `agg_NACE2007arb11` i 13926). Radene er slettet
+* **`agg_CoiCop2018Kpi011` har 13 hovedgrupper (`01`–`13`), ikke 12** (siden 1a3c07f)
+* **`agg_` betyr ikke mange-til-én.** `valueMap` avgjør: `agg_Fylker2024` (16), `agg_GrkretsNy`, `agg_CoiCop2018Kpi011` (13) og `agg_NACE2025nivaa1` (24) har ett element per kode og er utvalg. Summerende: `agg_KommFylker` (18 av 18 med flere), `agg_KommSummer` (277 av 360), aldersgruppene. Sto før bare for grunnkrets og i `kostra.md`; nå generell regel
+* **Aldersgruppene har egne koder** — `F00-04` … `F100G5+` og `F00-09` … `F100G10+` — ikke «0-4»
+* **Hakeparenteser i POST gir 400 `Non-existent value`**, er ikke bare unødvendige (`"[range(2020,2022)]"` i 07459). `["2015", "range(2020,2022)"]` gir 4 perioder
+* **SCB-merknaden om `outputValues` var utdatert** («ikke verifisert hos SCB») — SCB ble verifisert 2026-09-07 (SCB DEVLOG). Slettet; den var dessuten bare for vedlikeholder
+* **`discontinued` står bare på søketreffet og `GET /tables/{id}`, og bare når den er `true`** (funnet av evalene, verifisert 2026-10-11). Aktive tabeller (07459) mangler feltet helt; avsluttede (03013) har `true` — 22 av 39 treff på `konsumprisindeks` med `includeDiscontinued=true` hadde feltet, alle `true`. I metadata mangler feltet, og i data-responsen er det `null`, **også for 03013**. `SKILL.md` sa at feltet står på hvert treff (Steg 2) og i rot-`extension` (Steg 3), og `json-stat2.md` sa «`discontinued` når de er satt» (2026-08-30) — tre eval-agenter krasjet på `KeyError`. Rettet i Dataintegritet-regelen (primærforekomsten), Steg 2, Steg 3, `json-stat2.md`, `docs/instruks-kort.md` og `docs/llms.txt`. `check_examples.py` bruker `.get("discontinued")` på `/tables/{id}` og fanger fortsatt avsluttede tabeller — uendret
+* **`troubleshooting.md`:** «Feil kodeliste-ID» sto under 404. `GET /codelists/{ukjent}` gir 500 med tom body, også ved feil store/små bokstaver (`agg_kommfylker`); i en dataspørring gir samme feil 400 `Non-existent codelist`. Flyttet til 500-avsnittet
+
+### Nytt (verifisert 2026-10-10)
+
+* **En region som ikke fantes et år, gir 0 uten `status`, ikke tom celle** — både før opprettelse og etter nedleggelse: `vs_Fylker` med `*` gir 41 verdier uten én `null` i 2026, med 0 for `30` Viken og de andre nedlagte; `3002` Moss (2020–2023) gir 0 i 2019 og 2026, `3103` gir 0 i 2019 og 2022. Står under «Fylker og kommuner over tid»
+* **`+` i en kode må skrives `%2B` i GET.** `105+` (07459) og `F100G5+` gir 400 rå og 200 som `%2B`; i POST går `"105+"` rett. Rad i GET/POST-tabellen og sjekket URL
+* **To funksjoner i samme liste gir unionen:** `from(2024M01),to(2024M03)` i 14700 gir 321 perioder. Samme funn som `generic-pxweb-v2-skill` 0.11.0 hadde
+* `vs_`-labels slutter med mellomrom (sju av sju undersøkt: «Alle fylker », «Bydeler », «Varer og tjenester (alle nivå) » …), `agg_`-labels ikke
+* COICOP 2018 er FNs (UNSD) internasjonale klassifikasjon; `vs_CoiCop2018Kpi01`/`agg_CoiCop2018Kpi01x` er SSBs egne PxWeb-lister over kodene (vedlikeholder, 2026-10-10). 14700 tilbyr én liste per nivå, `agg_CoiCop2018Kpi010`–`015`
+* **`K_` er en annen liste enn `K-`, ikke en tilfeldig variant:** Moss er `K-3103` i `agg_KommSummer` (07459) og `K_3103` i `agg_KommSummerHist` (06913). Den siste går tilbake til den store kommunereformen i 1965 og har med kommuneendringene siden da; `agg_KommSummer` går tilbake til 1986 (vedlikeholder, 2026-10-11 — første utkast kalte det «prefikset varierer mellom tabeller», som var feil). Begge listene har labelen «Kommuner 2024, sammenslåtte tidsserier», så labelen alene skiller dem ikke; 06913 har også `agg_KommFylkerHist`. Funnet av eval 03. Ny rad i tabellen «Fylker og kommuner over tid», og merknad under regelen om label
+* Nytt eval-scenario 18 (aldersgrupper med `F100G10+`): 07459 med `agg_TiAarigGruppering`, `F90-99,F100G10%2B` → 200
+
+### Lagrede spørringer flyttet til `references/saved-queries.md`
+
+Vedlikeholder, 2026-10-10: Steg 6 la for stor vekt på lagrede spørringer; det viktige er SSBs anbefaling om vanlig URL med `top()`/`from()` til automatisering. Setningen om gamle sq-ID-er ble fjernet med vilje fra Steg 6 (av marginal interesse i `SKILL.md`).
+
+* **Ny `references/saved-queries.md`** (51 linjer): anbefalingen først, at en lagret spørring bare opprettes når brukeren ber om det (den blir liggende hos SSB), `POST /savedqueries`-bodyen uendret fra Steg 6, tabell over de tre GET-endepunktene, og gamle sq-lenker. `GET /savedqueries/10119120` og `/data` står nå som egne linjer og sjekkes (begge 200 2026-10-10, `/data` gir csv i iso-8859-1, `?outputFormat=json-stat2` overstyrer). `POST /savedqueries` er fortsatt bare JSON-validert
+* **`/savedqueries/{id}/data` bruker ikke de lagrede `outputFormatParams`** (funnet av eval 13, verifisert 2026-10-11): 10119120 er lagret som `csv` med `SeparatorSemicolon,IncludeTitle`, men leveres med komma og uten tittelrad; sendes parametrene i URL-en, kommer begge med. Står i `saved-queries.md`, sammen med at et Power Query-oppsett som venter semikolon, derfor kan feile selv om ID-en virker
+* **`SKILL.md` Steg 6** er fem linjer: anbefalingen og en peker. Rutingen (gamle sq-lenker er v2-stoff) peker direkte til referansefila. **Steg 5** tilbyr ikke lenger lagret spørring av seg selv — bare GET-URL eller POST-body. SKILL.md: 408 → 379 linjer. Endepunkttabellen, Verktøyvalg og «Lagre»-merknaden i Steg 4 er uendret
+* `docs/instruks-kort.md`: sq-avsnittet er byttet med SSB-anbefalingen; detaljene om sq-ID og savedqueries-bodyen er ute. `docs/skillkart-arbeidsflyt.svg`: Steg 6-boksen har ny tekst og en `saved-queries.md`-linje (bredden målt med PIL og DejaVu Sans: 257 og 274 px av 344). Versjonsmerkene i `instruks-kort.md`, `brukerveiledning.md`, `skillkart.html` og arbeidsflyt-SVG-en er 1.6.2. `brukerveiledning.md` sier fortsatt at Claude kan hente dataene bak gamle sq-lenker — det stemmer via referansefila
+
+### Vedlikeholderens ucommittede endringer etter 1.6.1
+
+* `SKILL.md` Steg 1: KOSTRA-avsnittet nevner også skole
+* `SKILL.md` Steg 6: setningen om gamle sq-ID-er fjernet (videreført i flyttingen over); endepunkttabellen rettet opp
+* `README.md`: installasjonsstien i Claude.ai er «Settings > Skills»; ny formulering om `DEVLOG.md`. Filtreet har fått `saved-queries.md`
+* `references/common-tables.md`: ny rad 12910 (økonomisk struktur etter næring, SN2007). `check_common_tables.py` 2026-10-11: 89 tabeller, 0 feil, 0 advarsler
+* `references/common-tables.md` har fått innholdsliste (vedlikeholder, 2026-10-11): 19 temaer med stikkord, i samme format som `codelists-and-filters.md`. «Helse» sto som `###` etter KOSTRA-seksjonen og så ut som en underseksjon av den; nå er den `##`. Én `* * *` er byttet med `---`. Innholdslista og `##`-overskriftene er sjekket mot hverandre, og `check_common_tables.py` gir fortsatt 89 tabeller, 0 feil. `json-stat2.md` har fått samme innholdsformat (**Innhold** i fet skrift, ikke `##`)
+
+### Evals 2026-10-11
+
+Scenario 3, 5, 6, 11, 12, 13, 14, 15 og nye 18 kjørt som ekte kjøringer av ferske Opus-agenter, én scratchpad-mappe hver, mot ny versjon (ingen baseline, siden ingen feilet). **9 av 9 bestått.** Hver agent lastet skillen med Skill-verktøyet, brukte curl `-g`, og fikk ingen 429.
+
+* 03: 06913 med `agg_KommSummerHist`/`K_3103` (1951–2026), kontrollert mot 07459 `K-3103` for 1986–2026 (41 like år); oppga kodelisten og at nullene for nedlagte koder er utelatt
+* 05: 03024, `2025U40` + `top(5)` blandet, ukeformat `U`
+* 06: 07459 med `agg_KommFylker` og `*`; holdt F-21/F-22/F-23 (0 uten `status`) utenfor med henvisning til den nye nullregelen; oppga kodeliste og utelatte dimensjoner
+* 11: `[range(2020,2022)]` i GET, curl `-g`, og at `range()` er et bevisst fast vindu (med `from(2020)` som alternativ)
+* 12: 14700, `2024*` og `??` uten kodeliste, CSV med semikolon; den obligatoriske noten vist
+* 13: leste `saved-queries.md`, hentet `/savedqueries/10119120` og `/data`, tilbød vanlig `from(2020M01)`-URL — og fant at `outputFormatParams` ikke følger med (se over)
+* 14: 14729 (SN2025), K = IT lest fra label, ikke skjøtt mot SN2007
+* 15: 04317 med `030109*`, summen merket som egen beregning
+* 18: `agg_TiAarigGruppering`, `F100G10%2B`, kodeliste og utelatt kjønn oppgitt
+
+**Funn fra evalene som ikke er rettet i denne utgaven:**
+
+* **`query=folkemengde` finner ikke 07459** (fire agenter), selv om SKILL.md-eksempelet «Hvor mange bor i Oslo?» bruker akkurat det søket. Agentene fant tabellen via `common-tables.md`. Samme type funn som i 1.5.0. *Eksempelet er rettet senere samme dag, se «Siste punkter før zip-en»; termregelen i Steg 2 er ikke endret*
+* **14729 (og 14728): hovedområdetallene fra J og utover følger SN2007-bokstavene**, mens 5-siffertallene følger SN2025. 2026K1: publisert J = 42 = SN2025 J (16) + K (26), publisert K = 6 = SN2025 L, publisert L = 79 = SN2025 M; A–I stemmer. 2026K2: publisert K = 12, 5-siffersum 41. Ser ut som en feil hos SSB. Meldt til tabellens kontakt i SSB 2026-10-11; skillen er ikke endret før SSB har svart. Den sjekkede URL-en med `agg_NACE2025nivaa1` gir fortsatt 200
+
+### Evals etter ombyggingen av `json-stat2.md` (2026-10-11)
+
+Scenario 2, 4 og 12 er kjørt som ekte kjøringer av ferske Opus-agenter, med én scratchpad-mappe per agent. **3 av 3 bestått.** Alle tre lastet skillen med Skill-verktøyet og leste `json-stat2.md`, og ingen fikk 429.
+
+* 02: 14700 med `top(13)`, indeks og endringstall, enhet 2025=100. Den obligatoriske noten er vist, og egne beregninger er merket. Agenten fant at regel 4 generaliserte fra 14700 til «KPI-tabellene» (rettet, se over)
+* 04: 13760 med trend og 3MGG, og ledigheten oppgitt både i prosent og i 1000 personer. `..` vist for 3MGG i siste måned. Agenten fant at `adjustment` ikke følger `Justering` (se over)
+* 12: 14700 med `??`, `2024*`, csv med `SeparatorSemicolon` og en `stub`-URL for Power Query. Latin-1 og desimalpunktum er nevnt, og den obligatoriske noten er vist
+
+**Funn som ikke er rettet** (utenfor `json-stat2.md`, kandidater til egen oppgave):
+
+* «KPI siste år» har ingen anbefalt standard: 12-måneders endring i 14700 eller årsendring i 14701 (eval 02). At 14701 manglet i `common-tables.md`, og at KPI-eksempelet utelot `VareTjenesteGrp`, er rettet, se «Siste punkter før zip-en»
+* Skillen skiller ikke AKU-ledighet fra registrert ledighet hos NAV, og `common-tables.md` sier ikke hvilken `Justering` som skal brukes i 13760. SSB anbefaler trend eller 3MGG. Siste måned i 3MGG er alltid `..`, fordi snittet er sentrert. Totalene i 13760 heter «Begge kjønn» og «15-74 år», så rådet om «I alt»/«Hele landet» i `category.label` treffer ikke (eval 04)
+* `UseTexts` i csv gir «00 I alt» for `VareTjenesteGrp`, som har `show: code_value`. `show` ser ut til å gå foran `UseTexts`. Det står ikke i `output-formats.md`. Skillen sier heller ikke hvordan en csv skal se ut for å åpnes direkte i norsk Excel, og ikke at perioder før 2026 i 14700 er regnet om til COICOP 2018 og 2025=100 (eval 12)
+
+### Siste punkter før zip-en (2026-10-11)
+
+En gjennomgang før zip-en fant at versjonen i rot-README var feil, og tre små faktafeil fra dagens evaler. Vedlikeholder valgte hva som skulle med.
+
+* **Rot-`README.md` sa 1.6.1** for `ssb-pxwebapi-v2`, i både den norske og den engelske tabellen. Nå 1.6.2. Release-sjekklisten i `CLAUDE.md` har fått punkt 6 om dette, siden rot-README ligger utenfor skillmappen og zip-en, og ingenting sjekker den
+* **Oslo-eksempelet i `SKILL.md`:** steg 1 var `GET /tables?query=folkemengde`, men det søket gir 33 treff uten 07459. Steg 1 er nå et oppslag i `common-tables.md`, med en parentes om at søket ikke finner tabellen. Andre søk, sjekket live: `befolkning` gir 07459 som nr. 44 av 100, `befolkning kommuner` som nr. 10 av 38, og `alders- og kjønnsfordeling` som nr. 5 av 11. GET-linjen ble sjekket av `check_examples.py`, så det er én sjekk mindre. **Termregelen i Steg 2 («folkemengde» ikke «befolkning») er ikke endret**; vedlikeholder tar den i en egen oppgave
+* **14701 i `common-tables.md`:** årlig KPI etter vare- og tjenestegruppe (2025=100), 2000–2025, aktiv. Den obligatoriske noten (`note[1]`) sier «Denne tabellen erstatter tabell 03014». `ContentsCode` er `KpiAar` (indeks) og `Aarsendring` (prosent). Raden for 14700 sa «erstatter 03013/03014», men 14700 erstatter bare 03013 (månedlig); 03014 er årlig. Rettet i raden, i KPI-avsnittet under tabellen og i KPI-eksempelets NB i `SKILL.md`. Eval-scenario 2 godtar nå 14701 når svaret gir årstall. `docs/instruks-kort.md`:100 sier fortsatt «Erstatter `03013`/`03014`» om 14700 — ikke endret, siden `docs/` var utenfor
+* **KPI-eksempelet i `SKILL.md`** har fått `VareTjenesteGrp` = `00` i POST-bodyen. Før ble dimensjonen utelatt uten at eksempelet sa det, selv om Steg 5 krever det. Eliminering gir samme tall som `00` (eval 02, og 2026-09-27 under)
+* **Innledningen i `common-tables.md`** sa «Bruk alltid `GET /tables?query=...` for å bekrefte at tabellen er oppdatert — tabell-IDer kan endre seg». Søket finner ikke 07459, og `SKILL.md` (Dataintegritet) sier at tabell-ID-er er permanente. Nå: bekreft med `GET /tables/{id}` (`discontinued` bare når avsluttet, `lastPeriod`), ID-en endres ikke, men en avsluttet tabell kan være erstattet av en ny (14700 erstatter 03013). Funnet av eval 01 etter at Oslo-eksempelet begynte å sende agenten hit; rettet etter vedlikeholders valg
+* **`CHANGELOG.md` 1.6.2:** de tre punktene om innholdslister og omorganisering er slått sammen til ett, og 14701 og eksemplene er med. 1.6.2 har ni punkter
+* **Eval 01 og 02 kjørt på nytt etter endringene:** begge valgte riktig tabell (07459 via `common-tables.md`, 14700/14701). Kandidater til egen oppgave: eksempelverdiene i `json-stat2.md` (07459-seriene) og `codelists-and-filters.md` (728 714) er de faktiske Oslo-tallene, så en agent kan svare uten API-kall uten at evalen ser det; Oslo-eksempelet nevner ikke det nyere kvartalstallet i 01222; `03` og `0301` har samme label i 07459
+
+### Søskensjekk 2026-10-11
+
+* **`scb-pxwebapi-v2`:** aggregeringskode uten kodeliste gir 400 også der (TAB638, `2023_A1`), og SKILL.md sier allerede at kodelistens egne koder gjelder — ingen feil. `+` i GET gjelder også SCB: `valueCodes[Alder]=100+` i TAB638 gir 400, `100%2B` gir 200; skillen nevner det ikke. Steg 6 er 30 linjer og Steg 5 tilbyr «en sparad fråga» — samme vekting som her før 1.6.2. Begge er kandidater til en egen oppgave; ingenting endret
+* **`discontinued`:** SCB utelater også feltet for aktive tabeller (`GET /tables/TAB638` uten nøkkelen, 2026-10-11); `scb-pxwebapi-v2` SKILL.md lister det i endepunkttabellen og Steg 2 som her. `generic-pxweb-v2-skill` SKILL.md:150 sier «`discontinued` when set» om rot-`extension` — samme feil som `json-stat2.md` hadde. Begge kandidater til egen oppgave; ingenting endret
+* **`json-stat2.md` i søsknene:** `generic-pxweb-v2-skill` `json-stat2.md`:91 sier at `discontinued` er «Often `null`», men hos SSB er feltet alltid `null` i data og mangler i metadata. L109 og L163 beskriver `categoryNoteMandatory` som det som styrer noter per verdi. Det stemmer med spesifikasjonen, men SSB setter aldri feltet. `scb-pxwebapi-v2` `json-stat2.md`:36 sier at rot-`extension` har `discontinued` «när de är satta», som denne fila sa før 1.6.2. L37 lister `categoryNoteMandatory` på variabelnivå, og L41 sier «Samma mekanik per värde». Ikke sjekket mot SCB. Kandidater til egen oppgave; ingenting endret
+* **`generic-pxweb-v2-skill`:** «`agg_` maps many-to-one» (SKILL.md:157 og `codelists-and-filters.md`:13) stemmer ikke for SSB. Unionsfunnet og hakeparentesregelen står allerede riktig der. Kandidat til egen oppgave; ingenting endret
+
 ## 1.6.1 — 2026-10-02
 
 Faktarettelser og presiseringer fra tre kilder: PxTools' brukerveiledning for PxWebApi v2, Idescats JSON-stat-skill (`https://www.idescat.cat/dev/api/taules/jsonstat/SKILL.md`, v1.0.0, CC BY 4.0) og kilden til PxWebs json-stat2-serializer. Alt er verifisert mot live API 2026-10-02. Arbeidet med `docs/` fra 2026-09-27, som ikke var committet, er slått sammen med denne utgaven (se nederst).

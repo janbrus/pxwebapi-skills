@@ -17,7 +17,7 @@ før du antar at skillen er problemet.
 
 ## 2. «KPI siste år»
 
-- **Forventet tabell:** 14700 (IKKE 03013/03014 — begge avsluttet)
+- **Forventet tabell:** 14700, eller 14701 hvis svaret gir årstall (IKKE 03013/03014 — begge avsluttet)
 - **Sekvens:** metadata → data
 - **Nøkkelvalg:** `ContentsCode=KpiIndMnd` (indeks) eller `Tolvmanedersendring` (12-mnd endring), `Tid=top(13)`
 - **Suksess:** Månedlig serie med enhet (indeks 2025=100 / prosent), kilde
@@ -110,3 +110,9 @@ før du antar at skillen er problemet.
 - **Forventet tabell:** en KOSTRA-nøkkeltallstabell funnet via `kostra` + fagterm — ikke egen summering fra 12367 (`aggregallowed: false`)
 - **Nøkkelvalg:** kommunekode fra brukeren eller metadata; `KOK…`-variabler og `KOS…`-kode lest fra metadata *i samtalen* (KOSTRA-variabler byttes ut når rapporteringskravene endres); region aldri utelatt; kodeliste «Uttrekk for KOSTRA-grupperinger» valgt på label hvis gruppen skal med
 - **Suksess:** forholdstallet vist med enhet, urevidert/revidert oppgitt, og svaret formidler tallet uten å tolke «høyt» som «lav produktivitet» — SSBs egen advarsel (kan skyldes kvalitet, behov, smådriftsulemper)
+
+## 18. «Hvor mange er 90–99 år, og hvor mange er 100 år eller eldre i Norge?»
+
+- **Forventet tabell:** 07459 med kodeliste `agg_TiAarigGruppering` på `Alder` (lagt til i 1.6.2, verifisert 2026-10-11)
+- **Nøkkelvalg:** `codelist[Alder]=agg_TiAarigGruppering` med kodelistens egne koder `F90-99` og `F100G10+`, lest fra `GET /codelists/agg_TiAarigGruppering` eller metadata — ikke `90-99`, og ikke uten kodeliste (begge gir 400 `Non-existent value`). I en GET-URL skrives `+` som `%2B` (`F100G10%2B`); i POST går `"F100G10+"` rett. Alternativet uten kodeliste er å summere enkeltaldrene selv, med `105+` som `%2B` i GET, og merke summen som egen beregning. `Region=0`, `Tid=top(1)`
+- **Suksess:** to tall for siste år med enhet personer og «Kilde: SSB, tabell 07459»; svaret oppgir kodelisten og at kjønn er utelatt (summert over begge kjønn). Ingen 400 på grunn av rå `+` i URL-en

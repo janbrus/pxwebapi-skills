@@ -4,6 +4,18 @@ Hva som er annerledes for deg som bruker skillen, nyeste først. Gjeldende versj
 
 Hva som er verifisert, hvor og når, står i vedlikeholderens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/ssb-pxwebapi-v2-skill/DEVLOG.md). Den ligger i repoet, ikke i zip-en.
 
+## 1.6.2 — 2026-10-11
+
+- **Rettet: koder fra en summerende kodeliste virker bare med kodelisten angitt.** `F-03`, `K-3103` og aldersgruppen `F00-04` gir feil uten `codelist[…]`; bare koder fra tabellens egen verdiliste virker uten. Skillen leser kodene fra kodelisten i stedet for å gjette dem.
+- Nytt: lange kommuneserier. `agg_KommSummer` (`K-3103`, 07459) går tilbake til 1986; `agg_KommSummerHist` (`K_3103`, 06913) går tilbake til den store kommunereformen i 1965. Begge har samme label, så skillen skiller dem på ID.
+- **Rettet: om en tabell er avsluttet, står bare på søketreffet og `GET /tables/{id}`** — og feltet `discontinued` er bare med når svaret er ja. Mangler det, er tabellen aktiv. Metadata og data-responsen sier ingenting om det.
+- **Rettet:** kodelistene `agg_RegHFRHF` og `agg_Nace17` finnes ikke og er fjernet. KPI har 13 hovedgrupper, ikke 12. I en POST-body gir hakeparenteser rundt et uttrykk feil.
+- Nytt: `agg_` betyr ikke alltid summering — det er `valueMap` som avgjør. En kommune eller et fylke som ikke fantes et år, gir 0 uten statusmerking, og vises ikke som tall. En kode med `+` (`105+`) skrives `%2B` i en GET-URL. `from()` og `to()` i samme liste gir alle periodene i begge, ikke intervallet mellom.
+- Lagrede spørringer har egen referansefil, `references/saved-queries.md`. Steg 6 sier nå det SSB anbefaler: en vanlig URL med `top()`/`from()` til automatisering. Skillen tilbyr ikke lenger en lagret spørring av seg selv, og vet at en gammel lagret spørring leveres uten de lagrede formatparameterne (f.eks. semikolon).
+- **Rettet: noter per variabel og per verdi er ikke obligatoriske hos SSB.** Bare tabellnotene som `extension.noteMandatory` peker på, skal alltid med i svaret.
+- Referansefilene `json-stat2.md`, `codelists-and-filters.md` og `common-tables.md` har fått innholdsliste. `json-stat2.md` har sju regler for å lese et uttrekk først, og PX-nøkkelordet ved hvert felt som kommer fra PX-filen. `codelists-and-filters.md` har generelle regler og filteruttrykk først, og er en tredjedel kortere. `common-tables.md` har fått 12910 (økonomisk struktur etter næring) og 14701 (årlig KPI, erstatter 03014).
+- KOSTRA-rutingen nevner også skole. Eksempelet «Hvor mange bor i Oslo?» henter 07459 fra `common-tables.md`, fordi søket `folkemengde` ikke finner tabellen, og KPI-eksempelet velger totalen (`VareTjenesteGrp=00`) i stedet for å utelate varegruppen. Kontrakter som viser til KPI, bruker oftere endringen desember–desember i 14700 enn årsendringen i 14701, og skillen sier det.
+
 ## 1.6.1 — 2026-10-02
 
 - **Rettet: `status` betyr ikke alltid at verdien mangler.** En celle med datanote beholder tallet: 09842 har `*` (foreløpig tall) på BNP-tall som finnes. Vis tallet med tegnet, og filtrer aldri bort `null` før indeksering. `-` (null) vises som `-` og regnes ikke som 0.

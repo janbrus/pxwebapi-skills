@@ -1,6 +1,28 @@
 # Vanlige SSB-tabeller
 
-Kurert liste over mye etterspurte tabeller, basert på faktisk bruk. Bruk alltid `GET /tables?query=...` for å bekrefte at tabellen er oppdatert — tabell-IDer kan endre seg.
+Kurert liste over mye etterspurte tabeller, basert på faktisk bruk. Bekreft med `GET /tables/{id}` at tabellen er aktiv og oppdatert: `discontinued` er bare med når tabellen er avsluttet, og `lastPeriod` viser siste periode. Tabell-ID-en endres ikke, men en avsluttet tabell kan være erstattet av en ny med annen ID, slik 14700 erstatter 03013.
+
+**Innhold**
+
+1. Befolkning: folketall, befolkningsendringer, innvandrere, grunnkretser, framskrivinger, levealder, døde per uke, navn
+2. Priser og inflasjon: KPI, KPI-JAE, drivstoff, strøm
+3. Arbeid og lønn: lønn etter yrke, utdanning og alder, lønnsindeks, ledige stillinger, sysselsetting, arbeidsledighet (AKU)
+4. Nasjonalregnskap og makroøkonomi: BNP, konjunkturprognoser, utenriksregnskap, renter
+5. Inntekt og skatt: inntekt, fradrag og skatt, medianinntekt for husholdninger
+6. Utenrikshandel: eksport og import etter vare og land
+7. Bolig og eiendom: boligprisindeks, kvadratmeterpris, boligmasse, igangsatte boliger, leie
+8. Byggekostnader: byggekostnadsindekser for boliger og vei
+9. Energi og petroleum: strøm, energibalanse, oljeinvesteringer
+10. Transport og reiseliv: overnattinger, transportkostnader
+11. Utdanning: grunnskole
+12. Næringsliv: bedrifter, konkurser (SN2007 og SN2025), aksjeselskaper, økonomisk struktur
+13. Kriminalitet: anmeldte lovbrudd
+14. Klima og miljø: klimagassutslipp
+15. Religion og livssyn: tros- og livssynssamfunn
+16. Medier og kultur: mediebruk
+17. Offentlig sektor: inntekter og utgifter i offentlig forvaltning
+18. KOSTRA (kommune-stat-rapportering): kommuneregnskap og nøkkeltall per tjenesteområde
+19. Helse: sykehusbehandlinger etter diagnose
 
 ---
 
@@ -32,13 +54,14 @@ Tabell 07459 er den mest brukte befolkningstabellen. Den dekker alle kommuner, f
 
 | ID    | Tittel                                                | Frekvens    | Typisk bruk                                                                       |
 | ----- | ----------------------------------------------------- | ----------- | --------------------------------------------------------------------------------- |
-| 14700 | Konsumprisindeks (KPI), etter vare- og tjenestegruppe | Månedlig    | Total KPI og prisvekst per varegruppe (erstatter 03013/03014)                     |
+| 14700 | Konsumprisindeks (KPI), etter vare- og tjenestegruppe | Månedlig    | Total KPI og prisvekst per varegruppe (erstatter 03013)                           |
+| 14701 | Konsumprisindeks (KPI), etter vare- og tjenestegruppe | Årlig       | KPI som årsgjennomsnitt og årsendring per varegruppe (erstatter 03014)            |
 | 14702 | KPI, KPI-JA og KPI-JAE, etter leveringssektor         | Månedlig    | KPI fordelt på leveringssektor                                                    |
 | 14704 | Justert KPI (KPI, KPI-JA og KPI-JAE), hovedgrupper    | Månedlig    | Kjerneinflasjon - underliggende prisvekst — Norges Banks foretrukne inflasjonsmål |
 | 09654 | Priser på drivstoff                                   | Månedlig    | Bensin- og dieselpriser per liter                                                 |
 | 09387 | Kraftpris, nettleie og avgifter for husholdninger     | Kvartalsvis | Strømpriser for husholdninger                                                     |
 
-KPI (14700): Basisår 2025=100. `ContentsCode` "KpiIndMnd" = indeks, "Tolvmanedersendring" = 12-måneders endring. Både 03013 og 03014 er avsluttet. KPI-JAE (14704) er populært kalt kjerneinflasjon og brukes mye i pengepolitisk analyse.
+KPI (14700): Basisår 2025=100. `ContentsCode` "KpiIndMnd" = indeks, "Tolvmanedersendring" = 12-måneders endring. Årlig KPI (14701): "KpiAar" = årsgjennomsnittet av indeksen, "Aarsendring" = endringen i årsgjennomsnittet, i prosent. Kontrakter som viser til KPI, bruker oftere endringen desember–desember i 14700 ("Tolvmanedersendring" for desember) enn årsendringen i 14701. Det er to ulike mål, og de gir ulike tall. Både 03013 (månedlig) og 03014 (årlig) er avsluttet; 14700 erstatter 03013, og 14701 erstatter 03014. For perioder til og med 2025 avviker endringstallene i 14700 og 14701 ofte fra dem som ble publisert i 03013 og 03014, i hovedsak på grunn av avrunding etter omregningen til 2025=100. KPI-JAE (14704) er populært kalt kjerneinflasjon og brukes mye i pengepolitisk analyse.
 
 ---
 
@@ -163,6 +186,7 @@ Tabell 12880 er unik fordi den inneholder SSBs egne prognoser for makroøkonomis
 | 14729 | Opna konkursar, etter konkurstype og 5-siffer næring (SN2025) | Kvartalsvis | Samme statistikk på SN2025, fra 2026K1 — ikke skjøtbar med 10790 på næringsnivå |
 | 07322 | Aksjeselskaper, aksjekapital og utdelt utbytte, etter næring (SN2007) | Årlig | Antall AS, aksjekapital og utbytte per næring, 2008– (SN2007) |
 | 14758 | Aksjeselskaper, aksjekapital og utdelt utbytte, etter næring (SN2025) | Årlig | Samme statistikk på SN2025, fra 2025 |
+| 12910 | Økonomisk struktur, hovedtall foretak og bedrifter etter næring (SN2007) | Årlig | Næringenes økonomiske utvikling |
 
 ---
 
@@ -196,7 +220,7 @@ Tabell 12880 er unik fordi den inneholder SSBs egne prognoser for makroøkonomis
 | ----- | ------------------------------------------ | -------- | ----------- |
 | 12947 | Bruk av ulike medier, etter kjønn og alder | Årlig    | Mediebruk   |
 
-* * *
+---
 
 ## Offentlig sektor
 
@@ -225,7 +249,7 @@ Alle KOSTRA-tabeller er årlige, bruker `KOK…`-variabler i stedet for `Region`
 
 ---
 
-### Helse
+## Helse
 
 | ID    | Tittel                                                               | Frekvens | Typisk bruk                           |
 | ----- | -------------------------------------------------------------------- | -------- | --------------------------------------|

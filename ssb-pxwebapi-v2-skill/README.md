@@ -25,7 +25,8 @@ ssb-pxwebapi-v2/
 ├── references/
 │   ├── json-stat2.md                     # json-stat2 format-spesifikasjon (Dataset, row-major mm. — også gyldig for Eurostat, World Bank)
 │   ├── api-details.md                    # SSB-spesifikk informasjon (publiseringstider, grenser, lisens)
-│   ├── codelists-and-filters.md          # Kodelister (bl.a. KPI/COICOP-grupperinger, næringsgruppering), syntaks for filtrering
+│   ├── codelists-and-filters.md          # Kodelisteprinsipper og filtersyntaks først; deretter region, næring (SN2025), alder og KPI/COICOP
+│   ├── saved-queries.md                  # Lagrede spørringer: SSBs anbefaling, opprette, hente, gamle sq-lenker
 │   ├── search-syntax.md                  # Søkesyntaks basert på Lucene for /tables?query=
 │   ├── klass-vardok.md                   # Kobling til SSBs Klass (klassifikasjoner) og VarDok (variabeldefinisjoner)
 │   ├── kostra.md                         # KOSTRA: mars/juni-syklus, spesielle kostra koder og variabler
@@ -42,14 +43,14 @@ ssb-pxwebapi-v2/
     └── llms.txt                          # Utkast til data.ssb.no/llms.txt (llmstxt.org v2) — et forslag til SSB, ikke en del av skillen
 ```
 
-`DEVLOG.md` (vedlikeholderens logg over hva som er verifisert mot live API, hvor og når), `CLAUDE.md`, `scripts/` og `evals/` ligger også i repoet, men er vedlikeholder-interne og følger ikke med i pakken.
+`DEVLOG.md` (min logg over hva som er verifisert mot SSB API, hvor og når), `CLAUDE.md`, `scripts/` og `evals/` ligger også i repoet, men er for internt vedlikehold og følger ikke med i pakken.
 
 ## Installasjon
 
 ### Claude.ai
 
 1. Last ned ZIP-filen: [ssb-pxwebapi-v2-skill.zip](ssb-pxwebapi-v2-skill.zip), eller bygg den fra Github-repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger repo-interne filer med)
-2. Gå til **Settings > Features > Skills** i Claude.ai
+2. Gå til **Settings > Skills** i Claude.ai
 3. Last opp ZIP-filen
 
 ### Claude Code

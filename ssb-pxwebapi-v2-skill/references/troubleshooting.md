@@ -24,7 +24,7 @@ Ugyldig forespørsel. **Diagnostiser fra `title`, ikke fra `detail`** — `detai
 **Vanlige årsaker:**
 
 - **Ukjent variabelkode** — `variableCode` i selection matcher ikke metadata. Variabel- og verdikoder er *ikke* case-sensitive (`region`, `contentscode`, `personer1` og `TOP(1)` aksepteres — verifisert 2026-09-09), så feilen skyldes at koden ikke finnes, ikke stor/liten bokstav. `Region` finnes ikke i KOSTRA-tabellene — der heter variabelen `KOKkommuneregion0000`/`KOKfylkesregion0000`/`KOKbydelsregion0000`, se `kostra.md`.
-- **Ugyldig verdikode** — Koden finnes ikke i tabellen. Sjekk `category.index` i metadata. I KOSTRA kan en `KOS…`-kode fra i fjor være borte, fordi variablene byttes ut når rapporteringskravene endres — hent metadata på nytt.
+- **Ugyldig verdikode** — Koden finnes ikke i tabellen. Sjekk `category.index` i metadata. En kode fra en summerende kodeliste (`F-03`, `K-3103`, `F00-04`) gir denne feilen hvis `codelist[Var]` mangler. En kode med `+` (`105+`) må skrives `%2B` i en GET-URL — ellers blir `+` et mellomrom. I KOSTRA kan en `KOS…`-kode fra i fjor være borte, fordi variablene byttes ut når rapporteringskravene endres — hent metadata på nytt.
 - **Feil tidsformat** — Bruker `"2024"` i en månedlig tabell (skal være `"2024M01"`).
 - **For mange celler** — Resultatet overstiger `maxDataCells` fra `/config`.
 - **Manglende obligatorisk variabel** — Variabel med `elimination: false` mangler fra selection. I KOSTRA-tabellene gjelder det nesten alle dimensjoner — også region (`KOKkommuneregion0000`), funksjon, art og regnskapsomfang.
@@ -61,7 +61,6 @@ Ressursen finnes ikke.
 
 - Feil tabell-ID (skal være et tall som streng, f.eks. `"07459"`)
 - Tabellen er fjernet og erstattet av en ny — søk etter temaet
-- Feil kodeliste-ID
 - Feil saved query-ID
 - **URL-en er lengre enn ca. 2 100 tegn** — API-et svarer 404, ikke 400. Grensen er målt 2026-09-09 på 07459: 400 distinkte kommunekoder (2 092 tegn) gir 200, 410 koder (2 142 tegn) gir 404. Bytt lange verdilister mot `*`, `?`, `from()`/`to()`/`[range()]` eller en kodeliste, eller bruk POST, som ikke har lengdegrensen
 
@@ -78,6 +77,8 @@ Rate-limiting. Du har sendt for mange forespørsler.
 **Gjentatt verdikode.** Oppgir du samme kode to ganger i samme variabel — `valueCodes[Region]=0301,0301`, eller `["0301", "0301"]` i en POST-body — svarer API-et 500 med **tom body**, ikke 400 med forklaring. To like koder er nok. Verifisert 2026-09-09 hos SSB, og samme oppførsel hos SCB og Latvia.
 
 Overlapp mellom et uttrykk og en enkeltkode er derimot uproblematisk: `valueCodes[Tid]=2026,top(1)` gir 200 selv når `top(1)` også er 2026 — det er bare bokstavelig like koder som feiler. Bygger du seleksjonen programmatisk (fra en løkke, en fil eller en union av flere kilder), dedupliser lista før du sender den.
+
+**Ukjent kodeliste-ID i `GET /codelists/{id}`** gir også 500 med tom body, ikke 404 — også når bare store/små bokstaver er feil (`agg_kommfylker`). I en dataspørring gir samme feil 400 `Non-existent codelist`. Verifisert 2026-10-10.
 
 ### 503 Service Unavailable
 
