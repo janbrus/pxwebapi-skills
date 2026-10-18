@@ -12,7 +12,7 @@ Praktisk driftsinformasjon for SSBs PxWebApi v2. For json-stat2-formatet (Datase
 - KOSTRA (385 aktive tabeller under `paths`-noden `kostrahoved`) har egen årsrytme: ureviderte tall for året før 15. mars, reviderte 15. juni; kommunene retter innen 15. april. API-et flagger ikke ureviderte verdier i `status` — `updated` på `/tables/{id}` mot kalenderen avgjør (verifisert 2026-09-20: 321 tabeller oppdatert i juni, 44 i mars). Se `kostra.md`.
 - API-grense: 800 000 celler per uttrekk (tomme celler teller med). Rate limit: 40 spørringer per minutt (`x-ratelimit-policy: 40;w=60s`, bekreftet 2026-09-09) — les gjeldende verdi fra `x-ratelimit-*`-responsheaderne (se under), ikke fra `/config`. SSBs brukerveiledning oppgir 30 per minutt; headeren er autoritativ når de to avviker.
 - GET-URL kan ikke overstige ca. 2 100 tegn — over det svarer API-et 404. Bruk POST for komplekse spørringer.
-- Desimalskilletegn er `.` (punktum) for alle formater unntatt xlsx på norsk (komma).
+- Desimalskilletegn er `.` (punktum) i alle tekstformater. xlsx har ekte tall, og Excel viser desimalskilletegnet etter egen språkinnstilling, uansett `lang`.
 - Lisens: Creative Commons CC BY 4.0.
 - Strukturelle endringer i tabeller dokumenteres på: https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller
 - `navigation`-endepunktet fra v1 er tatt bort i v2 (gir 404). Emnehierarkiet leses i stedet fra `paths` på hvert `/tables`-treff — se `klass-vardok.md` for kortnavn-utledning.

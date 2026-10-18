@@ -33,7 +33,7 @@ svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --
 </style>
 <rect width="1040" height="1040" class="bg"/>
 <text x="16" y="34" class="title">ssb-pxwebapi-v2 · arbeidsflyt</text>
-<text x="1024" y="34" text-anchor="end" class="r">v1.6.2 · oppdatert 2026-10-11</text>
+<text x="1024" y="34" text-anchor="end" class="r">v1.6.2 · oppdatert 2026-10-14</text>
           <defs>
             <marker id="f1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
             <marker id="f1h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-hot"/></marker>
@@ -82,7 +82,7 @@ svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --
           <!-- Steg 2 -->
           <rect x="276" y="240" width="360" height="90" rx="6" class="box"/>
           <text x="292" y="262" class="t"><tspan class="n">Steg 2</tspan> · Søk etter tabell</text>
-          <text x="292" y="282">Fagtermer: «folkemengde», ikke «befolkning»</text>
+          <text x="292" y="282">Fagtermer: «konsumprisindeks», ikke «inflasjon»</text>
           <text x="292" y="300">Vis 3–5 treff, anbefal ett</text>
           <text x="292" y="320" class="r">search-syntax.md · common-tables.md</text>
 

@@ -4,6 +4,15 @@ Vad som är annorlunda för den som använder skillen, nyast först. Gällande v
 
 Vad som verifierats, var och när, står i underhållarens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/scb-pxwebapi-v2-skill/DEVLOG.md). Den finns i repot, inte i zip:en.
 
+## 0.11.2 — 2026-10-14 (beta)
+
+- **Rättat: obligatoriska noter finns på tre nivåer.** Utöver tabellnoterna kan en variabel (`Alder` i TAB6471) och ett enskilt värde (`categoryNoteMandatory`) ha obligatoriska noter. Svaret ska visa alla tre.
+- **Rättat:** `discontinued` sätts aldrig i metadata eller data, och på sökträffen står fältet bara när det är `true`. `Kon` summeras i farten i TAB638 men har totalkoden `TotSa` i TAB6471.
+- **Rättat: procentkoda å, ä och ö i URL:en.** En rå `ä` i en sökning ger 0 träffar utan felmeddelande, och sökexemplet är nu procentkodat.
+- Nytt: `references/json-stat2.md` börjar med sju läsregler, och beskriver `extension.px`, `link` och det json-stat2 inte bär.
+- Nytt: har tabellen felmarginal, medelfel eller osäkerhetsmarginal som statistikvariabel, hämtas den med innan en skillnad kallas verklig. En uppenbart rätt sökträff väljs direkt, med motivering.
+- Nytt i repot, inte i zip:en: en skillkarta i `docs/`.
+
 ## 0.11.1 — 2026-10-02 (beta)
 
 - **Rättat: `status` betyder inte alltid att värdet saknas.** En cell med datanot behåller sitt tal. Läs `value` och `status` var för sig, visa ett flaggat tal med flaggan och filtrera aldrig bort `null` före indexering. Hos SCB är det inte observerat: i 13 kontrollerade tabeller står `..` alltid på `null`.

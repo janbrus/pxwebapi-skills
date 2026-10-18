@@ -1,12 +1,36 @@
 # json-stat2 — format reference
 
-json-stat2 is an open format for statistical datasets (https://json-stat.org/). It is used by PxWebApi v2 but also by other statistical providers such as Eurostat and World Bank. This file documents the format itself — installation-specific operational details (publishing times, limits, rate limiting) belong in `api-details.md`.
+json-stat2 is an open format for statistical datasets (https://json-stat.org/). PxWebApi v2, Eurostat and World Bank use it. This file describes the format as PxWebApi v2 delivers it, and says where SSB, SCB and Latvia (CSP) differ. Operational details (limits, rate limiting, publishing times) are in `api-details.md`.
 
-In v2, **both** `/tables/{id}/metadata` and `/tables/{id}/data` return a json-stat2 Dataset. They are not the same document, and several fields mean different things in each — see "Metadata response vs data response" below.
+In v2, **both** `/tables/{id}/metadata` and `/tables/{id}/data` return a json-stat2 Dataset. They are not the same document, and some fields mean different things in each.
+
+**Contents**
+
+1. How to read an extract
+2. Dataset structure and indexing
+3. Shape variants
+4. The fields in the dataset
+5. `dimension` and `extension` per variable
+6. `extension` at the root and `extension.px`
+7. `status`, `note` and `link`
+8. What json-stat2 cannot express
+9. Tooling
 
 ---
 
-## Dataset structure
+## How to read an extract
+
+1. **Start with `role`, then look in `id`.** `metric` is what is measured and `time` is time. `geo` is optional: SSB and Latvia set it, SCB does not. Look for a geographic variable in `id`; only when none exists do the figures cover the whole country. Do not ask the user. (SKILL.md Step 3)
+2. **`value` is row-major:** the last dimension in `id` varies fastest. The position is the sum of `category.index` × stride, where the stride is the product of `size` for the later dimensions. Iterate `id`, not `Object.keys(dimension)`, and use the `id` of the response you hold. Never assume time is sorted, and never filter out `null`. (See "Dataset structure and indexing")
+3. **Read `value` and `status` separately.** If the cell is `null`, show the symbol, never 0. If it has a number, show the number with its flag. (SKILL.md Step 5, and `status`)
+4. **Show mandatory notes at every level the table uses:** the table (`extension.noteMandatory`), the variable (`dimension.{var}.extension.noteMandatory`) and the value (`categoryNoteMandatory`). (SKILL.md Step 5, and `note`)
+5. **Read `elimination` from metadata only.** Find the total code in `category.label`, or as `eliminationValueCode` in a data response. (See `elimination`)
+6. **If `aggregallowed` is `false`, do not sum or average the figures.** If you do anyway, say so. The field blocks no query. (See `extension.px`)
+7. **State the codelist, the omitted dimensions and `timeUnit` yourself.** The response records none of them. (SKILL.md Step 5, and "What json-stat2 cannot express")
+
+---
+
+## Dataset structure and indexing
 
 ```json
 {
@@ -27,30 +51,20 @@ In v2, **both** `/tables/{id}/metadata` and `/tables/{id}/data` return a json-st
 }
 ```
 
-### Key elements
-
-- **`id`** — variable names in order. This order governs all indexing: iterate `id`, never `Object.keys(dimension)` — the two coincide at SSB, SCB, Latvia and Eurostat (verified 2026-10-02), but the specification does not promise it.
-- **`size`** — number of values per variable, same order as `id`.
-- **`value`** — flat array of all data values in **row-major order**: the last dimension in `id` varies fastest, the first varies slowest (the C/NumPy convention). For `size = [s₀, s₁, …, sₙ]` and category indices `(i₀, i₁, …, iₙ)`, the flat index is `i₀·(s₁·s₂·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ` — each position times its dimension's *stride*, the product of the sizes of every later dimension. Category positions come from `dimension.{var}.category.index`. Worked example below. **Use the `id` of the response you are indexing** — a default-selection response can order dimensions differently from the metadata (Latvia IRS010m: metadata `["ContentsCode", "TIME"]`, default data `["TIME", "ContentsCode"]`).
-- **`dimension`** — per variable: codes (`category.index`), labels (`category.label`), units (`category.unit`), per-value notes (`category.note`), and `extension`.
-- **`role`** — which variables are `time`, `geo` and `metric`. **Start your analysis here** (see below).
-- **`status`** — flags on individual cells, keyed by index into `value`. Read it **alongside** `value`, not instead of it: a missing-value symbol comes with a `null`, but a status can also flag a figure that exists (provisional, estimated, a cell note). See "Status codes".
-- **`note`** — an **array** of table-level caveats. Read it before interpreting a series: boundary changes, base-year changes and coverage gaps are recorded here. See "Notes" below — some of them are mandatory to display.
-- **`extension`** — installation-specific metadata, at two levels. See below.
-- **`link`** — classification and definition references. See below.
-
 Older serializers may omit `"version": "2.0"`. The rest of the structure is unaffected.
 
-### Worked example: two dimensions that vary
-
-`id = ["Region", "ContentsCode", "Tid"]`, `size = [2, 1, 3]` — two regions, one measure, three years. Strides: `Region` 1·3 = 3, `ContentsCode` 3, `Tid` 1.
+`value` is row-major, as in C and NumPy. For `size = [s₀, s₁, …, sₙ]` and category indices `(i₀, i₁, …, iₙ)` the position is `i₀·(s₁·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ`. Above, only `Tid` varies, so the order cannot go wrong. With two regions and three years, `id = ["Region", "ContentsCode", "Tid"]` and `size = [2, 1, 3]`. Strides: `Region` 1·3 = 3, `ContentsCode` 3, `Tid` 1.
 
 | Position in `value` | `Region` | `Tid` | Offset |
 |---|---|---|---|
 | 0, 1, 2 | index 0 | index 0, 1, 2 | `0·3 + 0·3 + t·1` |
 | 3, 4, 5 | index 1 | index 0, 1, 2 | `1·3 + 0·3 + t·1` |
 
-The second region's third year is `1·3 + 0·3 + 2·1 = 5`, so `value[5]`. A dimension of size 1 still has a stride, but always contributes 0. Positions follow the order of the request, not a sorted one: `valueCodes[Tid]=2026,2024,2025` returns `{"2026": 0, "2024": 1, "2025": 2}` at SSB, and SCB does the same (verified 2026-10-02; Latvia not tested). Always look the position up in `category.index`. To test an implementation, use https://json-stat.org/samples/order.json, where every value is a string naming its own position (`A2B1C3`) and `category.index` is in array form. Position 11 in that file reads `A1B1C4` where it should read `A2B1C4` (a typo, checked 2026-10-02), so correct code "fails" exactly there.
+The second region's third year is `1·3 + 0·3 + 2·1 = 5`, so `value[5]`. A dimension of size 1 always contributes 0.
+
+`category.index` follows the order of the request: `valueCodes[Tid]=2026,2024,2025` returns `{"2026": 0, "2024": 1, "2025": 2}` at SSB and SCB (2026-10-02) and at Latvia (`TIME`, 2026-10-14). `top(n)` and `from(x)` give ascending order. The keys of `dimension` come in `id` order at SSB, SCB, Latvia and Eurostat (2026-10-02), but the specification does not promise it, and a default-selection response can order `id` differently from the metadata (Latvia IRS010m: metadata `["ContentsCode", "TIME"]`, default data `["TIME", "ContentsCode"]`).
+
+To test an implementation, use https://json-stat.org/samples/order.json, where every value is a string naming its own position (`A2B1C3`) and `category.index` is in array form. Position 11 in that file reads `A1B1C4` where it should read `A2B1C4` (a typo, checked 2026-10-02), so correct code "fails" exactly there.
 
 ---
 
@@ -68,123 +82,83 @@ Verified 2026-10-02 on 88 SSB, 13 SCB and 12 Latvian tables, and on Eurostat `na
 
 ---
 
-## Start the analysis with `role`
+## The fields in the dataset
 
-- **`role.metric`** — what is being measured. Named `ContentsCode` on all three known installations (Nordic and Latvian alike), but **check `role.metric` for the actual name** rather than assuming. Read `dimension.{metric}.category.unit` for the unit and the number of decimals.
-- **`role.time`** — the time dimension: `Tid` at SSB and SCB, `TIME` at Latvia.
-- **`role.geo`** — geography, **when the installation sets it.** SSB and Latvia do (`Region`, `AREA`); SCB does not, even on tables with a 290-municipality `Region` dimension (verified 2026-09-07 on TAB638, TAB6471, TAB5444 — all `role: {time, metric}`). Look for a geographic variable in `id` first; only when none exists do the figures cover the whole country or area. Do not ask the user.
-- Variables in `id` but not in `role` are breakdown dimensions — sex, age, industry, and so on.
+| Field | What it is |
+|---|---|
+| `id`, `size` | The variables in the order that governs indexing, and the number of values per variable |
+| `value` | The figures as one flat list, with `null` where a figure is missing |
+| `status` | Flags per cell, keyed by position in `value`. Absent when no cell is flagged |
+| `dimension` | Per variable: codes, labels, unit, notes, `extension` and `link` |
+| `role` | `time`, `metric` and, where the installation sets it, `geo`. The other variables in `id` are breakdowns |
+| `note` | Table notes: base-year changes, corrections, successor tables |
+| `extension`, `link` | The installation's own fields and links, see below |
+| `label`, `source`, `updated` | Title, source and last update |
 
 ---
 
-## `extension` — two levels, not one
+## `dimension` and `extension` per variable
 
-`extension` appears both at the **dataset** level and inside **each dimension**, and the two carry different things. Confusing them is the most common misreading of a PxWeb json-stat2 document.
+`dimension.{var}` has `category.index` (code → position) and `category.label` (code → name). The metric variable also has `category.unit` per value, e.g. `{"Persons1": {"base": "number", "decimals": 0}}`: `base` is the unit and `decimals` the number of decimals to show. Keep that precision — do not add decimals the agency did not publish, and do not round away ones that carry meaning. Notes sit per variable (`note`, a list) and per value (`category.note`, value code → list).
 
-### Dataset level (`extension` in the root)
-
-| Field | Meaning |
-|---|---|
-| `px` | PX header keywords — see next section |
-| `contact` | Structured contact details for the statistic |
-| `noteMandatory` | Which entries in the root `note` array must be displayed — see "Notes" |
-| `discontinued` | Whether the table is closed. Often `null`; present in data responses |
-
-**`firstPeriod`, `lastPeriod` and the table's `discontinued` flag are fields of the `/tables` search hit, not of the dataset.** If you need the table's coverage before fetching data, read them from `GET /tables?query=…`, not from the json-stat2 document.
-
-### Dimension level (`dimension.{var}.extension`)
+`dimension.{var}.extension` has these fields. The PX keyword each comes from is in parentheses (source: `PxTools/PCAxis.Serializers`, `JsonStat2Serializer.cs`):
 
 | Field | Meaning |
 |---|---|
-| `elimination` | Whether the dimension may be omitted from a query — **metadata only**, see the trap below |
-| `eliminationValueCode` | The code that represents the total, when one exists — **data responses only**, see the trap below |
-| `codelists` | Available aggregations (`agg_`) and valuesets (`vs_`) for this dimension, with labels and links |
-| `show` | How the agency intends values to be labelled: `value`, `code`, `code_value` |
-| `refperiod` | Reference period per value, e.g. a stock measured at 1 January |
-| `measuringType` | `Stock`, `Flow`, `Average`, … — what kind of quantity this is |
-| `priceType` | Current prices, fixed prices, or not applicable |
-| `adjustment` | Seasonal / working-day adjustment, or `None` |
-| `basePeriod` | The base period of an index, e.g. `2025=100` |
-| `alternativeText` | An alternative label supplied by the agency |
-| `noteMandatory`, `categoryNoteMandatory` | Which dimension- or value-level notes must be displayed |
+| `elimination` (`ELIMINATION`) | Whether the variable may be omitted. Only metadata answers this, see below |
+| `eliminationValueCode` (`ELIMINATION`) | The total code. Only in a data response that includes the total (SSB 07459 `Region` → `"0"`, SCB TAB6471 `Region` → `"00"`) |
+| `show` (`PRESTEXT`) | `code`, `value` or `code_value` |
+| `codelists` | The codelists (`agg_`/`vs_`) the table offers for this variable |
+| `noteMandatory` (`NOTEX`) | Which of the variable's notes must be shown, keyed by index into `dimension.{var}.note`. Set at SCB (TAB6471 `Alder`: `{"0": true}`) |
+| `categoryNoteMandatory` (`VALUENOTEX`) | Which value notes must be shown: value code → index into `category.note`. Set at SCB (TAB638 `Region`: `{"0140": {"1": true}}`) |
+| `measuringType` (`STOCKFA`) | `Stock`, `Flow`, `Average` or `Other` |
+| `priceType` (`CFPRICES`) | `Current`, `Fixed` or `NotApplicable` |
+| `adjustment` (`DAYADJ`, `SEASADJ`) | `SesOnly`, `WorkAndSes` or `None` |
+| `basePeriod` (`BASEPERIOD`) | The base period of an index |
+| `refperiod` (`REFPERIOD`) | The reference time, e.g. 1 January for a stock |
+| `alternativeText` | A longer label supplied by the agency |
 
-`measuringType`, `priceType`, `adjustment` and `basePeriod` decide how a number may honestly be described. An index without its base period is meaningless; a fixed-price series compared against a current-price one is wrong. Read them before writing the sentence that explains what the figure means.
+The variable- and value-level note flags were set on 7 and 11 of 115 dimensions in 28 SCB tables (2026-10-13), on none of 89 at SSB (2026-10-11), and on none of 42 in 12 Latvian tables (2026-10-14). The last six fields sit on the metric variable only, with one value per measure. `measuringType`, `priceType`, `adjustment` and `basePeriod` decide how a number may honestly be described: an index without its base period is meaningless, and a fixed-price series compared with a current-price one is wrong. Where a table has its own adjustment dimension, that dimension says which series you got: SSB 13760 reports `adjustment: WorkAndSes` even for `Justering=IS` (not adjusted).
 
-### Trap: eliminability is readable only from the metadata response
+### `elimination`
 
-`extension.elimination` answers a **different question** in each response type (verified on SSB and SCB 2026-08-30, Latvia 2026-09-08):
+In metadata it is the contract: may this variable be left out of a query? In a data response it describes the extract you received: `true` only when the values that came back include the elimination value. Select one ordinary region, or apply a codelist, and it reads `false` although the variable is eliminable. So **never infer eliminability from a data response** (verified on SSB and SCB 2026-08-30, Latvia 2026-09-08).
 
-- **In a metadata response** it is the contract: *may this dimension be left out of a query?* This is the one you want.
-- **In a data response** it describes the extract you just received: it is `true` only when the value set that came back still contains the elimination value, and `false` otherwise. Select one ordinary region and it reads `false`; apply a codelist and it reads `false`; and neither says anything about whether the dimension was eliminable.
+PX has two forms, and the metadata response does not distinguish them:
 
-So **never infer eliminability from a data response.** Re-read the metadata instead.
+- `ELIMINATION("<variable>")=YES` — there is no total value; the API sums the variable when you omit it (SCB TAB638 `Kon`, which has only `1` and `2`).
+- `ELIMINATION("<variable>")="<value name>"` — the total exists as a value (SSB 07459 `Region`, `0` = "Hele landet").
 
-The same asymmetry runs the other way for `eliminationValueCode`, which is why a table can look as if it has no total code when it has one. PX has two elimination forms and the metadata response does not distinguish them:
+In metadata both appear as a bare `elimination: true`, without `eliminationValueCode` — absent from every dimension in a 50-table sweep at SSB and from all six of SCB's TAB638. A data response that includes the total reveals it. If you need to know the form, probe with the total.
 
-- `ELIMINATION=YES` — there is no total value; the API sums the dimension on the fly when you omit it. (A sex dimension whose only categories are "women" and "men".)
-- `ELIMINATION("<value>")` — a predefined total value already exists in the value set. (A region dimension carrying a "whole country" code alongside the municipalities.)
-
-In metadata both appear as a bare `elimination: true` — `eliminationValueCode` was absent from every dimension across a 50-table sweep at SSB, and from all six dimensions of SCB's TAB638. A **data** response that includes the total is what reveals it, as `eliminationValueCode: "<code>"` (SSB 07459 `Region` → `"0"`, SCB TAB6471 `Region` → `"00"`). If you need to know which form a dimension uses, that probe is the way to find out.
-
-Eliminability is a property of the **table**, not of the variable name: SCB's `Alder` is eliminable in TAB638 and mandatory in TAB6471.
+Eliminability is a property of the **table**, not of the variable name: SCB's `Alder` is eliminable in TAB638 and mandatory in TAB6471, and `Kon` has the total code `TotSa` in TAB6471 but none in TAB638.
 
 ---
 
-## `extension.px` — PX keywords inside the dataset
+## `extension` at the root and `extension.px`
 
-PxWeb adds a non-standard `px` object to the dataset-level `extension`, carrying part of the source PX file's header:
+The root `extension` has `contact`, `px` and, when the table has mandatory notes, `noteMandatory` (`NOTEX`). `discontinued` is never set: it is absent from metadata and `null` in data responses at SSB, SCB (2026-10-13) and Latvia (2026-10-14). **`firstPeriod`, `lastPeriod` and the table's `discontinued` flag belong to the `/tables` hit**, not to the dataset.
 
-```json
-"extension": {
-  "px": { "tableid": "…", "matrix": "…", "decimals": 1,
-          "aggregallowed": false, "official-statistics": true,
-          "heading": ["ContentsCode", "Tid"], "stub": ["Region"],
-          "subject-code": "pp", "subject-area": "Prices and price indices",
-          "contents": "…", "language": "en", "copyright": true }
-}
-```
+PxWeb puts part of the source PX file's header in `extension.px`. Each key is a PX keyword in lower case (`AGGREGALLOWED` becomes `aggregallowed`). The same 14 keys appeared at SSB, in 28 of 28 SCB tables (2026-10-13) and in 12 of 12 Latvian tables (2026-10-14):
 
-Useful fields:
-
-- **`aggregallowed`** — whether summing this table is meaningful at all. This is the only place the answer appears. It is commonly `false` for index tables, where adding index points produces nonsense. Treat it as a signal about interpretation, **not** as a technical block: an installation may still offer codelists on such a table and answer HTTP 200 for them.
-- **`decimals`** — the table's default decimal count (per-value decimals live in `category.unit`).
-- **`heading` / `stub`** — the pivot layout the agency intends, i.e. which variables belong in columns and which in rows. Useful when rendering a table the way its publisher does.
-- **`subject-code` / `subject-area`** — the subject classification.
+| Key | Meaning |
+|---|---|
+| `contents` | The short title |
+| `heading`, `stub` | The publisher's pivot: the variables in the column head and in the stub |
+| `decimals` | The table's default number of decimals (per-value decimals are in `category.unit`) |
+| `aggregallowed` | `false` when the figures must not be summed. A signal about interpretation, not a block: an installation may still offer codelists on such a table and answer HTTP 200. SSB sets `false` on indices and averages; SCB also on some counts (TAB6471, population with disclosure-control noise; 14 of its 28 tables); all 12 Latvian tables had `true` |
+| `tableid`, `matrix` | The table ID |
+| `subject-code`, `subject-area` | The subject classification |
+| `language` | Follows `lang` |
+| `official-statistics`, `copyright`, `descriptiondefault`, `infofile` | Flags and a reference from the PX file. `copyright` is `false` at all three. `infofile` is `"None"` at SSB, the product code at SCB (`BE0101`) and `"001"` at Latvia |
 
 This is a PxWeb extension — do not expect it from other json-stat producers.
 
 ---
 
-## Notes
+## `status`, `note` and `link`
 
-Two levels, and both may be **mandatory to display**:
-
-- **`note`** (root) — an array of table-level notes. `extension.noteMandatory` is keyed by index into that array: `{"1": true}` means `note[1]` must be shown to the user. The index differs per table, so resolve it rather than assuming the first note.
-- **`category.note`** (inside a dimension) — notes attached to individual values, gated by `extension.categoryNoteMandatory` in the same way. This is where boundary changes and definition breaks are recorded, per value.
-
-Mandatory notes are how an agency warns that a figure needs a caveat — a changed base year, a corrected period, a discontinued table with a successor. They travel with the **data** response too, so displaying them costs no extra call. If a note is flagged mandatory and your answer computes something the note is about, the note belongs in the answer.
-
----
-
-## Units and decimals
-
-```json
-"ContentsCode": {
-  "label": "statistical variable",
-  "category": {
-    "index": { "Persons1": 0 },
-    "label": { "Persons1": "Persons" },
-    "unit":  { "Persons1": { "base": "number", "decimals": 0 } }
-  },
-  "extension": { "elimination": false, "measuringType": { "Persons1": "Stock" } }
-}
-```
-
-`unit.base` is the unit of measurement and `unit.decimals` how many decimals to display. Keep that precision: do not add decimals the agency did not publish, and do not round away ones that carry meaning.
-
----
-
-## Status codes
+### `status`
 
 `value` and `status` are two parallel channels. Read them separately:
 
@@ -202,29 +176,41 @@ PxWebApi's serializer produces both (`PxTools/PCAxis.Serializers`, `JsonStat2Ser
 
 Exact symbols vary by installation, because they come from the source PX file's `DATASYMBOL1`–`6` keywords and each file may override the defaults (Latvia sends `…` where SSB sends `..`). Check the response, and look for a key to the symbols in the table's `note` — PxWeb has no field for it, while Eurostat explains its symbols in `extension.status.label`. **Never treat any symbol as zero**, never silently drop the row, and never filter `null`s out of `value` before indexing: a `null` holds its position, and removing it shifts every later cell.
 
----
+### `note`
 
-## Classification links
+Mandatory notes can sit at three levels. All travel with the data response, so showing them costs no extra call:
 
-Some agencies attach classification URNs to `link.describedby`:
+| Level | The notes | Which must be shown | Seen at |
+|---|---|---|---|
+| Table | `note` (root, list) | `extension.noteMandatory`, keyed by index: `{"1": true}` means `note[1]` | SSB, SCB, Latvia |
+| Variable | `dimension.{var}.note` (list) | `dimension.{var}.extension.noteMandatory`, keyed by index | SCB |
+| Value | `dimension.{var}.category.note` (value code → list) | `dimension.{var}.extension.categoryNoteMandatory`, value code → index: `{"0140": {"1": true}}` means `category.note["0140"][1]` | SCB |
 
-```json
-"link": { "describedby": [ { "extension": { "Region": "urn:…:classification:…:104" } } ] }
-```
+The index differs per table, so resolve it rather than assuming the first note. Value-level notes come only for the values you selected. Mandatory notes are how an agency warns that a figure needs a caveat — a changed base year, a corrected period, a successor table, disclosure-control noise. If your answer computes something a mandatory note is about, the note belongs in the answer.
 
-The `extension` key is either a variable name (a URN for the whole variable) or a single value code (a URN per value — common for the metric variable). Some installations additionally publish ready-made human-readable links under `link.related` in metadata responses; availability varies by installation, so check rather than assume.
+### `link`
+
+What `link` carries differs per installation (SSB 2026-10-11, SCB 2026-10-13, Latvia 2026-10-14):
+
+| | SSB | SCB | Latvia |
+|---|---|---|---|
+| `link.related` | Root: the statistics page and "About the statistics"; per variable: classification and definition pages. **Metadata only** | Root: the statistics page (`https://www.scb.se/BE0101`, `metaid` `PRODUCTCODE:BE0101`), in metadata **and** data | none |
+| `link.describedby` per variable | URNs to Klass and VarDok, also in data | plain text, e.g. `{"Kon": "Kön"}` | on 4 of 42 dimensions, value codes mapped to `"1"` |
+
+The `describedby` key is either a variable name (one entry for the whole variable) or a value code (one per value — common for the metric variable).
 
 ---
 
 ## What json-stat2 cannot express
 
-The loss is silent in all three cases:
+The loss is silent in every case:
 
 - **Time periodicity.** PX declares it explicitly (`TIMEVAL(...)=TLIST(A1|H1|Q1|M1|W1)`, which also guarantees consecutive periods). json-stat2 has no standard field for it — `role.time` names the time dimension but says nothing about its frequency. PxWebApi v2 works around this with **`timeUnit` on the `/tables` resource, *outside* the json-stat2 document**. If a consumer downstream needs to know whether an axis is monthly or quarterly, carry `timeUnit` across yourself; the dataset will not. `timeUnit: Other` means the codes are not periods at all (Latvia `IRJ010`: `Time01`).
+- **`firstPeriod`, `lastPeriod` and `discontinued`.** They are only on the `/tables` hit and `GET /tables/{id}`. There, `discontinued` appears at SSB and SCB only when it is `true` (2 of 43 SCB hits, 2026-10-13), and never at Latvia (0 of 100 hits with `includeDiscontinued=true`, 2026-10-14).
 - **The aggregation that produced a figure.** An omitted dimension is eliminated and **disappears from `id` and `dimension` entirely** — the dataset does not record that it was summed away, or over what.
-- **Which codelist a code came from.** Requesting `codelist[Var]=agg_…` leaves no trace in the response: the dimension comes back with the aggregated codes and an `extension` that names no codelist. Two different aggregations of the same variable produce datasets that look alike and are not.
+- **Which codelist a code came from.** Requesting `codelist[Var]=…` leaves no trace in the response: the dimension comes back with the codelist's codes and an `extension` that names no codelist (SCB TAB6471 with `vs_CKM02Län`: `{"elimination": false, "show": "code_value"}`, 2026-10-14). Two different aggregations of the same variable produce datasets that look alike and are not.
 
-All three are reasons to state your selection alongside your numbers rather than relying on the response to document itself.
+These are reasons to state your selection alongside your numbers rather than relying on the response to document itself.
 
 ---
 

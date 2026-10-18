@@ -20,7 +20,7 @@ En kodeliste gir en variabel et annet sett verdier enn tabellens eget. Listene e
 | Type          | Prefiks | Gir                                                          | Eksempel fra 07459                                |
 | ------------- | ------- | ------------------------------------------------------------ | ------------------------------------------------- |
 | `Valueset`    | `vs_`   | Et utvalg av tabellens egne koder                            | `vs_Fylker`: 41 fylkeskoder, også nedlagte        |
-| `Aggregation` | `agg_`  | Grupper med egne koder; `valueMap` viser hva hver består av  | `agg_KommFylker`: 18 fylker summert fra kommunene |
+| `Aggregation` | `agg_`  | Grupper med egne koder; `valueMap` viser hva hver består av  | `agg_KommFylker`: 18 koder summert fra kommunene  |
 
 - **Bruk ID-en fra metadata for tabellen du spør mot.** ID-ene varierer mellom tabeller — samme næringsnivå heter `agg_NACE2025nivaa1` i 14729 og `agg_NACE2025niv1` i 14721 — og er case-sensitive. At en kodeliste finnes, betyr ikke at tabellen tilbyr den: `vs_Fylker2024` finnes, men ikke på 07459.
 - **Velg på `label`.** «Fylker 2024-» er dagens fylker, «Fylker 2024, sammenslåtte tidsserier» er fylkene summert fra kommunene bakover i tid, «Alle fylker» tar med nedlagte koder. Samme label kan likevel stå på lister med ulik tidsdybde: `agg_KommSummer` (07459) og `agg_KommSummerHist` (06913) heter begge «Kommuner 2024, sammenslåtte tidsserier». `vs_`-labels slutter ofte med mellomrom («Alle fylker ») — trim før du sammenligner.

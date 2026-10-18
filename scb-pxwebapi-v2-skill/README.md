@@ -18,10 +18,14 @@ scb-pxwebapi-v2/
 ├── README.md                 # Denna fil
 ├── CHANGELOG.md              # Ändringslogg — gällande version står i SKILL.md-frontmatter (metadata.version)
 ├── scb-pxwebapi-v2-skill.zip # Färdigpackad skill — ladda upp i Claude.ai, eller packa upp i .agents/skills/ för ChatGPT/Codex
-└── references/
-    ├── json-stat2.md         # json-stat2 formatspecifikation (Dataset, row-major, statuskoder, extension, noteMandatory — gäller även Eurostat, World Bank)
-    ├── mcp-tools.md          # Mappning till @jarib/pxweb-mcp och verktygens begränsningar mot SCB
-    └── search-syntax.md      # Lucene-baserad söksyntax för /tables?query=
+├── references/
+│   ├── json-stat2.md         # json-stat2 så som SCB levererar det: sju läsregler först, sedan fälten, obligatoriska noter på tre nivåer, status och länkar
+│   ├── mcp-tools.md          # Mappning till @jarib/pxweb-mcp och verktygens begränsningar mot SCB
+│   └── search-syntax.md      # Lucene-baserad söksyntax för /tables?query=
+└── docs/                     # Tillägg: följer inte med i zip:en
+    ├── skillkarta-arbetsflode.svg              # Diagram över arbetsflödet: Steg 1–6 och API-anropen i varje steg
+    ├── skillkarta-kontroll-och-paketering.svg  # Diagram över vad som kontrolleras mot live-API:et och vad som packas
+    └── skillkarta.html                         # Båda diagrammen med förklaring. Öppnas i webbläsare från ett klonat repo
 ```
 
 `CLAUDE.md`, `DEVLOG.md`, `scripts/` och `evals/` i repot är underhållarinterna och ingår inte i paketet.
@@ -38,7 +42,7 @@ scb-pxwebapi-v2/
 
    Paketet innehåller endast de användarvända filerna (`SKILL.md`, `README.md`, `CHANGELOG.md`, `references/`) plus `LICENSE` under toppmappen `scb-pxwebapi-v2/`.
 
-2. Gå till **Settings > Features > Skills**
+2. Gå till **Settings > Skills**
 3. Ladda upp ZIP-filen
 
 ### Claude Code

@@ -4,6 +4,15 @@ What is different for users of the skill, newest first. The current version is i
 
 What was verified, on which installations and when, is in the maintainer's log, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/pxwebapi-v2-generic-skill/DEVLOG.md). It is in the repository, not in the ZIP.
 
+## 0.11.2 — 2026-10-14
+
+- **Corrected: mandatory notes can sit at three levels.** Besides the table's notes, SCB flags notes per variable (`Alder` in TAB6471) and per value (`categoryNoteMandatory`). The answer should show all of them.
+- **Corrected: percent-encode non-ASCII letters in the URL.** A raw `ä` or `ī` returns 0 hits at SCB and Latvia, and a raw `ø` returns 400 at SSB.
+- **Corrected:** `discontinued` is never set in metadata or data, and on a search hit it appears only when `true` (never at Latvia). The PX elimination forms are now written correctly, and `copyright` in `extension.px` is `false` at all three installations.
+- New: `references/json-stat2.md` starts with seven reading rules, and says per installation what `link` and `extension.px` carry.
+- New: if a table has a standard error or margin of error as a measure, fetch it before calling a difference real. An obviously right search hit is chosen directly, with the reason given.
+- New in the repository, not in the zip: a skill map in `docs/`.
+
 ## 0.11.1 — 2026-10-02
 
 - **Corrected: a `status` flag does not always mean the value is missing.** A cell with a data note keeps its number — SSB marks provisional figures `*`. Show the number with its flag, and never drop `null`s before indexing.

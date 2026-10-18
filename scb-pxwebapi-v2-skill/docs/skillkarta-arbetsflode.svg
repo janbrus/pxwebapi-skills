@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" width="960" height="1136" viewBox="0 0 960 1136" role="img" aria-label="Arbetsflöde i sex steg: förstå behovet, sök efter tabell, utforska metadata, bygg och kör query, presentera, sparad fråga. Steg 2, 3, 4 och 6 anropar SCB:s PxWebApi v2. Siffror i svaret kommer bara från data-svaret i steg 4. Svarar inte API:et säger svaret det och ger inga siffror.">
+<title>Arbetsflöde i sex steg: förstå behovet, sök efter tabell, utforska metadata, bygg och kör query, presentera, sparad fråga. Steg 2, 3, 4 och 6 anropar SCB:s PxWebApi v2. Siffror i svaret kommer bara från data-svaret i steg 4. Svarar inte API:et säger svaret det och ger inga siffror.</title>
+<style>
+svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --ink2: #4C5765; --line: #C3CBD5; --accent: #0A6A88; --tag: #DDE3EA;
+  --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, "Liberation Sans", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+@media (prefers-color-scheme: dark) { svg.dg { --bg: #10151B; --surface: #18202A; --panel: #141B23; --ink: #E3E8EE; --ink2: #9AA6B3; --line: #3A4552; --accent: #5DB9D7; --tag: #27313C; } }
+.dg .bg { fill: var(--bg); }
+.dg .title { font-size: 15px; font-weight: 600; }
+.dg text { font-family: var(--sans); font-size: 12px; fill: var(--ink); }
+.dg .t { font-size: 13px; font-weight: 600; }
+.dg .n { fill: var(--ink2); font-weight: 500; }
+.dg .mn { font-family: var(--mono); font-size: 12px; }
+.dg .m { font-family: var(--mono); font-size: 11px; }
+.dg .r { font-family: var(--mono); font-size: 11px; fill: var(--ink2); }
+.dg .lbl { font-size: 11px; fill: var(--ink2); }
+.dg .cap { font-family: var(--mono); font-size: 11px; fill: var(--ink2); letter-spacing: .08em; font-weight: 600; }
+.dg .hot-t { fill: var(--accent); font-weight: 600; font-size: 11px; }
+.dg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.dg .ext { fill: var(--bg); stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .quiet { fill: none; stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .panel { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+.dg .pill { fill: var(--surface); stroke: var(--ink2); stroke-width: 1; }
+.dg .wire { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .route { stroke-dasharray: 5 4; }
+.dg .hot { stroke: var(--accent); stroke-width: 2.4; fill: none; }
+.dg .brk { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .mk { fill: var(--ink2); }
+.dg .mk-hot { fill: var(--accent); }
+.dg .tagbox { fill: var(--tag); stroke: var(--line); stroke-width: 1; }
+.dg .tagtx { font-family: var(--mono); font-size: 9.5px; font-weight: 600; fill: var(--ink2); }
+.dg .quiet-t { fill: var(--ink2); }
+</style>
+<rect width="960" height="1136" class="bg"/>
+<text x="16" y="30" class="title">scb-pxwebapi-v2 · arbetsflöde</text>
+<text x="944" y="30" text-anchor="end" class="r">v0.11.1 · ritad 2026-10-06</text>
+<defs>
+  <marker id="f1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+  <marker id="f1h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-hot"/></marker>
+</defs>
+
+<!-- Question -->
+<rect x="81" y="44" width="330" height="34" rx="17" class="pill"/>
+<text x="246" y="66" text-anchor="middle">Fråga: «Hur många bor i Stockholm?»</text>
+<line x1="246" y1="78" x2="246" y2="110" class="wire" marker-end="url(#f1a)"/>
+
+<!-- Steg 1 -->
+<rect x="16" y="112" width="460" height="96" rx="6" class="box"/>
+<text x="32" y="134" class="t"><tspan class="n">Steg 1</tspan> · Förstå behovet</text>
+<text x="32" y="154">Fenomen · geografi · tidsperiod · nedbrytning</text>
+<text x="32" y="172">Vag fråga? En följdfråga, inte flera</text>
+<text x="32" y="190">Svenska ger lang=sv, engelska lang=en</text>
+
+<line x1="246" y1="208" x2="246" y2="246" class="wire" marker-end="url(#f1a)"/>
+<text x="256" y="231" class="lbl">sökord</text>
+
+<!-- Steg 2 -->
+<rect x="16" y="248" width="460" height="128" rx="6" class="box"/>
+<text x="32" y="270" class="t"><tspan class="n">Steg 2</tspan> · Sök efter tabell</text>
+<text x="32" y="290">Fackord: «folkmängd», inte «befolkning»</text>
+<text x="32" y="308">discontinued räcker inte: jämför lastPeriod med i dag</text>
+<text x="32" y="326">TAB638 slutar 2024 utan flagga, serien går i TAB6471</text>
+<text x="32" y="344">Visa 3–5 träffar, rekommendera en</text>
+<text x="32" y="364" class="r">search-syntax.md</text>
+
+<line x1="246" y1="376" x2="246" y2="414" class="wire" marker-end="url(#f1a)"/>
+<text x="256" y="399" class="lbl">tabell-ID</text>
+
+<!-- Steg 3 -->
+<rect x="16" y="416" width="460" height="128" rx="6" class="box"/>
+<text x="32" y="438" class="t"><tspan class="n">Steg 3</tspan> · Utforska metadata</text>
+<text x="32" y="458">Hoppas aldrig över: koderna bekräftas här</text>
+<text x="32" y="476">SCB sätter inte role.geo: leta efter Region i id</text>
+<text x="32" y="494">Läs elimination bara från metadata, aldrig från data</text>
+<text x="32" y="512">Eliminerbart per tabell: Alder krävs i TAB6471</text>
+<text x="32" y="532" class="r">json-stat2.md</text>
+
+<line x1="246" y1="544" x2="246" y2="582" class="wire" marker-end="url(#f1a)"/>
+<text x="256" y="567" class="lbl">koder + kodlista</text>
+
+<!-- Steg 4 -->
+<rect x="16" y="584" width="460" height="114" rx="6" class="box"/>
+<text x="32" y="606" class="t"><tspan class="n">Steg 4</tspan> · Bygg och kör query</text>
+<text x="32" y="626">Tid och ContentsCode är alltid med</text>
+<text x="32" y="644">Tid: top(N) eller from() framför fasta perioder</text>
+<text x="32" y="662">GET: uttryck med komma inom [ ] · curl -g</text>
+<text x="32" y="680">Upprepad värdekod ger 500 med tom body</text>
+
+<line x1="246" y1="698" x2="246" y2="736" class="hot" marker-end="url(#f1h)"/>
+<text x="256" y="721" class="hot-t">enda källan till siffror i svaret</text>
+
+<!-- Steg 5 -->
+<rect x="16" y="738" width="460" height="146" rx="6" class="box"/>
+<text x="32" y="760" class="t"><tspan class="n">Steg 5</tspan> · Presentera</text>
+<text x="32" y="780">Tabell med enhet och «Källa: SCB, tabell TAB6471»</text>
+<text x="32" y="798">Obligatoriska noter och statustecken visas</text>
+<text x="32" y="816">Från 2025: CKM-brus, totalen ≠ summan av delarna</text>
+<text x="32" y="834">Egna beräkningar märks som dina</text>
+<text x="32" y="852">Visa URL/body, utelämnade dimensioner, kodlista</text>
+<text x="32" y="872" class="r">json-stat2.md</text>
+
+<line x1="246" y1="884" x2="246" y2="922" class="wire" marker-end="url(#f1a)"/>
+<text x="256" y="907" class="lbl">valfritt</text>
+
+<!-- Steg 6 -->
+<rect x="16" y="924" width="460" height="78" rx="6" class="box"/>
+<text x="32" y="946" class="t"><tspan class="n">Steg 6</tspan> · Sparad fråga</text>
+<text x="32" y="966">Delbart ID; top(N) håller den aktuell</text>
+<text x="32" y="984">Body kräver outputFormat och outputFormatParams</text>
+
+<!-- Fallback -->
+<rect x="16" y="1042" width="460" height="78" rx="6" class="box"/>
+<text x="32" y="1064" class="t">Fallback · API:et svarar inte</text>
+<text x="32" y="1084">Säg det, inga siffror ur minnet → Statistikdatabasen</text>
+<text x="32" y="1102">Syntax: PxTools-guiden, SCB:s handbok (engelska)</text>
+
+<!-- API column -->
+<rect x="576" y="44" width="368" height="964" rx="8" class="panel"/>
+<text x="592" y="66" class="t">SCB PxWebApi v2</text>
+<text x="592" y="84" class="m">statistikdatabasen.scb.se/api/v2</text>
+<text x="592" y="106">Kanal: pxweb-mcp eller HTTP</text>
+<text x="592" y="124" class="lbl">pxweb-mcp pekar mot SSB utan --url till SCB</text>
+<rect x="592" y="136" width="38" height="16" rx="3" class="tagbox"/>
+<text x="611" y="148" text-anchor="middle" class="tagtx">HTTP</text>
+<text x="638" y="148" class="lbl">bara HTTP, inte i pxweb-mcp</text>
+<text x="592" y="166" class="lbl">även lang=sv och outputFormatParams</text>
+<text x="592" y="186" class="r">mcp-tools.md</text>
+
+<!-- Row: Steg 2 -->
+<rect x="588" y="252" width="344" height="96" rx="5" class="box"/>
+<text x="600" y="274" class="m">GET /tables?query=…</text>
+<text x="600" y="294" class="m">GET /tables/{id}</text>
+<text x="600" y="318" class="lbl">lastPeriod · timeUnit · discontinued</text>
+<text x="600" y="336" class="lbl">pageSize 20: träff 47 syns inte på sida 1</text>
+<line x1="476" y1="285" x2="586" y2="285" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="279" text-anchor="middle" class="lbl">sök</text>
+<line x1="588" y1="301" x2="478" y2="301" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="315" text-anchor="middle" class="lbl">träffar</text>
+
+<!-- Row: Steg 3 -->
+<rect x="588" y="420" width="344" height="102" rx="5" class="box"/>
+<text x="600" y="442" class="m">GET /tables/{id}/metadata</text>
+<text x="600" y="462" class="m">GET /codelists/{id}</text>
+<text x="600" y="482" class="m">GET /tables/{id}/defaultselection</text>
+<rect x="886" y="471" width="38" height="16" rx="3" class="tagbox"/>
+<text x="905" y="483" text-anchor="middle" class="tagtx">HTTP</text>
+<text x="600" y="506" class="lbl">svar i json-stat2-format</text>
+<line x1="476" y1="453" x2="586" y2="453" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="447" text-anchor="middle" class="lbl">tabell-ID</text>
+<line x1="588" y1="469" x2="478" y2="469" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="483" text-anchor="middle" class="lbl">metadata</text>
+
+<!-- Row: Steg 4 -->
+<rect x="588" y="588" width="344" height="102" rx="5" class="box"/>
+<text x="600" y="610" class="m">POST /tables/{id}/data</text>
+<text x="600" y="630" class="m">GET /tables/{id}/data?valueCodes[…]</text>
+<text x="600" y="650" class="m">GET /config</text>
+<rect x="886" y="639" width="38" height="16" rx="3" class="tagbox"/>
+<text x="905" y="651" text-anchor="middle" class="tagtx">HTTP</text>
+<text x="600" y="674" class="lbl">maxDataCells 150 000 · 30 anrop per 10 s</text>
+<line x1="476" y1="621" x2="586" y2="621" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="615" text-anchor="middle" class="lbl">selektion</text>
+<line x1="588" y1="637" x2="479" y2="637" class="hot" marker-end="url(#f1h)"/>
+<text x="532" y="653" text-anchor="middle" class="hot-t">json-stat2</text>
+
+<!-- Row: Steg 6 -->
+<rect x="588" y="928" width="344" height="70" rx="5" class="box"/>
+<text x="600" y="950" class="m">POST /savedqueries</text>
+<rect x="886" y="939" width="38" height="16" rx="3" class="tagbox"/>
+<text x="905" y="951" text-anchor="middle" class="tagtx">HTTP</text>
+<text x="600" y="970" class="m">GET /savedqueries/{id}/data</text>
+<rect x="886" y="959" width="38" height="16" rx="3" class="tagbox"/>
+<text x="905" y="971" text-anchor="middle" class="tagtx">HTTP</text>
+<text x="600" y="990" class="lbl">returnerar ett ID</text>
+<line x1="476" y1="961" x2="586" y2="961" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="955" text-anchor="middle" class="lbl">selektion</text>
+<line x1="588" y1="977" x2="478" y2="977" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="991" text-anchor="middle" class="lbl">ID</text>
+
+<!-- API failure to fallback -->
+<polyline points="760,1008 760,1081 478,1081" class="wire" marker-end="url(#f1a)"/>
+<text x="770" y="1046" class="lbl">4xx · 5xx · 503</text>
+</svg>

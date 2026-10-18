@@ -10,15 +10,16 @@ Detaljerte regler for valg og utforming av diagramtyper for SSB-data.
 
 **Akser:**
 - Tid på x-aksen, verdi på y-aksen
-- Y-aksen starter alltid på 0 for absolutte tall
+- Y-aksen starter på 0 som utgangspunkt. Avkortet akse er lov når endringen er budskapet og startverdien står synlig på aksen
 - For indekser (KPI, boligpris) kan y-aksen starte på en annen verdi, men marker basisverdi tydelig
+- Arealdiagram starter alltid på 0 — flaten koder mengde, som en søyle
 
 **Serier:**
 - Maks 5 linjer per diagram (strengere enn den generelle maks-6–7-regelen i SKILL.md, fordi overlappende linjer blir uleselige raskere enn separate søyler). Bruk small multiples hvis du trenger å vise flere.
 - For interaktive visninger der brukeren selv velger serier: vis advarsel ved overskridelse, men render likevel.
 - Bruk utheving-paletten for fokusserie (SSB Grønn for nøkkelserie, grå for resten)
 - Linjestil: 2px solid
-- Markører bare ved <10 datapunkter
+- Markører bare ved <10 datapunkter — flaggede punkter (f.eks. foreløpige tall) merkes alltid
 
 **SSB-spesifikt:**
 - Vis basisår for indekser med annotasjon (f.eks. "2015=100")
@@ -28,7 +29,7 @@ Detaljerte regler for valg og utforming av diagramtyper for SSB-data.
 **Vanlige feil:**
 - For mange linjer — bruk small multiples i stedet
 - Manglende markering av basisår for indekser
-- Avkortet y-akse som overdriver trender
+- Avkortet y-akse uten at startverdien er tydelig, eller der budskapet er nivå og ikke endring
 
 ---
 
@@ -39,7 +40,7 @@ Detaljerte regler for valg og utforming av diagramtyper for SSB-data.
 **Regler:**
 - Sorter alltid etter verdi (høyest → lavest eller lavest → høyest)
 - Y-aksen starter alltid på 0
-- Avstand: 40% gap mellom søyler
+- Luft mellom søylene ≈ halve søylebredden (søylen tar ⅔ av plassen: Chart.js `categoryPercentage: 0.67, barPercentage: 1`; matplotlib `width=0.67`)
 - Direkte merking med verdier på enden av hver søyle
 - Maks 15–20 søyler per diagram
 
@@ -72,24 +73,20 @@ Detaljerte regler for valg og utforming av diagramtyper for SSB-data.
 
 ---
 
-## Ringdiagram (donut)
+## Kake- og ringdiagram
 
-**Når:** Del av helhet, maks 5 segmenter.
+**Når:** Del av helhet, inntil 5 deler. Kake og ring er likestilt; ssb.no bruker kake.
 
 **Regler:**
-- Hull: 50% av radius
-- Sortering: størst segment starter kl. 12, med klokken
-- Samle alt under 5% i "Andre" (SSB Grå)
+- Maks 5 deler: de fire største og "Andre" (SSB Grå) for resten. "Andre" står sist før nest største, uansett størrelse
+- Blir "Andre" større enn den største enkeltdelen, passer ikke kake: bruk sorterte liggende søyler, som viser alle kategoriene. Ber brukeren likevel om kake, list det som ligger i "Andre" ved siden av og nevn søylealternativet
+- Største del starter kl. 12 og går med klokken; nest største starter kl. 12 og går mot klokken, så begge kan måles mot loddlinjen. Chart.js har ingen innstilling for dette: legg dataene i rekkefølgen største, 3., 4., …, "Andre", nest største
 - Direkte merking med prosent OG absolutt tall
-
-**SSB-spesifikt:**
-- Vis total i midten av ringen
-- Maks 5 segmenter — grupper resten
+- Ring: hull 50 % av radius, og vis totalen i midten
 
 **Vanlige feil:**
-- For mange segmenter (>6) — vanskelig å lese
-- Manglende "Andre"-kategori for små segmenter
-- Bruker kakediagram i stedet for ringdiagram
+- For mange deler (>5) — vanskelig å lese
+- Kake der "Andre" dominerer — da er det søylediagram som viser fordelingen
 
 ---
 
@@ -100,7 +97,7 @@ Detaljerte regler for valg og utforming av diagramtyper for SSB-data.
 **Forutsetning:** `data.role.geo` finnes i responsen. **Hvis `role.geo` mangler**, ikke prøv å rendre kart — dataene er typisk allerede aggregerte til hele Norge. Vis dem som linje (tidsserie), horisontal søyle (rangering) eller scorecard (KPI) i stedet. Ikke spør brukeren om geografi når API-et ikke har levert det.
 
 **Regler:**
-- Bruk sekvensielt grønn fra `#ECFEED` til `#274247`
+- Bruk sekvensielt grønn fra `#ECFEED` til `#075745` (se `color-system.md`); for avvik fra et snitt, den divergerende blå–oker-skalaen
 - 5 kvantilgrupper er standard
 - Tooltip med navn, verdi og rang
 - Inkluder legend med verdiskala
@@ -126,10 +123,10 @@ Detaljerte regler for valg og utforming av diagramtyper for SSB-data.
 - Stort tall: 32px+ bold
 - Undertekst med kontekst: periode, enhet
 - Vis endring med ▲/▼ og semantisk farge (grønn/rosa)
-- Bruk kortformat for store tall: 5.6 mill., 720k
+- Bruk kortformat for store tall: 5,6 mill., 720 k
 
 **SSB-spesifikt:**
-- Vis alltid sammenligningsperiode: "5 609 000 innbyggere (+1.2% fra 2024)"
+- Vis alltid sammenligningsperiode: "5 609 000 innbyggere (+1,2 % fra 2024)"
 - For indekser: vis både indeksverdi og endring
 
 ---

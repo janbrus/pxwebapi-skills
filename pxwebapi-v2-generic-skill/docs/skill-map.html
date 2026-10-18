@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>generic-pxweb-v2-skill map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column for prose, wide figures that scroll sideways on phones. Cool slate neutrals, one teal accent reserved for the data path. */
+:root {
+  --bg: #F3F5F8;
+  --surface: #FFFFFF;
+  --panel: #E8ECF1;
+  --ink: #17202B;
+  --ink2: #4C5765;
+  --line: #C3CBD5;
+  --accent: #0A6A88;
+  --tag: #DDE3EA;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10151B; --surface: #18202A; --panel: #141B23; --ink: #E3E8EE; --ink2: #9AA6B3;
+    --line: #3A4552; --accent: #5DB9D7; --tag: #27313C; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10151B; --surface: #18202A; --panel: #141B23; --ink: #E3E8EE; --ink2: #9AA6B3;
+  --line: #3A4552; --accent: #5DB9D7; --tag: #27313C; color-scheme: dark;
+}
+
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
+.page { max-width: 1100px; margin: 0 auto; padding-inline: 16px; padding-block: 40px 56px; display: grid; gap: 40px; }
+.prose { max-width: 66ch; }
+
+header { display: grid; gap: 10px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; color: var(--ink2); letter-spacing: .02em; }
+h1 { font-family: var(--display); font-weight: 600; font-size: clamp(30px, 5vw, 44px); line-height: 1.08; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 24px; line-height: 1.2; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+code { font-family: var(--mono); font-size: .9em; }
+
+.rule { display: grid; gap: 6px; padding-block: 18px; border-top: 2px solid var(--accent); border-bottom: 1px solid var(--line); }
+.rule .label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); font-weight: 600; }
+.rule .quote { font-family: var(--display); font-size: clamp(20px, 3vw, 26px); line-height: 1.25; text-wrap: balance; }
+.rule .note { color: var(--ink2); font-size: 14px; }
+
+section { display: grid; gap: 14px; }
+figure { margin: 0; display: grid; gap: 12px; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.scroll img { display: block; width: 100%; min-width: 880px; height: auto; max-width: none; }
+figcaption { color: var(--ink2); font-size: 14px; max-width: 72ch; }
+
+footer { color: var(--ink2); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
+footer a { color: var(--accent); }
+
+</style>
+</head>
+<body>
+<main class="page">
+  <header>
+    <div class="eyebrow">generic-pxweb-v2-skill · v0.11.1 · drawn 6 October 2026</div>
+    <h1>generic-pxweb-v2-skill</h1>
+    <p class="prose">The skill guides Claude through finding, fetching and presenting official statistics from any PxWebApi v2 installation. Statistics Norway, Statistics Sweden and Latvia’s CSP are verified. The first diagram shows the workflow in a conversation. The second shows how the package is verified and built into a zip.</p>
+  </header>
+
+  <div class="rule prose">
+    <div class="label">Base rule</div>
+    <div class="quote">Never state a number you have not fetched from the API in this conversation.</div>
+    <p class="note">The highlighted line in the diagram below is the only way a number can enter the answer.</p>
+  </div>
+
+  <section>
+    <h2>The workflow in a conversation</h2>
+    <figure>
+      <div class="scroll">
+        <img src="skill-map-workflow.svg" width="960" height="1118" alt="Workflow in six steps: identify the installation, search for tables, explore metadata, build and run the query, present, saved query. Steps 1, 2, 3, 4 and 6 call the installation's PxWebApi v2. Numbers in the answer come only from the data response in Step 4. If the API fails, the answer says so and gives no numbers.">
+      </div>
+      <figcaption>Six steps in a fixed order. Step 5 calls nothing, and the numbers in the answer come only from the <code>/data</code> response in Step 4. Variable names, the cell limit, the default format and the period codes vary by installation, so Step 1 reads <code>/config</code> and Step 3 reads the metadata every time. Grey file names are the reference files each step reads.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>How the skill is checked and packaged</h2>
+    <figure>
+      <div class="scroll">
+        <img src="skill-map-checks-and-packaging.svg" width="960" height="356" alt="SKILL.md, references, README, CHANGELOG and LICENSE are packed by build_zip.sh into generic-pxweb-v2-skill.zip, and CI checks that the committed zip matches a fresh build. There is no example checker, because the examples are schematic. Facts are verified by hand against SSB, SCB and Latvia and dated in DEVLOG.md. docs, CLAUDE.md, DEVLOG.md, evals and scripts stay out of the zip.">
+      </div>
+      <figcaption>Unlike the SSB and SCB skills, this one has no example checker. Its examples use <code>{base_url}</code> and <code>{id}</code>, so there is nothing to call. A factual claim is only as fresh as its last manual verification, and <code>DEVLOG.md</code> records the date. The zip gets the user files only. <code>docs/</code> is neither checked nor shipped.</figcaption>
+    </figure>
+  </section>
+
+  <footer class="prose">Drawn from <code>SKILL.md</code> v0.11.1, <code>CLAUDE.md</code> and <code>README.md</code>. If the workflow changes, the diagram has to be redrawn by hand. The skill is unofficial; none of the agencies is behind it. Source: <a href="https://github.com/janbrus/pxwebapi-skills/tree/main/pxwebapi-v2-generic-skill">github.com/janbrus/pxwebapi-skills</a>.</footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" width="1040" height="1150" viewBox="0 0 1040 1150" role="img" aria-label="Arbeidsflyt i ni steg fra en JSON-stat2-respons hentet med ssb-pxwebapi-v2 til et ferdig diagram: avgjør rendringsmål, velg diagramtype, gjør JSON-stat2 om til datasett, farger, typografi, tittel og kilde, tabeller, format og sjekkliste. Rendringsmålet deler flyten i A, inline chat-widget, og B, frittstående leveranse. Data-blekket er SSB-farger i begge. Resten følger verten i A og SSB-stilen i B.">
+<title>Arbeidsflyt i ni steg fra en JSON-stat2-respons hentet med ssb-pxwebapi-v2 til et ferdig diagram: avgjør rendringsmål, velg diagramtype, gjør JSON-stat2 om til datasett, farger, typografi, tittel og kilde, tabeller, format og sjekkliste. Rendringsmålet deler flyten i A, inline chat-widget, og B, frittstående leveranse. Data-blekket er SSB-farger i begge. Resten følger verten i A og SSB-stilen i B.</title>
+<style>
+svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --ink2: #4C5765; --line: #C3CBD5; --accent: #0A6A88; --tag: #DDE3EA;
+  --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, "Liberation Sans", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+@media (prefers-color-scheme: dark) { svg.dg { --bg: #10151B; --surface: #18202A; --panel: #141B23; --ink: #E3E8EE; --ink2: #9AA6B3; --line: #3A4552; --accent: #5DB9D7; --tag: #27313C; } }
+.dg .bg { fill: var(--bg); }
+.dg .title { font-size: 15px; font-weight: 600; }
+.dg text { font-family: var(--sans); font-size: 12px; fill: var(--ink); }
+.dg .t { font-size: 13px; font-weight: 600; }
+.dg .n { fill: var(--ink2); font-weight: 500; }
+.dg .mn { font-family: var(--mono); font-size: 12px; }
+.dg .m { font-family: var(--mono); font-size: 11px; }
+.dg .r { font-family: var(--mono); font-size: 11px; fill: var(--ink2); }
+.dg .lbl { font-size: 11px; fill: var(--ink2); }
+.dg .cap { font-family: var(--mono); font-size: 11px; fill: var(--ink2); letter-spacing: .08em; font-weight: 600; }
+.dg .hot-t { fill: var(--accent); font-weight: 600; font-size: 11px; }
+.dg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.dg .ext { fill: var(--bg); stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .quiet { fill: none; stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .panel { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+.dg .pill { fill: var(--surface); stroke: var(--ink2); stroke-width: 1; }
+.dg .wire { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .route { stroke-dasharray: 5 4; }
+.dg .hot { stroke: var(--accent); stroke-width: 2.4; fill: none; }
+.dg .brk { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .mk { fill: var(--ink2); }
+.dg .mk-hot { fill: var(--accent); }
+.dg .tagbox { fill: var(--tag); stroke: var(--line); stroke-width: 1; }
+.dg .tagtx { font-family: var(--mono); font-size: 9.5px; font-weight: 600; fill: var(--ink2); }
+.dg .quiet-t { fill: var(--ink2); }
+</style>
+<rect width="1040" height="1150" class="bg"/>
+<text x="16" y="30" class="title">ssb-chart · arbeidsflyt</text>
+<text x="1024" y="30" text-anchor="end" class="r">v1.3 · tegnet 2026-10-15</text>
+<defs>
+  <marker id="f1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+  <marker id="f1h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-hot"/></marker>
+</defs>
+
+<!-- Input -->
+<rect x="36" y="44" width="260" height="34" rx="17" class="pill"/>
+<text x="166" y="66" text-anchor="middle">Inn: JSON-stat2 fra ssb-pxwebapi-v2</text>
+<line x1="166" y1="78" x2="166" y2="128" class="hot" marker-end="url(#f1h)"/>
+<text x="176" y="107" class="hot-t">eneste kilde til tallene</text>
+
+<!-- Column heads -->
+<text x="356" y="98" class="cap">A · INLINE CHAT-WIDGET</text>
+<text x="356" y="116" class="lbl">forsvinner når samtalen lukkes</text>
+<text x="702" y="98" class="cap">B · FRITTSTÅENDE LEVERANSE</text>
+<text x="702" y="116" class="lbl">lever videre som fil</text>
+
+<!-- 1 Rendringsmål -->
+<rect x="16" y="130" width="300" height="78" rx="6" class="box"/>
+<text x="32" y="152" class="t"><tspan class="n">1</tspan> · Avgjør rendringsmål</text>
+<text x="32" y="172">Før farger, typografi og layout</text>
+<text x="32" y="190">Usikker? Spør brukeren</text>
+<rect x="356" y="130" width="322" height="78" rx="6" class="box"/>
+<text x="372" y="154">Rendres i samtalen, f.eks. show_widget</text>
+<text x="372" y="172">Vertens designsystem styrer alt</text>
+<text x="372" y="190">unntatt data-blekket</text>
+<rect x="702" y="130" width="322" height="78" rx="6" class="box"/>
+<text x="718" y="154">Nedlastbar HTML, PDF, Excel eller PPTX</text>
+<text x="718" y="172">Hele SSB-stilen gjelder uavkortet</text>
+
+<line x1="166" y1="208" x2="166" y2="244" class="wire" marker-end="url(#f1a)"/>
+
+<!-- 2 Diagramvalg -->
+<rect x="16" y="246" width="300" height="78" rx="6" class="box"/>
+<text x="32" y="268" class="t"><tspan class="n">2</tspan> · Velg diagramtype</text>
+<text x="32" y="288">Én innsikt per diagram</text>
+<text x="32" y="308" class="r">chart-selection.md</text>
+<rect x="356" y="246" width="668" height="78" rx="6" class="box"/>
+<text x="372" y="270">Linje for tid (maks 5 linjer) · liggende søyler for kategorier og rangering</text>
+<text x="372" y="288">Kake/ring for del av helhet · kart for geografi · scorecard for ett tall</text>
+<text x="372" y="306">Aldri 3D, doble y-akser eller avkortet y-akse på søyler og areal</text>
+
+<line x1="166" y1="324" x2="166" y2="360" class="wire" marker-end="url(#f1a)"/>
+
+<!-- 3 JSON-stat2 til datasett -->
+<rect x="16" y="362" width="300" height="78" rx="6" class="box"/>
+<text x="32" y="384" class="t"><tspan class="n">3</tspan> · Fra JSON-stat2 til datasett</text>
+<text x="32" y="404">Ingen husket eller utfylt verdi</text>
+<text x="32" y="424" class="r">jsonstat-to-chart.md</text>
+<rect x="356" y="362" width="668" height="78" rx="6" class="box"/>
+<text x="372" y="386">x-aksen følger category.index · desimaler per måltall fra category.unit</text>
+<text x="372" y="404">null blir et hull i linjen, aldri interpolert eller fylt med nabotall</text>
+<text x="372" y="422">Status på et tall (* = foreløpig) er et flagg: tegn punktet og merk det</text>
+
+<line x1="166" y1="440" x2="166" y2="478" class="wire" marker-end="url(#f1a)"/>
+
+<!-- 4 Farger -->
+<rect x="16" y="480" width="300" height="118" rx="6" class="box"/>
+<text x="32" y="502" class="t"><tspan class="n">4</tspan> · Farger</text>
+<text x="32" y="522">Hva fargen brukes på, avgjør</text>
+<text x="32" y="540">hvilket rendringsmål som gjelder</text>
+<text x="32" y="560" class="r">color-system.md</text>
+<rect x="356" y="480" width="668" height="50" rx="6" class="box"/>
+<text x="372" y="510">Data-blekk i begge: fast rekkefølge, SSB-paletten som standard</text>
+<rect x="836" y="499" width="12" height="12" rx="2" fill="#00824D"/>
+<rect x="852" y="499" width="12" height="12" rx="2" fill="#1D9DE2"/>
+<rect x="868" y="499" width="12" height="12" rx="2" fill="#C78800"/>
+<rect x="884" y="499" width="12" height="12" rx="2" fill="#C775A7"/>
+<rect x="900" y="499" width="12" height="12" rx="2" fill="#075745"/>
+<rect x="916" y="499" width="12" height="12" rx="2" fill="#0F2080"/>
+<rect x="932" y="499" width="12" height="12" rx="2" fill="#A3136C"/>
+<rect x="948" y="499" width="12" height="12" rx="2" fill="#471F00"/>
+<rect x="964" y="499" width="12" height="12" rx="2" fill="#909090"/>
+<rect x="356" y="538" width="322" height="60" rx="6" class="box"/>
+<text x="372" y="562">Chrome fra vertens tokens</text>
+<text x="372" y="580">Mørke farger sjekkes i mørk modus</text>
+<rect x="702" y="538" width="322" height="60" rx="6" class="box"/>
+<text x="718" y="562">Chrome også i SSB-hex:</text>
+<text x="718" y="580">rutenett #D9DFE0, nullinje #899597</text>
+
+<line x1="166" y1="598" x2="166" y2="636" class="wire" marker-end="url(#f1a)"/>
+
+<!-- 5 Typografi -->
+<rect x="16" y="638" width="300" height="60" rx="6" class="box"/>
+<text x="32" y="660" class="t"><tspan class="n">5</tspan> · Typografi</text>
+<text x="32" y="680">Tekst inne i selve visningen</text>
+<rect x="356" y="638" width="322" height="60" rx="6" class="box"/>
+<text x="372" y="662">Vertens typografi-tokens</text>
+<rect x="702" y="638" width="322" height="60" rx="6" class="box"/>
+<text x="718" y="662">Open Sans for titler og tekst,</text>
+<text x="718" y="680">Roboto Condensed i tabell-header</text>
+
+<line x1="166" y1="698" x2="166" y2="736" class="wire" marker-end="url(#f1a)"/>
+
+<!-- 6 Tittel og kilde -->
+<rect x="16" y="738" width="300" height="78" rx="6" class="box"/>
+<text x="32" y="760" class="t"><tspan class="n">6</tspan> · Tittel og kilde</text>
+<text x="32" y="780">Tittelen sier innsikten</text>
+<text x="32" y="798">Kildelinjen er alltid med</text>
+<rect x="356" y="738" width="322" height="78" rx="6" class="box"/>
+<text x="372" y="762">Begge i chat-teksten rundt</text>
+<text x="372" y="780">widget-kallet, aldri inni widgeten</text>
+<rect x="702" y="738" width="322" height="78" rx="6" class="box"/>
+<text x="718" y="762">Inne i diagrammet, kilden nederst:</text>
+<text x="718" y="780" class="m">Kilde: SSB, tabell {id}.</text>
+<text x="718" y="798" class="m">Sist oppdatert: {dato}.</text>
+
+<line x1="166" y1="816" x2="166" y2="854" class="wire" marker-end="url(#f1a)"/>
+
+<!-- 7 Tabeller -->
+<rect x="16" y="856" width="300" height="60" rx="6" class="box"/>
+<text x="32" y="878" class="t"><tspan class="n">7</tspan> · Tabeller</text>
+<text x="32" y="898">Statussymbol i cellen, aldri 0</text>
+<rect x="356" y="856" width="322" height="60" rx="6" class="box"/>
+<text x="372" y="880">Vanlig markdown-tabell i chat-svaret</text>
+<rect x="702" y="856" width="322" height="60" rx="6" class="box"/>
+<text x="718" y="880">SSB-tabellstil: header #274247,</text>
+<text x="718" y="898">zebra #ECFEED, tall høyrejustert</text>
+
+<line x1="166" y1="916" x2="166" y2="954" class="wire" marker-end="url(#f1a)"/>
+
+<!-- 8 Format -->
+<rect x="16" y="956" width="300" height="78" rx="6" class="box"/>
+<text x="32" y="978" class="t"><tspan class="n">8</tspan> · Format</text>
+<text x="32" y="998">Snuttene kopieres ordrett</text>
+<text x="32" y="1018" class="r">format-guidelines.md</text>
+<rect x="356" y="956" width="322" height="78" rx="6" class="box"/>
+<text x="372" y="980">React/HTML og Chart.js med vertens</text>
+<text x="372" y="998">tokens, tittelen slått av i widgeten</text>
+<rect x="702" y="956" width="322" height="78" rx="6" class="box"/>
+<text x="718" y="980">React/HTML, Chart.js, PowerPoint,</text>
+<text x="718" y="998">Excel, matplotlib, markdown</text>
+
+<line x1="166" y1="1034" x2="166" y2="1072" class="wire" marker-end="url(#f1a)"/>
+
+<!-- 9 Sjekkliste -->
+<rect x="16" y="1074" width="300" height="60" rx="6" class="box"/>
+<text x="32" y="1096" class="t"><tspan class="n">9</tspan> · Sjekkliste før levering</text>
+<text x="32" y="1116">Siste kontroll, hver gang</text>
+<rect x="356" y="1074" width="668" height="60" rx="6" class="box"/>
+<text x="372" y="1098">Rendringsmål avklart først · y-akse fra 0 på søyler og areal · enhet på aksene</text>
+<text x="372" y="1116">WCAG AA: 3:1 for grafikk, 4,5:1 for tekst · leselig uten farge</text>
+</svg>

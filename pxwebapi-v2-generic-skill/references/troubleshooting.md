@@ -40,6 +40,8 @@ curl: (3) bad range in URL position 66:
 
 Pass `-g` (`--globoff`), or URL-encode the brackets as `%5B`/`%5D` — the API accepts both. The same applies to bracketed expressions such as `[range(2024M01,2024M03)]`. If you get no JSON at all, check this first.
 
+`-g` does not encode anything else. Non-ASCII letters must be percent-encoded (`ä` → `%C3%A4`), or passed with `curl -G --data-urlencode "query=…"`. Raw UTF-8 fails differently per installation (verified 2026-10-14): a search returns 200 with 0 hits at SCB (`folkmängden`) and Latvia (`iedzīvotāji`, 357 hits encoded), and 400 with an HTML page at SSB (`lønnsindeks`). A codelist ID with a non-ASCII letter (SCB `vs_CKM02Län`) gives 400.
+
 ### 403 Forbidden
 
 Request understood but denied. The table may not be available via API. **Note:** exceeding the cell limit is a **400** in v2, not a 403 — if you are porting knowledge from PxWebApi v1, where the cell-limit response *is* 403, that mapping does not carry over.
@@ -77,7 +79,8 @@ Cell count = product of number of values per variable. Solution: limit time with
 ### Empty or unexpected search results
 
 - Try alternative keywords or synonyms in the agency's language
-- Use `includeDiscontinued=true` for historical series — but a frozen table is often *not* flagged; compare `lastPeriod` with today (SCB TAB638 stops at 2024 with `discontinued: null`; Latvia omits the key from `/tables` hits entirely)
+- Use `includeDiscontinued=true` for historical series — but a frozen table is often *not* flagged; compare `lastPeriod` with today (SCB TAB638 stops at 2024 with no `discontinued` field; SSB and SCB set the key only when it is `true`, Latvia never)
+- Check that non-ASCII letters were percent-encoded: a raw `ä` or `ø` in the URL gives 0 hits at SCB and Latvia (see the curl section above)
 - Check pagination: default `pageSize` is 20 and `page.totalElements` tells you how many hits you have not seen
 
 ### Special values in data

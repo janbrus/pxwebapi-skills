@@ -109,6 +109,8 @@ Det ikke-SSB/SCB-scenarioet. CLAUDE.md krever minst ett eksempel som beviser at
     på et tall, og den bytter ikke stilltiende til en annen tabell
   - `vs:` på samme variabel virker fortsatt, og er det riktige alternativet hvis
     brukeren egentlig ba om et nivå i klassifikasjonen
+  - Svaret viser den obligatoriske tabellnoten (`extension.noteMandatory`, `{"1": true}`
+    på 14700 i v1, verifisert 2026-10-14)
 - **Feilmodus å fange:** at modellen henter aggregeringsnavnet fra v2 (der samme
   aggregering svarer 200 med data) og konkluderer at v1-kallet «burde» virke. Flagget
   betyr forskjellige ting i de to API-ene — det er hele poenget med scenarioet
@@ -153,3 +155,15 @@ modellen det — ingen estimater, ingen «omtrent», ingen tall fra en tredjepar
 I v1 er dette skarpere enn i v2: flere installasjoner svarer bare `Bad Request` uten
 diagnose, og på spansk `Solicitud incorrecta`, så en mislykket spørring er lett å
 forveksle med et tomt resultat.
+
+---
+
+## Kjøringer
+
+**2026-10-14, mot v0.12.2.** Scenario 3 og 5 kjørt av ferske agenter som leste en utpakket kopi
+av zip-fila i scratchpad, ikke repo-mappa, så ingen `CLAUDE.md` kom med i konteksten.
+
+| # | Utfall | Kommentar |
+|---|---|---|
+| 3 | Bestått, annen vei | Valgte landstotalen `SSS` eksplisitt i stedet for å utelate `alue_23_20260101`, og sa at tallet gjelder hele landet. Elimineringsveien og motprøven med `contentscode` ble dermed ikke prøvd. Agentens grunn: variabelen blander land, regioner, kommuner og NUTS (568 verdier), og metadata skiller ikke en navngitt total fra summering. Svaret bekreftet `eliminationValueCode: "SSS"`. Fant at `extension.px.language` er `fi` på en `/en/`-URL hos Finland (rettet i `json-stat2.md` samme dag) |
+| 5 | Bestått, bonusveien | Brukte de vanlige item-kodene `01`–`13` (bonuspoeng-veien) i stedet for `agg:`, så 400-en ble ikke prøvd. Viste den obligatoriske tabellnoten (`noteMandatory {"1": true}`) |

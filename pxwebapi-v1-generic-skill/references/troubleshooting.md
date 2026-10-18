@@ -215,8 +215,10 @@ When you cannot tell which variable is the metric or the geography, run a minima
 
 ### `role.geo` is absent from the response
 
-Either the table has no geographic dimension, or the geographic variable was eliminated. In both
-cases the figures cover the whole country or area — do not ask the user to disambiguate.
+Either the table has no geographic dimension, the geographic variable was eliminated, or the
+installation never sets `role.geo` — SCB's v1 leaves it out even with `Region` in the response
+(2026-10-14). Look for a geographic variable in `id` first; only when there is none do the figures
+cover the whole country or area. Do not ask the user to disambiguate.
 
 ### Numbers changed between two runs of the same query
 

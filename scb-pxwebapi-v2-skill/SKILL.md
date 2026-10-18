@@ -13,7 +13,7 @@ description: >
   sparade frågor och outputformat (json-stat2, csv, xlsx).
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.11.1"
+  version: "0.11.2"
 ---
 
 # SCB PxWebApi v2 — Komplett guide
@@ -36,7 +36,7 @@ SCB är Sveriges officiella statistikproducent. Förtroendet för siffrorna är 
 - **Ingen interpolering eller framskrivning.** Saknas en period i uttaget saknas den i svaret.
 - **Märk dina egna beräkningar.** Tillväxttal, andelar och summor är dina, inte SCB:s — visa vilka hämtade siffror de bygger på, och behåll API:ets decimaler (`category.unit.decimals`).
 - **Visa `status`-värden som de är.** Saknade, preliminära och konfidentiella värden hör hemma i tabellen, inte dolda eller ersatta med noll.
-- **Visa obligatoriska noter.** Är `extension.noteMandatory` satt har SCB bestämt att noten ska följa siffran. Att utelämna den är att presentera siffran utan det förbehåll SCB själv knutit till den. Se Steg 5.
+- **Visa obligatoriska noter.** Är en not markerad som obligatorisk (`noteMandatory` eller `categoryNoteMandatory`) har SCB bestämt att den ska följa siffran. Att utelämna den är att presentera siffran utan det förbehåll SCB själv knutit till den. Se Steg 5.
 - **Kontrollera `discontinued` och `lastPeriod`.** Tabeller avslutas och serien fortsätter ofta i en ny tabell. Använder du en avslutad tabell, säg det och ange sista perioden.
 
 Att inte hitta siffran är ett giltigt svar. Ett ärligt "hittade inte", med förslag på sökord, är bättre än en rimlig siffra som är fel.
@@ -70,7 +70,7 @@ Alla endpoints accepterar `lang`-parameter (`sv`, `en`). Standard är `sv`.
 API:et kan nås via två kanaler:
 
 - **MCP-verktyg från `pxweb-mcp`** (npm: `@jarib/pxweb-mcp`) — använd dessa när de är anslutna *och täcker behovet*. Verktygstabell och begränsningar i `references/mcp-tools.md`.
-- **Direkta HTTP-anrop** (curl via Bash eller motsvarande) — använd URL-strukturen under «Arbetsflöde». POST kräver ett verktyg med stöd för request-body. Med curl: använd `-g` (`--globoff`), annars stannar curl lokalt på hakparenteserna i `valueCodes[Var]` med «bad range in URL» — det är inget API-fel.
+- **Direkta HTTP-anrop** (curl via Bash eller motsvarande) — använd URL-strukturen under «Arbetsflöde». POST kräver ett verktyg med stöd för request-body. Med curl: använd `-g` (`--globoff`), annars stannar curl lokalt på hakparenteserna i `valueCodes[Var]` med «bad range in URL» — det är inget API-fel. Procentkoda å, ä och ö (`folkm%C3%A4ngden`), eller använd `curl -G --data-urlencode "query=…"`. Rå UTF-8 ger 0 träffar i sökningen, utan felmeddelande, och 400 i kodlist-ID:n.
 
 **OBS:** `pxweb-mcp` pekar som standard mot norska SSB. Mot SCB måste servern startas med `--url https://statistikdatabasen.scb.se/api/v2` — verifiera vilken instans den anslutna servern använder (verktygsbeskrivningarna nämner "Statistics Norway" oavsett konfiguration).
 
@@ -127,12 +127,12 @@ Använd `GET /tables` med `query`-parameter.
 - Sökningen är case-insensitiv och letar i tabelltitlar, variabler och variabelvärden
 - Trunkering med `*` (t.ex. `anlägg*`) och fältbegränsning med `title:` räcker ofta
 - Använd `pastDays` för nyligen uppdaterade tabeller; kontrollera `lastPeriod`, `timeUnit` och `discontinued` i resultaten
-- **`discontinued` är inget tillförlitligt aktualitetstest — jämför alltid `lastPeriod` med dagens datum.** SCB fryser regelbundet en tabell och fortsätter serien i en ny, utan att sätta flaggan. TAB638 (folkmängd efter region, civilstånd, ålder och kön) slutar på 2024 med `discontinued: null`; fortsättningen ligger i TAB5557 (år 2025) och TAB6471 (månad, 2025M01–). Samma sak för KPI: TAB5737 slutar 2025M12, TAB6596 fortsätter. Ligger `lastPeriod` längre bak än tabellens frekvens borde tillåta, sök efter efterföljaren innan du svarar
+- **`discontinued` är inget tillförlitligt aktualitetstest — jämför alltid `lastPeriod` med dagens datum.** SCB fryser regelbundet en tabell och fortsätter serien i en ny, utan att sätta flaggan. TAB638 (folkmängd efter region, civilstånd, ålder och kön) slutar på 2024 utan `discontinued`-fält; fortsättningen ligger i TAB5557 (år 2025) och TAB6471 (månad, 2025M01–). Samma sak för KPI: TAB5737 slutar 2025M12, TAB6596 fortsätter. Ligger `lastPeriod` längre bak än tabellens frekvens borde tillåta, sök efter efterföljaren innan du svarar
 - För fuzzy-sökning, närhetssökning, booleska operatorer och datumsyntax: se `references/search-syntax.md`
 
-Presentera de 3–5 mest relevanta träffarna med tabell-ID, titel, senaste period, tidsfrekvens och `discontinued`-status. Rekommendera den mest passande.
+Presentera de 3–5 mest relevanta träffarna med tabell-ID, titel, senaste period, tidsfrekvens och `discontinued`-status. Rekommendera den mest passande. Är en träff uppenbart rätt, säg vilken tabell du valde och varför, och gå vidare.
 
-Responsstrukturen för varje träff inkluderar: `id`, `label`, `description`, `updated`, `firstPeriod`, `lastPeriod`, `timeUnit` (Annual/Quarterly/Monthly/Weekly), `variableNames`, `discontinued`, `subjectCode`, och `paths` (ämnesplacering i SCB:s hierarki).
+Responsstrukturen för varje träff inkluderar: `id`, `label`, `description`, `updated`, `firstPeriod`, `lastPeriod`, `timeUnit` (Annual/Quarterly/Monthly/Weekly), `variableNames`, `discontinued` (bara när `true`), `subjectCode`, och `paths` (ämnesplacering i SCB:s hierarki).
 
 **Hitta kommunkoder:**
 
@@ -152,12 +152,12 @@ Metadata returneras i json-stat2-format (Dataset-schema) — se `references/json
 - **`id`-array** — Variabelnamnen (t.ex. `["Region", "Kon", "Alder", "ContentsCode", "Tid"]`); `size`-arrayen ger antal värden per variabel
 - **`dimension`-objekt** — Per variabel: koder (`category.index`), läsbara namn (`category.label`), enhet och decimaler (`category.unit`, på ContentsCode), samt `extension` med `elimination` och `codelists` (tillgängliga kodlistor)
 - **`role`-objekt** — **Börja analysen här:** `role.metric` visar vad som mäts (antal, procent, SEK, index) — hos SCB är det `ContentsCode`; kontrollera `category.unit` för enhet och decimaler. `role.time` är tidsdimensionen. **SCB sätter inte `role.geo`** — geografin hittar du som en variabel i `id` (oftast `Region`; `variableNames` i sökträffen räcker för att se den). Saknas en geografisk variabel helt gäller data hela Sverige — fråga inte användaren. Övriga variabler i `id` är nedbrytningsdimensioner (kön, ålder, näringsgren m.m.)
-- **`note`-array + `extension.noteMandatory` (rot)** — tabellnoter, och vilka av dem som **ska visas**; `noteMandatory` är nycklat på index i `note`. Se Steg 5
-- **`extension`-objekt (rot)** — `noteMandatory`, `contact`, PX-metadata under `extension.px`, samt `discontinued` när det är satt. **`firstPeriod`/`lastPeriod` ligger inte här** utan på `/tables`-träffen och `GET /tables/{id}` — tillsammans med `timeUnit`, som är enda källan till tidsfrekvens
+- **`note`-array + `extension.noteMandatory` (rot)** — tabellnoter, och vilka av dem som **ska visas**; `noteMandatory` är nycklat på index i `note`. Obligatoriska noter finns också per variabel och per värde. Se Steg 5
+- **`extension`-objekt (rot)** — `noteMandatory`, `contact` och PX-metadata under `extension.px`. **`firstPeriod`/`lastPeriod` och `discontinued` ligger inte här** utan på `/tables`-träffen och `GET /tables/{id}` — tillsammans med `timeUnit`, som är enda källan till tidsfrekvens
 
 **Viktiga regler om metadata:**
 
-- Läs `elimination` **enbart från metadata** — i ett data-svar betyder fältet något annat och vilseleder dig. Utelämnar du en eliminerbar variabel försvinner den helt ur svaret (ur `id` och `dimension`, inte som en totalrad); notera det själv. Metadata skiljer inte tabeller med egen totalkod (`Region` = `00`, «Riket») från dem som summeras i farten (`Kon`) — leta efter «Riket»/«Totalt» i `category.label`. `eliminationValueCode` finns bara i data-svar som innehåller totalen (TAB6471 Region=`00` → `"00"`), aldrig i metadata. Detaljer: `references/json-stat2.md`
+- Läs `elimination` **enbart från metadata** — i ett data-svar betyder fältet något annat och vilseleder dig. Utelämnar du en eliminerbar variabel försvinner den helt ur svaret (ur `id` och `dimension`, inte som en totalrad); notera det själv. Metadata skiljer inte tabeller med egen totalkod (`Region` = `00`, «Riket») från dem som summeras i farten (`Kon` i TAB638; i TAB6471 har `Kon` totalkoden `TotSa`) — leta efter «Riket»/«Totalt» i `category.label`. `eliminationValueCode` finns bara i data-svar som innehåller totalen (TAB6471 Region=`00` → `"00"`), aldrig i metadata. Detaljer: `references/json-stat2.md`
 - Variabler med `elimination: false` MÅSTE inkluderas i query. Tid och ContentsCode är alltid icke-elimineringsbara (felet du annars får står i Steg 4)
 
 **Kodlistor och filtrering:**
@@ -234,9 +234,9 @@ Viktigaste mönster: `top(N)` = senaste N värdena, `bottom(N)` = äldsta N, `fr
 
 - Visa data i en snygg markdown-tabell
 - Inkludera **alltid** källhänvisning med **samtliga tabell-ID:n** som använts (lista alla om flera tabeller kombinerats — utelämna ingen). Format för tal och källhänvisning: se «Språk»
-- Förklara vad siffrorna betyder i kontext — på användarens språk. Kommentera **endast** det hämtade uttaget — se Dataintegritet
+- Förklara vad siffrorna betyder i kontext — på användarens språk. Kommentera **endast** det hämtade uttaget — se Dataintegritet. Har tabellen felmarginal, medelfel eller osäkerhetsmarginal som statistikvariabel, hämta den med och titta på den innan du kallar en skillnad verklig
 - Presentera enheter tydligt (antal/count, procent/percent, index, SEK). För index: ange basperioden (t.ex. 2020=100)
-- **Visa obligatoriska noter.** `extension.noteMandatory` är nycklat på index i `note`-arrayen och följer med data-svaret — det kostar inget extra anrop. TAB6471 har fyra, TAB6596 fyra
+- **Visa obligatoriska noter.** De finns på tre nivåer: tabellen (`extension.noteMandatory`, nycklat på index i `note`), variabeln (`dimension.{var}.extension.noteMandatory`) och värdet (`categoryNoteMandatory`, värdekod → index i `category.note`). Alla följer med data-svaret — det kostar inget extra anrop. TAB6471 har fyra tabellnoter och en på `Alder`. Se `references/json-stat2.md`
 - **Noten kan begränsa din egen aritmetik.** Från referensår 2025 lägger SCB in en kontrollerad slumpmässig osäkerhet i befolkningsstatistiken (Cell Key Method) — **redovisade totaler är därför inte alltid lika med summan av delarna, och osäkerheten adderas när du summerar själv.** Det står i en obligatorisk not. Summerar du hämtade värden till en ny total: säg att den är din egen och att den bär mer osäkerhet än ett enskilt publicerat tal
 - **Gör uttaget reproducerbart.** Ange vilka dimensioner du utelämnade och vilken kodlista du använde — svaret registrerar ingetdera. Visa GET-URL:en eller POST-bodyn, eller erbjud en sparad fråga (Steg 6)
 - Erbjud att visualisera data
@@ -296,7 +296,8 @@ SCB:s statistik publiceras under **Creative Commons CC0 1.0** (public domain —
 ### "Hur många bor i Stockholm?"
 
 ```
-1. GET /tables?query=folkmängden+per+månad
+1. GET /tables?query=folkm%C3%A4ngden+per+m%C3%A5nad
+   → «folkmängden per månad», procentkodat — rå ä och å ger 0 träffar
 2. GET /tables/TAB6471/metadata
    → Alder har elimination: false i denna tabell — totalen är koden TotSA.
      Kon är eliminerbar (totalkod TotSa — annan versalisering, lätt att förväxla).
@@ -308,7 +309,7 @@ SCB:s statistik publiceras under **Creative Commons CC0 1.0** (public domain —
        { "variableCode": "Tid", "valueCodes": ["top(1)"] }
    ]}
 → "Den {sista dagen i månaden} {månad år} hade Stockholm {N} invånare (Källa: SCB, tabell TAB6471)"
-  — följt av tabellens fyra obligatoriska noter, och med Kon angiven som utelämnad dimension
+  — följt av tabellens fyra obligatoriska noter och variabelnoten på Alder, och med Kon angiven som utelämnad dimension
 ```
 
 Utelämnas `Alder` här blir svaret `400 "Missing selection for mandantory variable"` — samma variabel är eliminerbar i den äldre TAB638. Eliminerbarhet är en egenskap hos tabellen, inte hos variabelnamnet.

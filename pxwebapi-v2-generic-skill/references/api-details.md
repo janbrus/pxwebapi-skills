@@ -36,7 +36,7 @@ Three things are worth acting on:
 
 ## Verified differences between installations
 
-Everything in this table was observed live on 2026-09-08. It is the evidence behind every "varies by installation" in `SKILL.md`. Search-operator row: `population region` returned 199 at SSB (= AND 199, OR 1 832), 207 at SCB (= AND, OR 1 373) and 494 at Latvia (= OR, AND 125).
+Everything in this table was observed live on 2026-09-08, except two rows checked on 2026-10-13 and 2026-10-14: `discontinued` and raw UTF-8. It is the evidence behind every "varies by installation" in `SKILL.md`. Search-operator row: `population region` returned 199 at SSB (= AND 199, OR 1 832), 207 at SCB (= AND, OR 1 373) and 494 at Latvia (= OR, AND 125).
 
 | | SSB (Norway) | SCB (Sweden) | CSP (Latvia) |
 |---|---|---|---|
@@ -50,7 +50,8 @@ Everything in this table was observed live on 2026-09-08. It is the evidence beh
 | `role.geo` set | yes | **no** | yes |
 | Quarter code | `2024K2` | `2024K2` | `2026Q2` |
 | Week code | `2026U35` | `2026V30` | `2026W13` |
-| `discontinued` on `/tables` hit | `null` | `null` | **absent** |
+| `discontinued` on `/tables` hit | only when `true` | only when `true` | **absent** |
+| Raw UTF-8 (`ø`, `ä`, `ī`) in a URL | 400, HTML page | **200, 0 hits** | **200, 0 hits** |
 | `/tables/{id}` `lastPeriod` vs data | matches | matches | **lags** (2026M04 vs 2026M07 in the data) |
 | `range()`/`top(N,offset)` | GET `[range(a,b)]`, POST bare | same | same |
 | Search wildcard on stem | `popul*` ok, `population*` 0 | `folkmäng*` ok, `folkmängd*` 0 | `popul*` ok, `population*` 0 |

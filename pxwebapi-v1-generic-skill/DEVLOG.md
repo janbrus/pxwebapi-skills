@@ -5,6 +5,92 @@ and the outcome of every sibling check. It is repo-internal and not in the ZIP. 
 short [`CHANGELOG.md`](CHANGELOG.md); every version appears in both files. Until 2026-10-03 this
 file *was* `CHANGELOG.md`, so older entries say "this changelog" where they mean this log.
 
+## 0.12.2 — 2026-10-14
+
+`references/json-stat2.md` now has the layout of `ssb-pxwebapi-v2` 1.6.2, adapted to v1, and the
+facts that differ from v2 were measured on SSB's v1 (`data.ssb.no/api/v0/`) and SCB's v1
+(`api.scb.se/OV0104/v1/doris/`) on 2026-10-14. GET, and POST only to table URLs.
+
+- **New layout of `json-stat2.md`:** Contents, then "How to read an extract" with eight rules
+  adapted to v1 (only the data response is json-stat2; `role` then `id`; table-order positions;
+  `value`/`status`; mandatory notes; eliminability from v1 metadata; `aggregallowed`; state the
+  `agg:`/`vs:`, the eliminated variables and the frequency yourself), then the format sections:
+  structure and indexing (worked example and `order.json` kept), Shape variants, a field table,
+  `dimension`/`extension` per variable with PX keywords ("Units and decimals" folded in), root
+  `extension` and `extension.px`, `status`/`note`/`link`, "What json-stat2 cannot express",
+  tooling. Installations and dates inline. 12 670 → 17 915 bytes
+- **New, and the opposite of v2: `category.index` follows the table's order, not the request's.**
+  SSB's v1 07459 with `item` `["4601", "0301"]` and years `["2026", "2024", "2025"]` returns
+  `{"0301": 0, "4601": 1}` and `{"2024": 0, "2025": 1, "2026": 2}`; SCB's v1 `BefolkningNy` with
+  `["0180", "0140"]` returns `{"0140": 0, "0180": 1}`. v2 keeps the request order (SSB, SCB and
+  Latvia). A parser ported from a v2 client would put figures under the wrong labels. One sentence
+  added under the metadata table in `v1-vs-v2.md`
+- **New: mandatory notes in v1.** SSB's v1 sets root `noteMandatory` (14700 `{"1": true}`), SCB's
+  v1 sets it on `BefolkningNy` (`{"0": true, "1": true, "2": true}`) and `categoryNoteMandatory`
+  per value (`Region` `{"0140": {"1": true}}`, `ContentsCode` `{"BE0101N2": {"0": true}}`). v1's
+  metadata has no notes (`title` and `variables` only), so they arrive only with the data. The
+  variable level, set at SCB's v2, was not checked in v1. `SKILL.md` Data integrity gets the
+  "Show mandatory notes" bullet the other three skills have; `CLAUDE.md` records it. Eval 5 now
+  asks for the 14700 note
+- **New: root `extension`** is `contact`, `px`, `noteMandatory` when set, and `discontinued`,
+  always `null` at both. `extension.px` has the same 14 keys as v2 at both, `copyright: false`
+- **New: `dimension.{var}.extension` table** with PX keywords. At SSB's and SCB's v1 it has
+  `elimination`, `eliminationValueCode` (SCB `Region` → `"00"`), `show`, `categoryNoteMandatory`,
+  `measuringType`, `priceType`, `adjustment`, `basePeriod` (SSB 14700) and `refperiod` — no
+  `codelists` and no `alternativeText`, which v2 has. In a data response `elimination` describes
+  the extract: SSB's v1 says `false` for `Region` with `0301` selected, `true` in metadata
+- **New: `link`.** SSB's v1 sends Klass/VarDok URNs in `describedby`, two in one space-separated
+  string on `Region` (`klass:104 klass:131`), per value on the metric (`KpiIndMnd` → VarDok 2755).
+  SCB's v1 sends plain text (`{"Kon": "Kön"}`). Neither sends `link.related`
+- **Corrected: `role.geo`.** The file and `troubleshooting.md` said a missing `role.geo` means the
+  whole country. SCB's v1 never sets it, even with `Region` in the response — look for a
+  geographic variable in `id` first, as the v2 skills already say
+- **Corrected in `v1-vs-v2.md`:** first/last period and `discontinued` are on v2's `/tables` hit,
+  not in `extension`; v1 has notes, but only in the data response
+- **New (part H of the SSB 1.6.3 plan): non-ASCII letters in the URL.** A raw `ø` in `?query=`
+  gets 400 and an HTML page at SSB's v1, as at its v2; Finland (`väestö`), Estonia (`sündimus`),
+  the Faroe Islands (`fólkatal`) and Greenland (`løn`) give the same hits raw and encoded. SCB and
+  Iceland have no search. One sentence in `api-details.md` beside "URL-encode as usual"
+- **Removed before release:** the uncommitted line in `SKILL.md` pointing to
+  `references/environments.md`, which does not exist (maintainer, 2026-10-13). Never released
+- `CLAUDE.md`: the Layout line for `json-stat2.md` lists the v1 facts that differ from v2.
+  `README.md`: the file-tree comment. Root `README.md`: 0.12.2 in both tables. The skill map is
+  not redrawn: the workflow is unchanged
+- **Evals 3 and 5** as actual runs on 2026-10-14, by fresh agents reading an unpacked copy of the
+  ZIP (no `CLAUDE.md` in their context). Both passed, each by a path the scenario does not test
+  first:
+  - **3 (Finland, elimination):** it selected the total `SSS` explicitly instead of omitting the
+    area variable, because that variable mixes country, regions, municipalities and NUTS (568
+    values) and the metadata cannot tell a named total from summing. The data response confirmed
+    `eliminationValueCode: "SSS"`. The elimination path and the `contentscode` counter-test were
+    not exercised. **Corrected from it:** `extension.px.language` does not follow the URL
+    everywhere — Finland returns `fi` on an `/en/` URL, while SSB's and SCB's v1 return `en`
+    (checked the same day). Finland also sets `role.geo`; both added to `json-stat2.md`
+  - **5 (SSB 14700, `aggregallowed`):** it used the ordinary item codes `01`–`13` (the scenario's
+    bonus path), so the `agg:` 400 was not exercised. It showed the mandatory table note
+- **Sibling check:** the source is `ssb-pxwebapi-v2` 1.6.2's `json-stat2.md`. `scb-pxwebapi-v2`
+  0.11.2 and `generic-pxweb-v2-skill` 0.11.2 got the same rebuild the same day. The table-order
+  finding does not apply to them: v2 keeps the request order
+
+Prepared 2026-10-06 without a version until now ("Unreleased"):
+
+- **New: `docs/skill-map-workflow.svg` and `docs/skill-map-checks-and-packaging.svg`**, two
+  hand-drawn diagrams of the skill as standalone SVG with no script, their own style and a light
+  and a dark variant. GitHub shows them as images. `docs/skill-map.html` puts them together with
+  explanatory text. The first shows the environment check (can the tool POST?), Steps 1–5, the
+  endpoint each step calls, and the POST response as the only way a number can enter the answer.
+  The second shows that there is no example checker, how claims are verified by hand, and what
+  `build_zip.sh` packs. Same style as the skill map in `ssb-pxwebapi-v2-skill/docs/`, without its
+  column for routing to other skills. Drawn from v0.12.1.
+- Text widths checked by measuring every text line with DejaVu Sans and DejaVu Sans Mono, the
+  widest fallback fonts, and by rendering both themes with cairosvg.
+- `README.md`: the file tree lists the five files under `docs/`, and the sentence about `docs/`
+  now covers the skill map. The ZIP has to be rebuilt before this is committed, since `README.md`
+  is in it. `CLAUDE.md`: Layout describes the skill map, and the release checklist says when to
+  redraw it.
+- Siblings: the same diagrams were drawn for `generic-pxweb-v2-skill`, `scb-pxwebapi-v2` and
+  `ssb-chart` on the same day. No rule changed, so there is nothing to check.
+
 ## 0.12.1 — 2026-09-28
 
 A correction to the HTTP status codes, plus a new `docs/` folder for agencies. The `docs/` work was prepared on 2026-09-27

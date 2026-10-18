@@ -4,6 +4,21 @@ Hva som er annerledes for deg som bruker skillen, nyeste først. Gjeldende versj
 
 Hva som er verifisert, hvor og når, står i vedlikeholderens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/ssb-pxwebapi-v2-skill/DEVLOG.md). Den ligger i repoet, ikke i zip-en.
 
+## 1.6.3 — 2026-10-13
+
+- **Rettet: søketipset om fagtermer.** «folkemengde» finner ikke 07459, og norske ord gir 0 treff med `lang=en`, fordi søket følger språket. De nye eksemplene er «konsumprisindeks» (ikke «inflasjon») og «brukte boliger» (ikke «boligpriser»), og med `lang=en` søker du på engelsk. Søket leter ikke i emnenavn, og gir 20 treff per side.
+- **Rettet: prosentkod æ, ø og å i URL-en.** `curl -g` koder dem ikke, og rå UTF-8 gir 400.
+- **Rettet: xlsx anbefales når dataene skal i Excel.** Tallene kommer som ekte tall, og Excel velger desimaltegn selv, uansett `lang` — det er ikke API-et som gir komma. Skal fila pivoteres, er csv bedre, fordi xlsx bare skriver radtekstene på første rad i hver blokk.
+- **Rettet:** mot en lagret spørrings `/data` virker bare gjentatte `outputFormatParams`, ikke kommaformen.
+- **Rettet: fylkeseksemplet.** `agg_KommFylker` med `*` gir ikke bare fylkene, men også Svalbard, Jan Mayen og «Kontinentalsokkelen og uoppgitt» (med 0 i befolkningstabellen). Ta dem ut før rangering eller diagram.
+- Nytt: per innbygger-tall du regner ut selv, deles på middelfolkemengden når størrelsen måles over en periode (BNP, inntekt), og på folketallet samme dato når den måles på et tidspunkt. Skillen sier hvilken nevner den brukte, og bruker SSBs ferdige per innbygger-tall når de finnes, med mindre de mangler serier eller perioder, eller bygger på en eldre revisjon. Middelfolkemengden (03037) står nå i `common-tables.md`.
+- Nytt: SSBs prognoser kalles prognoser, og for en framskriving oppgis alternativet. I 12880 er de fire siste årene alltid prognoser (`top(4)`); siste regnskapsår er `[top(1,4)]`.
+- Nytt: kildehenvisningen har datoen tabellen sist ble oppdatert: «Kilde: SSB, tabell {id}. Sist oppdatert: {dato}.», som i `ssb-chart-skill`.
+- Nytt: AKU-ledighet (13760) hentes som sesongjustert tremåneders glidende gjennomsnitt (`3MGG`); siste måned er `..`, så skillen henter to måneder og oppgir tremånedersperioden.
+- Nytt: Forbruksundersøkelsen (14100) i `common-tables.md`. Skillen henter standardfeil eller feilmargin når tabellen har det, før den kaller en forskjell reell, og sier hvilke koder et vagt begrep som «mat» ble til.
+- KPI-noten om avrunding behandles som andre obligatoriske noter: den vises, uten egen omtale i skillen.
+- `SKILL.md` er rundt en tiendedel kortere. Dobbeltomtale er fjernet, og detaljer står i referansefilene. Det engelske eksempelet er fjernet, fordi søket det viste, ikke fant tabellen.
+
 ## 1.6.2 — 2026-10-11
 
 - **Rettet: koder fra en summerende kodeliste virker bare med kodelisten angitt.** `F-03`, `K-3103` og aldersgruppen `F00-04` gir feil uten `codelist[…]`; bare koder fra tabellens egen verdiliste virker uten. Skillen leser kodene fra kodelisten i stedet for å gjette dem.

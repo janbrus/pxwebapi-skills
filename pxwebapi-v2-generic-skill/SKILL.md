@@ -10,7 +10,7 @@ description: >
   Covers table search, metadata, data queries, codelists, and saved queries.
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.11.1"
+  version: "0.11.2"
 ---
 
 # PxWebApi v2 — Generic Skill
@@ -29,7 +29,7 @@ Official statistics carry an agency's name. A wrong number under that citation d
 - **No interpolation or projection.** A period missing from the extract is missing from the answer.
 - **Mark your own calculations.** Growth rates, shares and sums are yours, not the agency's — show which fetched numbers they rest on, and keep the API's decimals (`category.unit.decimals`).
 - **Show `status` values as they are.** Missing, provisional and confidential values belong in the table, not hidden or replaced by zero.
-- **Show mandatory notes.** When `extension.noteMandatory` is set, the agency has decided the note travels with the figure. Omitting it presents the number without the caveat the agency attached. See Step 5.
+- **Show mandatory notes.** When a note is flagged mandatory (`noteMandatory` or `categoryNoteMandatory`), the agency has decided the note travels with the figure. Omitting it presents the number without the caveat the agency attached. See Step 5.
 - **Check `discontinued` and `lastPeriod`.** Tables are closed and the series often continues in a new one. If you use a discontinued table, say so and give the last period.
 
 Not finding the number is a valid answer. An honest "not found", with suggested search terms, beats a plausible number that is wrong.
@@ -121,6 +121,7 @@ Use `GET {base_url}/tables` with the `query` parameter.
 - `title:` restricts to the title field; `AND`, `OR` and `"phrase"~N` work (the engine is Lucene). **The default operator between words differs**: AND at SSB and SCB (`population region` = `population AND region`), OR at Latvia (`population region` = `population OR region`, 494 hits against 125). Write the operator out in any query you intend to share
 - **Truncation matches the *stemmed* index term, so truncate short.** `population*` returns **0** hits at Latvia and at SSB's English index; `popul*` returns 203 and 403. Swedish `folkmängd*` returns 0 at SCB, `folkmäng*` returns 117. Cut the word before its ending, and check `page.totalElements` before concluding a table does not exist. A leading wildcard (`*ulation`) returns HTTP 500 at Latvia
 - Default `pageSize` is 20. A table in position 47 is never on page 1 — raise `pageSize` or page through
+- **Percent-encode non-ASCII letters** (`folkm%C3%A4ngd`), or let curl do it: `curl -G --data-urlencode "query=…"`. Raw UTF-8 in the URL returns 200 with **0 hits** at SCB and Latvia, and 400 at SSB (verified 2026-10-14)
 
 **Screen candidates from the search hit, before spending a metadata call each.** A `/tables` hit carries more than the title:
 
@@ -133,9 +134,9 @@ Use `GET {base_url}/tables` with the `query` parameter.
 | `discontinued` | Whether the series has stopped — **but see below** |
 | `source`, `subjectCode`, `updated`, `category` | Attribution and freshness |
 
-**`discontinued` is not an aliveness test — compare `lastPeriod` with today.** Agencies freeze a table and continue the series in a *new* one without setting the flag: SCB's TAB638 stops at 2024 with `discontinued: null` while TAB6471 carries 2025 onwards. At Latvia the key is absent from the `/tables` hit altogether. If `lastPeriod` is further back than the table's frequency should allow, find the successor before answering. The catalogue can also lag the *other* way: Latvia's `/tables/IRS010m` says `lastPeriod: 2026M04` while the data run to 2026M07 — take "latest" from a `top(1)` on the data, not from the hit.
+**`discontinued` is not an aliveness test — compare `lastPeriod` with today.** Agencies freeze a table and continue the series in a *new* one without setting the flag: SCB's TAB638 stops at 2024 with no `discontinued` field while TAB6471 carries 2025 onwards. SSB and SCB include the field only when it is `true`; Latvia never does. If `lastPeriod` is further back than the table's frequency should allow, find the successor before answering. The catalogue can also lag the *other* way: Latvia's `/tables/IRS010m` says `lastPeriod: 2026M04` while the data run to 2026M07 — take "latest" from a `top(1)` on the data, not from the hit.
 
-Present the 3–5 most relevant hits with table ID, title, last period, time frequency, and `discontinued` status.
+Present the 3–5 most relevant hits with table ID, title, last period, time frequency, and `discontinued` status. If one hit is obviously right, say which table you chose and why, and move on.
 
 ### Step 3: Explore metadata
 
@@ -146,8 +147,8 @@ Metadata is returned in json-stat2 format. Focus on:
 - **`id` array** — variable names; `size` gives the number of values per variable
 - **`dimension` object** — per variable: codes (`category.index`), labels (`category.label`), units (`category.unit`), and `extension` with `elimination` and the available `codelists`
 - **`role` object** — **start the analysis here.** `role.metric` is what is measured (`ContentsCode` on all three known installations; read `category.unit` for unit and decimals). `role.time` is the time dimension (`Tid` or `TIME`). **`role.geo` is optional and installation-dependent** — SSB and Latvia set it (`Region`, `AREA`), SCB does not, even on tables with 290 municipalities. Look for a geographic variable in `id` first; only when none exists does the data cover the whole area. Do not ask the user. Remaining variables in `id` are breakdown dimensions
-- **`note` array + `extension.noteMandatory`** — table notes, and which of them **must be shown**, keyed by index into `note`. See Step 5
-- **`extension` (root)** — `noteMandatory`, `contact`, PX metadata under `extension.px`, and `discontinued` when set. **`firstPeriod`/`lastPeriod`/`timeUnit` are not here** — they are on the `/tables` hit and `GET /tables/{id}`
+- **`note` array + `extension.noteMandatory`** — table notes, and which of them **must be shown**, keyed by index into `note`. Some installations also flag notes per variable and per value. See Step 5
+- **`extension` (root)** — `noteMandatory`, `contact` and PX metadata under `extension.px`. **`firstPeriod`/`lastPeriod`/`timeUnit` and `discontinued` are not here** — they are on the `/tables` hit and `GET /tables/{id}`
 
 **Key rules:**
 
@@ -209,9 +210,9 @@ Default `json-stat2`; also `csv`, `xlsx`, `html`, `px`, `json-px`, and at some i
 
 - Display data in a clean markdown table
 - **Say which dimensions you collapsed and which codelist you used — the response records neither.** If the reader cannot reconstruct your query from your answer, the extract is not reproducible. See "What json-stat2 cannot express" in `references/json-stat2.md`
-- **Show mandatory notes.** `extension.noteMandatory` is keyed by index into the root `note` array and travels with the data response, so it costs no extra call. A mandatory note may constrain your own arithmetic — SCB's population tables from 2025 carry disclosure-control noise, so published totals are not the sum of their parts; say so when you sum
+- **Show mandatory notes.** `extension.noteMandatory` is keyed by index into the root `note` array. SCB also flags notes per variable (`dimension.{var}.extension.noteMandatory`) and per value (`categoryNoteMandatory`, value code → index into `category.note`); SSB and Latvia have not been seen to. All travel with the data response, so they cost no extra call — details in `references/json-stat2.md`. A mandatory note may constrain your own arithmetic — SCB's population tables from 2025 carry disclosure-control noise, so published totals are not the sum of their parts; say so when you sum
 - **Always** include source attribution listing **every table ID used** — if multiple tables were combined, list all of them; never omit a source table. `/config` `sourceReferences` gives the agency's own citation string per language
-- Explain what the numbers mean in context — in the user's language
+- Explain what the numbers mean in context — in the user's language. If the table has a standard error, margin of error or confidence interval as a measure, fetch it too and look at it before calling a difference real
 - Present units clearly (count, percent, index, currency); for an index, give the base period
 - Offer to visualize the data or download in another format. If the data came from SSB and the `ssb-chart-skill` skill is available in the environment, use it for the visualization
 

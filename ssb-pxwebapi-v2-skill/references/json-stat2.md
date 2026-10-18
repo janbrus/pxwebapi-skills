@@ -20,7 +20,7 @@ json-stat2 er et åpent format for statistiske datasett (https://json-stat.org/)
 1. **Start med `role`.** `metric` er det som måles, `time` er tiden og `geo` geografien. Mangler `role.geo`, gjelder tallene hele landet. Ikke spør brukeren. (SKILL.md Steg 3)
 2. **`value` er row-major:** siste dimensjon i `id` varierer raskest. Posisjonen er summen av `category.index` × stride, der stride er produktet av `size` for de senere dimensjonene. Iterer over `id`, ikke over `Object.keys(dimension)`. Anta aldri at tiden er sortert, og filtrer aldri bort `null`. (Se «Dataset-struktur og indeksering»)
 3. **Les `value` og `status` hver for seg.** Er cellen `null`, vis symbolet, aldri 0. Har den et tall, vis tallet med flagget. (SKILL.md Steg 5, og `status`)
-4. **Vis obligatoriske noter.** `extension.noteMandatory` sier hvilke. På 14700 og 14710 varsler noten at endringstall du regner ut selv, kan avvike fra de publiserte. (SKILL.md Steg 5, og `note`)
+4. **Vis obligatoriske noter.** `extension.noteMandatory` sier hvilke. (SKILL.md Dataintegritet, og `note`)
 5. **Les `elimination` bare fra metadata.** Totalkoden finner du via `category.label`, eller som `eliminationValueCode` i en data-respons. (Se `elimination`)
 6. **Står `aggregallowed: false`, skal tallene verken summeres eller gjennomsnittes.** Gjør du det likevel, merk det. Feltet stopper ingen spørring. (Se `extension.px`)
 7. **Oppgi selv kodelisten, de utelatte dimensjonene og `timeUnit`**, og send `timeUnit` videre til `ssb-chart-skill`. (SKILL.md Steg 5, og «Det json-stat2 ikke bærer»)
@@ -147,9 +147,7 @@ SSBs standardtegn, også de eldre fra før 2021, står i `troubleshooting.md` un
 
 ### `note`
 
-`extension.noteMandatory` er nøklet på indeksen i `note`: `{"1": true}` (14700) betyr at `note[1]` skal vises. Indeksen varierer, 14710 har `{"0": true}` og 03013 `{"2": true, "3": true}`, så slå den opp. Noten følger med i data-responsen. På 14700 og 14710 sier den blant annet:
-
-> «F.o.m. 2026 er referanseår 2025=100. Endringstall beregnet fra serier med 2025=100 kan avvike fra endringstall publisert før 2026 med annet referanseår.»
+`extension.noteMandatory` er nøklet på indeksen i `note`: `{"1": true}` (14700) betyr at `note[1]` skal vises. Indeksen varierer, 14710 har `{"0": true}` og 03013 `{"2": true, "3": true}`, så slå den opp. Noten følger med i data-responsen.
 
 Noter per variabel og per verdi er ikke obligatoriske hos SSB. Spesifikasjonen har `noteMandatory` og `categoryNoteMandatory` i `dimension.{var}.extension` til det, men SSB setter dem ikke.
 

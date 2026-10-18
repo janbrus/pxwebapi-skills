@@ -2,18 +2,18 @@
 
 En [Agent Skill](https://agentskills.io) — en `SKILL.md` med arbeidsflyt og regler pluss referansefiler — som lærer AI-verktøy som Claude og ChatGPT å presentere norsk offentlig statistikk fra SSB i SSBs visuelle stil — som diagram, tabell eller dashboard.
 
-Skillen styrer **hvordan** data vises, ikke hvordan de hentes. Bruk den sammen med [`ssb-pxwebapi-v2`](../ssb-pxwebapi-v2-skill/) som henter dataene; denne skillen tar JSON-Stat2-responsen og gjør den om til en korrekt, SSB-stilet visualisering.
+Skillen styrer **hvordan** data vises, ikke hvordan de hentes. Bruk den sammen med [`ssb-pxwebapi-v2`](../ssb-pxwebapi-v2-skill/) som henter dataene; denne skillen tar JSON-stat2-responsen og gjør den om til en korrekt, SSB-stilet visualisering.
 
 ## Hva skillen gjør
 
-- Skiller mellom to **rendringsmål** som ikke deler stilregler: *inline chat-widget* (kun data-blekket er SSB-styrt — chrome, mørk modus og typografi følger vertens designsystem) og *frittstående leveranse* (nedlastbar HTML, PDF, Excel — full SSB-stil). Punktene under gjelder frittstående leveranse med mindre annet er nevnt
-- Bruker SSBs **fargesystem** (kategorisk, sekvensiell og divergerende palett) med verdier i hex/RGB/CSS/JS/Python/openpyxl. Den kategoriske paletten gjelder alltid, uansett rendringsmål
-- Setter riktig **typografi** (Roboto Condensed for titler, Open Sans for brødtekst, med Arial-fallback)
-- Gir en **diagramvalg-matrise** — når man skal bruke linje, horisontal søyle, ring, kart, scorecard, scatter, histogram eller small multiples, og hva man skal unngå (3D, doble y-akser, kakediagram, avkortet y-akse)
-- Beskriver **JSON-Stat2 → chart-config**-oppskriften: riktig tids-sortering via `category.index`, desimaler per metric fra `category.unit`, manglende verdier som visuelle hull (aldri interpolert) og status på et tall (f.eks. foreløpig) som et merket punkt
+- Skiller mellom to **rendringsmål** som ikke deler stilregler: *inline chat-widget* (kun data-blekket styres av skillen — chrome, mørk modus og typografi følger vertens designsystem) og *frittstående leveranse* (nedlastbar HTML, PDF, Excel — full SSB-stil). Punktene under gjelder frittstående leveranse med mindre annet er nevnt
+- Bruker SSBs **fargesystem** som standard (kategorisk, sekvensiell og divergerende palett) med verdier i hex/RGB/CSS/JS/Python/openpyxl. Paletten er kontrollert for kontrast og fargeblindhet. Du kan velge egne farger; kontrastkravene gjelder uansett
+- Setter riktig **typografi** (Open Sans for titler og tekst, Roboto Condensed for tabell-header, med Arial-fallback)
+- Gir en **diagramvalg-matrise** — når man skal bruke linje, horisontal søyle, kake/ring, kart, scorecard, scatter, histogram eller small multiples, og hva man skal unngå (3D, doble y-akser, avkortet y-akse på søyler og areal)
+- Beskriver **JSON-stat2 → chart-config**-oppskriften: riktig tids-sortering via `category.index`, desimaler per metric fra `category.unit`, manglende verdier som visuelle hull (aldri interpolert) og status på et tall (f.eks. foreløpig) som et merket punkt
 - Dekker **stilregler per output-format**: React/HTML (Recharts, Chart.js), vanilla JS + Chart.js v4, PowerPoint, Excel, matplotlib og markdown-tabeller
 - Bygger **deklarative titler** fra `extension.px.contents` og en flerspråklig **kildelinje** (`Kilde: SSB, tabell {id}. Sist oppdatert: {dato}.`)
-- Håndhever **statistisk integritet**: y-akse fra 0 på søyler, jevne tidsintervaller, synlig enhet og periode, manglende data vist som hull — ikke skjult
+- Håndhever **statistisk integritet**: y-akse fra 0 på søyler og areal, jevne tidsintervaller, synlig enhet og periode, manglende data vist som hull — ikke skjult
 - Følger **WCAG AA** (≥3:1 ikke-tekst, ≥4.5:1 tekst) og krever at diagrammet fungerer uten farge alene
 
 ## Filstruktur
@@ -24,21 +24,25 @@ ssb-chart-skill/
 ├── README.md                      # Denne filen
 ├── CHANGELOG.md                   # Endringslogg — versjon står i SKILL.md-frontmatter
 ├── ssb-chart-skill.zip            # Ferdigpakket skill — last opp i Claude.ai, eller pakk ut i .agents/skills/ for ChatGPT/Codex
-└── references/
-    ├── chart-selection.md         # Beslutningsmatrise per diagramtype (linje, søyle, ring, kart, scorecard …)
-    ├── color-system.md            # Komplett fargespesifikasjon i alle formater (CSS/JS/Python/Recharts/Chart.js/matplotlib)
-    ├── format-guidelines.md       # Stilregler per leveranseformat (React, vanilla JS, PPTX, Excel, matplotlib, markdown)
-    └── jsonstat-to-chart.md       # Oppskrift: JSON-Stat2-respons → chart-datasets (labels, decimals, status som hull eller flagg)
+├── references/
+│   ├── chart-selection.md         # Beslutningsmatrise per diagramtype (linje, søyle, ring, kart, scorecard …)
+│   ├── color-system.md            # Komplett fargespesifikasjon i alle formater (CSS/JS/Python/Recharts/Chart.js/matplotlib)
+│   ├── format-guidelines.md       # Stilregler per leveranseformat (React, vanilla JS, PPTX, Excel, matplotlib, markdown)
+│   └── jsonstat-to-chart.md       # Oppskrift: JSON-stat2-respons → chart-datasets (labels, decimals, status som hull eller flagg)
+└── docs/                          # Tillegg: følger ikke med i zip
+    ├── skillkart-arbeidsflyt.svg      # Diagram over arbeidsflyten: ni steg, delt i rendringsmål A (widget) og B (frittstående)
+    ├── skillkart-sjekk-og-pakking.svg # Diagram over hva som sjekkes for hånd og hva som pakkes i zip
+    └── skillkart.html                 # Begge diagrammene med forklaring. Åpnes i nettleser fra en klonet mappe
 ```
 
-`CLAUDE.md`, `DEVLOG.md` og `scripts/` i repoet er vedlikeholder-interne og følger ikke med i pakken.
+`CLAUDE.md`, `DEVLOG.md` og `scripts/` er for internt vedlikehold og følger ikke med i pakken.
 
 ## Installasjon
 
 ### Claude.ai
 
 1. Last ned [ssb-chart-skill.zip](ssb-chart-skill.zip), eller bygg den fra repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger `CLAUDE.md` og `scripts/` med). Pakken har toppmappe `ssb-chart/` og inneholder kun `SKILL.md`, `README.md`, `CHANGELOG.md`, `references/` og `LICENSE`
-2. Gå til **Settings > Features > Skills** i Claude.ai
+2. Gå til **Settings > Skills** i Claude.ai
 3. Last opp ZIP-filen
 
 ### Claude Code
@@ -68,7 +72,7 @@ Frittstående skills er tilgjengelige i ChatGPT desktop-app, Codex CLI og IDE-ut
 
 ## Bruk sammen med datakilde-skillen
 
-Denne skillen inneholder **ingen datahenting** — den forutsetter at du allerede har en JSON-Stat2-respons fra SSBs PxWebApi v2. Last derfor opp begge skillene sammen for komplett arbeidsflyt:
+Denne skillen inneholder **ingen datahenting** — den forutsetter at du allerede har en JSON-stat2-respons fra SSBs PxWebApi v2. Last derfor opp begge skillene sammen for komplett arbeidsflyt:
 
 - **`ssb-pxwebapi-v2`** — søker, utforsker og henter SSB-data. Eier dataformat-spesifikasjonen (`references/json-stat2.md`) som denne skillen peker til i stedet for å gjenta.
 - **`ssb-chart-skill`** (denne) — styrer presentasjonen av de hentede dataene.

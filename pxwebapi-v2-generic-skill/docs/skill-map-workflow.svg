@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" width="960" height="1118" viewBox="0 0 960 1118" role="img" aria-label="Workflow in six steps: identify the installation, search for tables, explore metadata, build and run the query, present, saved query. Steps 1, 2, 3, 4 and 6 call the installation's PxWebApi v2. Numbers in the answer come only from the data response in Step 4. If the API fails, the answer says so and gives no numbers.">
+<title>Workflow in six steps: identify the installation, search for tables, explore metadata, build and run the query, present, saved query. Steps 1, 2, 3, 4 and 6 call the installation's PxWebApi v2. Numbers in the answer come only from the data response in Step 4. If the API fails, the answer says so and gives no numbers.</title>
+<style>
+svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --ink2: #4C5765; --line: #C3CBD5; --accent: #0A6A88; --tag: #DDE3EA;
+  --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, "Liberation Sans", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+@media (prefers-color-scheme: dark) { svg.dg { --bg: #10151B; --surface: #18202A; --panel: #141B23; --ink: #E3E8EE; --ink2: #9AA6B3; --line: #3A4552; --accent: #5DB9D7; --tag: #27313C; } }
+.dg .bg { fill: var(--bg); }
+.dg .title { font-size: 15px; font-weight: 600; }
+.dg text { font-family: var(--sans); font-size: 12px; fill: var(--ink); }
+.dg .t { font-size: 13px; font-weight: 600; }
+.dg .n { fill: var(--ink2); font-weight: 500; }
+.dg .mn { font-family: var(--mono); font-size: 12px; }
+.dg .m { font-family: var(--mono); font-size: 11px; }
+.dg .r { font-family: var(--mono); font-size: 11px; fill: var(--ink2); }
+.dg .lbl { font-size: 11px; fill: var(--ink2); }
+.dg .cap { font-family: var(--mono); font-size: 11px; fill: var(--ink2); letter-spacing: .08em; font-weight: 600; }
+.dg .hot-t { fill: var(--accent); font-weight: 600; font-size: 11px; }
+.dg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.dg .ext { fill: var(--bg); stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .quiet { fill: none; stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .panel { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+.dg .pill { fill: var(--surface); stroke: var(--ink2); stroke-width: 1; }
+.dg .wire { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .route { stroke-dasharray: 5 4; }
+.dg .hot { stroke: var(--accent); stroke-width: 2.4; fill: none; }
+.dg .brk { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .mk { fill: var(--ink2); }
+.dg .mk-hot { fill: var(--accent); }
+.dg .tagbox { fill: var(--tag); stroke: var(--line); stroke-width: 1; }
+.dg .tagtx { font-family: var(--mono); font-size: 9.5px; font-weight: 600; fill: var(--ink2); }
+.dg .quiet-t { fill: var(--ink2); }
+</style>
+<rect width="960" height="1118" class="bg"/>
+<text x="16" y="30" class="title">generic-pxweb-v2-skill · workflow</text>
+<text x="944" y="30" text-anchor="end" class="r">v0.11.1 · drawn 2026-10-06</text>
+<defs>
+  <marker id="f1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+  <marker id="f1h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-hot"/></marker>
+</defs>
+
+<!-- Question -->
+<rect x="81" y="44" width="330" height="34" rx="17" class="pill"/>
+<text x="246" y="66" text-anchor="middle">Question: “Population of Riga, last 5 years”</text>
+<line x1="246" y1="78" x2="246" y2="110" class="wire" marker-end="url(#f1a)"/>
+
+<!-- Step 1 -->
+<rect x="16" y="112" width="460" height="110" rx="6" class="box"/>
+<text x="32" y="134" class="t"><tspan class="n">Step 1</tspan> · Identify the installation</text>
+<text x="32" y="154">Unclear which agency? Ask before calling anything</text>
+<text x="32" y="172">GET /config first: limits, formats, languages</text>
+<text x="32" y="190">Parse the body as JSON: a 200 can be an HTML page</text>
+<text x="32" y="210" class="r">api-details.md</text>
+
+<line x1="246" y1="222" x2="246" y2="260" class="wire" marker-end="url(#f1a)"/>
+<text x="256" y="245" class="lbl">base URL + limits</text>
+
+<!-- Step 2 -->
+<rect x="16" y="262" width="460" height="114" rx="6" class="box"/>
+<text x="32" y="284" class="t"><tspan class="n">Step 2</tspan> · Search for tables</text>
+<text x="32" y="304">Local-language terms; truncate short: popul*</text>
+<text x="32" y="322">Screen hits on variableNames before metadata</text>
+<text x="32" y="340">discontinued is no aliveness test: check lastPeriod</text>
+<text x="32" y="358">Show 3–5 hits and recommend one</text>
+
+<line x1="246" y1="376" x2="246" y2="414" class="wire" marker-end="url(#f1a)"/>
+<text x="256" y="399" class="lbl">table ID</text>
+
+<!-- Step 3 -->
+<rect x="16" y="416" width="460" height="128" rx="6" class="box"/>
+<text x="32" y="438" class="t"><tspan class="n">Step 3</tspan> · Explore metadata</text>
+<text x="32" y="458">Never skipped: codes are confirmed here</text>
+<text x="32" y="476">Start with role: metric · time · geo (geo is optional)</text>
+<text x="32" y="494">Read elimination from metadata, never from data</text>
+<text x="32" y="512">elimination: false and left out → HTTP 400</text>
+<text x="32" y="532" class="r">json-stat2.md · codelists-and-filters.md</text>
+
+<line x1="246" y1="544" x2="246" y2="582" class="wire" marker-end="url(#f1a)"/>
+<text x="256" y="567" class="lbl">codes + codelist</text>
+
+<!-- Step 4 -->
+<rect x="16" y="584" width="460" height="128" rx="6" class="box"/>
+<text x="32" y="606" class="t"><tspan class="n">Step 4</tspan> · Build and run the query</text>
+<text x="32" y="626">outputFormat=json-stat2 always: Latvia returns PX</text>
+<text x="32" y="644">GET: wrap comma expressions in [ ] · POST: bare</text>
+<text x="32" y="662">Time: top(N) or from() rather than fixed periods</text>
+<text x="32" y="680">Names from role: Tid or TIME, Region or AREA</text>
+<text x="32" y="700" class="r">codelists-and-filters.md · api-details.md</text>
+
+<line x1="246" y1="712" x2="246" y2="750" class="hot" marker-end="url(#f1h)"/>
+<text x="256" y="735" class="hot-t">only source of numbers in the answer</text>
+
+<!-- Step 5 -->
+<rect x="16" y="752" width="460" height="128" rx="6" class="box"/>
+<text x="32" y="774" class="t"><tspan class="n">Step 5</tspan> · Present</text>
+<text x="32" y="794">Table with units, citing every table ID used</text>
+<text x="32" y="812">Say which dimensions you collapsed, which codelist</text>
+<text x="32" y="830">Show status symbols and mandatory notes</text>
+<text x="32" y="848">Mark growth rates, shares and sums as your own</text>
+<text x="32" y="868" class="r">json-stat2.md</text>
+
+<line x1="246" y1="880" x2="246" y2="918" class="wire" marker-end="url(#f1a)"/>
+<text x="256" y="903" class="lbl">optional</text>
+
+<!-- Step 6 -->
+<rect x="16" y="920" width="460" height="78" rx="6" class="box"/>
+<text x="32" y="942" class="t"><tspan class="n">Step 6</tspan> · Saved query</text>
+<text x="32" y="962">Shareable ID; top(N) keeps it current</text>
+<text x="32" y="980">Body needs outputFormat and outputFormatParams</text>
+
+<!-- Fallback -->
+<rect x="16" y="1038" width="460" height="64" rx="6" class="box"/>
+<text x="32" y="1060" class="t">Fallback · The API does not respond</text>
+<text x="32" y="1078">Say so, no numbers from memory → agency’s database</text>
+<text x="32" y="1094" class="r">troubleshooting.md</text>
+
+<!-- API column -->
+<rect x="576" y="44" width="368" height="960" rx="8" class="panel"/>
+<text x="592" y="66" class="t">PxWebApi v2 installation</text>
+<text x="592" y="84" class="lbl">SSB · SCB · CSP (Latvia), verified 2026-09-08</text>
+<text x="592" y="102" class="r">api-details.md</text>
+
+<!-- Row: Step 1 -->
+<rect x="588" y="116" width="344" height="90" rx="5" class="box"/>
+<text x="600" y="138" class="m">GET /config</text>
+<text x="600" y="158" class="lbl">maxDataCells: 10 000 (CSP) to 800 000 (SSB)</text>
+<text x="600" y="176" class="lbl">dataFormats · languages · rate limit</text>
+<text x="600" y="194" class="lbl">sourceReferences: the agency’s own citation</text>
+<line x1="476" y1="149" x2="586" y2="149" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="143" text-anchor="middle" class="lbl">version</text>
+<line x1="588" y1="165" x2="478" y2="165" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="179" text-anchor="middle" class="lbl">limits</text>
+
+<!-- Row: Step 2 -->
+<rect x="588" y="266" width="344" height="82" rx="5" class="box"/>
+<text x="600" y="288" class="m">GET /tables?query=…</text>
+<text x="600" y="308" class="m">GET /tables/{id}</text>
+<text x="600" y="332" class="lbl">variableNames · lastPeriod · timeUnit</text>
+<line x1="476" y1="299" x2="586" y2="299" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="293" text-anchor="middle" class="lbl">search</text>
+<line x1="588" y1="315" x2="478" y2="315" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="329" text-anchor="middle" class="lbl">hits</text>
+
+<!-- Row: Step 3 -->
+<rect x="588" y="420" width="344" height="102" rx="5" class="box"/>
+<text x="600" y="442" class="m">GET /tables/{id}/metadata</text>
+<text x="600" y="462" class="m">GET /codelists/{id}</text>
+<text x="600" y="482" class="m">GET /tables/{id}/defaultselection</text>
+<text x="600" y="506" class="lbl">role · elimination · codelists</text>
+<line x1="476" y1="453" x2="586" y2="453" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="447" text-anchor="middle" class="lbl">table ID</text>
+<line x1="588" y1="469" x2="478" y2="469" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="483" text-anchor="middle" class="lbl">metadata</text>
+
+<!-- Row: Step 4 -->
+<rect x="588" y="588" width="344" height="102" rx="5" class="box"/>
+<text x="600" y="610" class="m">POST /tables/{id}/data</text>
+<text x="600" y="630" class="m">GET /tables/{id}/data?valueCodes[…]</text>
+<text x="600" y="654" class="lbl">?outputFormat=json-stat2 on every call</text>
+<text x="600" y="672" class="lbl">over maxDataCells: 400 “Too many cells selected”</text>
+<line x1="476" y1="621" x2="586" y2="621" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="615" text-anchor="middle" class="lbl">selection</text>
+<line x1="588" y1="637" x2="479" y2="637" class="hot" marker-end="url(#f1h)"/>
+<text x="532" y="653" text-anchor="middle" class="hot-t">json-stat2</text>
+
+<!-- Row: Step 6 -->
+<rect x="588" y="924" width="344" height="70" rx="5" class="box"/>
+<text x="600" y="946" class="m">POST /savedqueries</text>
+<text x="600" y="966" class="m">GET /savedqueries/{id}/data</text>
+<text x="600" y="986" class="lbl">exists on all three installations</text>
+<line x1="476" y1="957" x2="586" y2="957" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="951" text-anchor="middle" class="lbl">selection</text>
+<line x1="588" y1="973" x2="478" y2="973" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="987" text-anchor="middle" class="lbl">ID</text>
+
+<!-- API failure to fallback -->
+<polyline points="760,1004 760,1070 478,1070" class="wire" marker-end="url(#f1a)"/>
+<text x="770" y="1040" class="lbl">4xx · 5xx · down</text>
+</svg>

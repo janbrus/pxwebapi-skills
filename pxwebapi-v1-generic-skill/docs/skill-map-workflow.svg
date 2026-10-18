@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" width="960" height="1138" viewBox="0 0 960 1138" role="img" aria-label="Workflow in five steps after an environment check: can the tool send POST, identify the installation, find the table, read the metadata, build the query and POST it, present. Steps 1 to 4 call the installation's PxWebApi v1. Data comes only from a POST, and numbers in the answer come only from that response. If a call fails, the answer says so and gives no numbers.">
+<title>Workflow in five steps after an environment check: can the tool send POST, identify the installation, find the table, read the metadata, build the query and POST it, present. Steps 1 to 4 call the installation's PxWebApi v1. Data comes only from a POST, and numbers in the answer come only from that response. If a call fails, the answer says so and gives no numbers.</title>
+<style>
+svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --ink2: #4C5765; --line: #C3CBD5; --accent: #0A6A88; --tag: #DDE3EA;
+  --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, "Liberation Sans", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+@media (prefers-color-scheme: dark) { svg.dg { --bg: #10151B; --surface: #18202A; --panel: #141B23; --ink: #E3E8EE; --ink2: #9AA6B3; --line: #3A4552; --accent: #5DB9D7; --tag: #27313C; } }
+.dg .bg { fill: var(--bg); }
+.dg .title { font-size: 15px; font-weight: 600; }
+.dg text { font-family: var(--sans); font-size: 12px; fill: var(--ink); }
+.dg .t { font-size: 13px; font-weight: 600; }
+.dg .n { fill: var(--ink2); font-weight: 500; }
+.dg .mn { font-family: var(--mono); font-size: 12px; }
+.dg .m { font-family: var(--mono); font-size: 11px; }
+.dg .r { font-family: var(--mono); font-size: 11px; fill: var(--ink2); }
+.dg .lbl { font-size: 11px; fill: var(--ink2); }
+.dg .cap { font-family: var(--mono); font-size: 11px; fill: var(--ink2); letter-spacing: .08em; font-weight: 600; }
+.dg .hot-t { fill: var(--accent); font-weight: 600; font-size: 11px; }
+.dg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.dg .ext { fill: var(--bg); stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .quiet { fill: none; stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .panel { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+.dg .pill { fill: var(--surface); stroke: var(--ink2); stroke-width: 1; }
+.dg .wire { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .route { stroke-dasharray: 5 4; }
+.dg .hot { stroke: var(--accent); stroke-width: 2.4; fill: none; }
+.dg .brk { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .mk { fill: var(--ink2); }
+.dg .mk-hot { fill: var(--accent); }
+.dg .tagbox { fill: var(--tag); stroke: var(--line); stroke-width: 1; }
+.dg .tagtx { font-family: var(--mono); font-size: 9.5px; font-weight: 600; fill: var(--ink2); }
+.dg .quiet-t { fill: var(--ink2); }
+</style>
+<rect width="960" height="1138" class="bg"/>
+<text x="16" y="30" class="title">generic-pxweb-v1-skill · workflow</text>
+<text x="944" y="30" text-anchor="end" class="r">v0.12.1 · drawn 2026-10-06</text>
+<defs>
+  <marker id="f1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+  <marker id="f1h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-hot"/></marker>
+</defs>
+
+<!-- Question -->
+<rect x="81" y="44" width="330" height="34" rx="17" class="pill"/>
+<text x="246" y="66" text-anchor="middle">Question: “Population of Helsinki, latest year”</text>
+<line x1="246" y1="78" x2="246" y2="110" class="wire" marker-end="url(#f1a)"/>
+
+<!-- Environment check -->
+<rect x="16" y="112" width="460" height="78" rx="6" class="box"/>
+<text x="32" y="134" class="t"><tspan class="n">Before Step 1</tspan> · Can your tool send POST?</text>
+<text x="32" y="154">v1 returns data to POST only; a GET returns metadata</text>
+<text x="32" y="172">No POST: do the GET-only parts, then Fallback</text>
+
+<line x1="246" y1="190" x2="246" y2="228" class="wire" marker-end="url(#f1a)"/>
+<text x="256" y="213" class="lbl">POST works</text>
+
+<!-- Step 1 -->
+<rect x="16" y="230" width="460" height="110" rx="6" class="box"/>
+<text x="32" y="252" class="t"><tspan class="n">Step 1</tspan> · Identify the installation</text>
+<text x="32" y="272">{host}/{APINAME}/v1/{LANGUAGE}/{DATABASEID}/…</text>
+<text x="32" y="290">Unknown base URL? Walk down from the language level</text>
+<text x="32" y="308">Start with ?config, a query parameter, not a path</text>
+<text x="32" y="328" class="r">installations.md · api-details.md</text>
+
+<line x1="246" y1="340" x2="246" y2="378" class="wire" marker-end="url(#f1a)"/>
+<text x="256" y="363" class="lbl">base URL + limits</text>
+
+<!-- Step 2 -->
+<rect x="16" y="380" width="460" height="110" rx="6" class="box"/>
+<text x="32" y="402" class="t"><tspan class="n">Step 2</tspan> · Find the table</text>
+<text x="32" y="422">Navigate: GET each level; type l = level, t = table</text>
+<text x="32" y="440">Search with ?query= where it exists (not SCB, Iceland)</text>
+<text x="32" y="458">Use the id as returned: .px is part of the URL</text>
+<text x="32" y="478" class="r">api-details.md · px-files-and-classifications.md</text>
+
+<line x1="246" y1="490" x2="246" y2="528" class="wire" marker-end="url(#f1a)"/>
+<text x="256" y="513" class="lbl">table URL</text>
+
+<!-- Step 3 -->
+<rect x="16" y="530" width="460" height="128" rx="6" class="box"/>
+<text x="32" y="552" class="t"><tspan class="n">Step 3</tspan> · Read the metadata</text>
+<text x="32" y="572">Never skipped: GET the URL you will POST to</text>
+<text x="32" y="590">No role, units or codelists: infer the roles yourself</text>
+<text x="32" y="608">Copy codes verbatim: names vary by installation</text>
+<text x="32" y="626">time: true says nothing about the frequency</text>
+<text x="32" y="646" class="r">query-syntax.md · json-stat2.md</text>
+
+<line x1="246" y1="658" x2="246" y2="696" class="wire" marker-end="url(#f1a)"/>
+<text x="256" y="681" class="lbl">variable codes</text>
+
+<!-- Step 4 -->
+<rect x="16" y="698" width="460" height="128" rx="6" class="box"/>
+<text x="32" y="720" class="t"><tspan class="n">Step 4</tspan> · Build the query and POST it</text>
+<text x="32" y="740">Always set response.format: three different defaults</text>
+<text x="32" y="758">Filters: item · all · top · agg: · vs:</text>
+<text x="32" y="776">agg: takes explicit codes only, never *</text>
+<text x="32" y="794">Left out, elimination false or absent → all values</text>
+<text x="32" y="814" class="r">query-syntax.md · px-files-and-classifications.md</text>
+
+<line x1="246" y1="826" x2="246" y2="864" class="hot" marker-end="url(#f1h)"/>
+<text x="256" y="849" class="hot-t">only source of numbers in the answer</text>
+
+<!-- Step 5 -->
+<rect x="16" y="866" width="460" height="128" rx="6" class="box"/>
+<text x="32" y="888" class="t"><tspan class="n">Step 5</tspan> · Present</text>
+<text x="32" y="908">Cite every table: “Source: {Agency}, table {id}”</text>
+<text x="32" y="926">Units from the data response, or name them yourself</text>
+<text x="32" y="944">Say which variables you eliminated</text>
+<text x="32" y="962">Status symbols are set per PX file: read them</text>
+<text x="32" y="982" class="r">json-stat2.md</text>
+
+<!-- Fallback -->
+<rect x="16" y="1034" width="460" height="88" rx="6" class="box"/>
+<text x="32" y="1056" class="t">Fallback · A call failed, or no POST</text>
+<text x="32" y="1076">A bare Bad Request is a failure, not an empty result</text>
+<text x="32" y="1094">Point to the web database’s “API query” button</text>
+<text x="32" y="1112" class="r">troubleshooting.md</text>
+
+<!-- API column -->
+<rect x="576" y="44" width="368" height="770" rx="8" class="panel"/>
+<text x="592" y="66" class="t">PxWebApi v1 installation</text>
+<text x="592" y="84" class="lbl">7 verified end to end, 50 known · data by POST only</text>
+<text x="592" y="102" class="r">installations.md</text>
+
+<!-- Row: Step 1 -->
+<rect x="588" y="234" width="344" height="90" rx="5" class="box"/>
+<text x="600" y="256" class="m">GET …/{LANGUAGE}/?config</text>
+<text x="600" y="276" class="lbl">maxCells · maxValues · maxCalls · timeWindow</text>
+<text x="600" y="294" class="lbl">no maxCells does not mean “unlimited”</text>
+<text x="600" y="312" class="lbl">/config as a path returns 400</text>
+<line x1="476" y1="267" x2="586" y2="267" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="261" text-anchor="middle" class="lbl">?config</text>
+<line x1="588" y1="283" x2="478" y2="283" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="297" text-anchor="middle" class="lbl">limits</text>
+
+<!-- Row: Step 2 -->
+<rect x="588" y="384" width="344" height="102" rx="5" class="box"/>
+<text x="600" y="406" class="m">GET {level}</text>
+<text x="600" y="426" class="m">→ [{id, type, text}, …]</text>
+<text x="600" y="446" class="m">GET {level}/?query=…</text>
+<text x="600" y="470" class="lbl">?query= returns 400 at SCB and Iceland</text>
+<line x1="476" y1="417" x2="586" y2="417" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="411" text-anchor="middle" class="lbl">level</text>
+<line x1="588" y1="433" x2="478" y2="433" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="447" text-anchor="middle" class="lbl">nodes</text>
+
+<!-- Row: Step 3 -->
+<rect x="588" y="534" width="344" height="82" rx="5" class="box"/>
+<text x="600" y="556" class="m">GET {table_url}</text>
+<text x="600" y="576" class="lbl">code · text · values · valueTexts</text>
+<text x="600" y="600" class="lbl">elimination and time default to false</text>
+<line x1="476" y1="567" x2="586" y2="567" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="561" text-anchor="middle" class="lbl">table URL</text>
+<line x1="588" y1="583" x2="478" y2="583" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="597" text-anchor="middle" class="lbl">metadata</text>
+
+<!-- Row: Step 4 -->
+<rect x="588" y="702" width="344" height="102" rx="5" class="box"/>
+<text x="600" y="724" class="m">POST {table_url}</text>
+<text x="600" y="744" class="m">{"query": […], "response": {…}}</text>
+<text x="600" y="768" class="lbl">over the cell limit: 403, not 400</text>
+<text x="600" y="786" class="lbl">only SSB returns a JSON error body</text>
+<line x1="476" y1="735" x2="586" y2="735" class="wire" marker-end="url(#f1a)"/>
+<text x="532" y="729" text-anchor="middle" class="lbl">query</text>
+<line x1="588" y1="751" x2="479" y2="751" class="hot" marker-end="url(#f1h)"/>
+<text x="532" y="767" text-anchor="middle" class="hot-t">json-stat2</text>
+
+<!-- API failure to fallback -->
+<polyline points="760,814 760,1078 478,1078" class="wire" marker-end="url(#f1a)"/>
+<text x="770" y="950" class="lbl">4xx · 5xx · down</text>
+</svg>

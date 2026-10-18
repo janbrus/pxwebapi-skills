@@ -1,6 +1,6 @@
-# JSON-Stat2 → diagram-config — oppskrift
+# JSON-stat2 → diagram-config — oppskrift
 
-Hvordan gå fra en JSON-Stat2-respons fra SSBs PxWebApi v2 til et chart-bibliotek-config (Chart.js, Recharts, matplotlib …). Selve dataformatet er dokumentert i `ssb-pxwebapi-v2`-skillens `references/json-stat2.md` — denne filen handler kun om mappingen til chart-data.
+Hvordan gå fra en JSON-stat2-respons fra SSBs PxWebApi v2 til et chart-bibliotek-config (Chart.js, Recharts, matplotlib …). Selve dataformatet er dokumentert i `ssb-pxwebapi-v2`-skillens `references/json-stat2.md` — denne filen handler kun om mappingen til chart-data.
 
 ---
 
@@ -124,27 +124,35 @@ function readStatus(data, flatIdx) {
 
 I Chart.js: sett `spanGaps: false` på datasettet slik at `null` faktisk lager hull i stedet for å trekke linjer mellom kjente punkter. Flaggene ligger i `dataset.flags` (Steg 3). Bruk dem i en scriptable `pointStyle` (f.eks. hult punkt der `ctx.dataset.flags[ctx.dataIndex]` er satt) og i tooltip-callbacken, og forklar tegnet i en fotnote under diagrammet. SSB forklarer tegnet i tabellens `note` (09842: «* = Foreløpig tall»).
 
+**Foreløpige tall som bare står i noten.** Noen tabeller har ingen `status`, men sier i datasettets `note` hvilke perioder som er foreløpige (09189: «Tallene etter år 2023 (basisåret) er foreløpige.»). Merk de periodene som flagg på samme måte, og siter noten i fotnoten. Gå ikke ut over det noten sier, og spriker notene, si det i fotnoten.
+
 **Hvorfor:** Statistisk integritet. Antall innbyggere kan ikke interpoleres — at vi *ikke vet* tallet er en observasjon i seg selv. Aldri drop, interpoler, eller gjenta nabopunkter for å «fylle» dataene. Det motsatte er like galt: å blanke et foreløpig tall fordi cellen har en status, kaster et publisert tall. Tidligere versjoner av `readValue` gjorde nettopp det.
 
 ---
 
-## Steg 6 — Desimaler per metric
+## Steg 6 — Desimaler og enhet per metric
 
-Hardkod aldri antall desimaler. SSB oppgir presisjon per ContentsCode-verdi:
+Hardkod aldri antall desimaler eller enheten. SSB oppgir begge per ContentsCode-verdi, i `category.unit`:
 
 ```js
 const metricDim = data.role?.metric?.[0];          // f.eks. "ContentsCode"
 const metricCode = /* hvilken kode fra combo som tilhører metricDim */;
-const decimals = data.dimension[metricDim]?.category.unit?.[metricCode]?.decimals
+const unitInfo = data.dimension[metricDim]?.category.unit?.[metricCode];
+const decimals = unitInfo?.decimals
               ?? data.extension?.px?.decimals       // dataset-default
               ?? 0;                                 // siste utvei
+const unit = unitInfo?.base ?? '';                  // benevningen, på språket fra lang
 ```
 
-Lagre `decimals` på datasettet (custom-property — Chart.js bevarer ukjente felter):
+Lagre begge på datasettet (custom-properties — Chart.js bevarer ukjente felter):
 
 ```js
-datasets.push({ label, data: values, flags, decimals });
+datasets.push({ label, data: values, flags, decimals, unit });
 ```
+
+`base` er skrevet ut og følger `lang`: `prosent`/`per cent`, `mill. kr`/`NOK million`, `kr per innbygger`/`NOK per capita`, `indeks`/`index`, `antall`/`number`. Benevningen over y-aksen er `base` med stor forbokstav (endre bare første tegn — `NOK million` skal ikke bli «Nok million»). For indekser hører basisåret med («2025=100») — det står i serielabelen, ikke i `base`. Én tabell kan ha flere enheter (14700: indeks, prosent og promille): serier med ulik enhet hører ikke på samme y-akse, så lag ett diagram per enhet (aldri to y-akser).
+
+**Egne beregninger** (per innbygger, andeler, endringer) har verken `base` eller `decimals` i dataene: sett `unit` og `decimals` på serien selv, ut fra hva tallet er. Arv dem ikke fra kildetallene — BNP i `mill. kr` (0 desimaler) delt på folketall er `kr per innbygger` (0 desimaler), og endringen i den er `prosent` med 1 desimal, som SSBs egne endringstall.
 
 Bruk det i tooltip-callback og som y-akse-presisjon:
 

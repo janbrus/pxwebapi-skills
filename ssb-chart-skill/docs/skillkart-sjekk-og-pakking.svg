@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" width="1040" height="356" viewBox="0 0 1040 356" role="img" aria-label="Ingen skript sjekker innholdet i ssb-chart. Hex-verdiene holdes like med grep mot color-system.md, og kodesnuttene i format-guidelines.md kontrolleres mot reglene i SKILL.md for hånd. SKILL.md, references, README, CHANGELOG og LICENSE pakkes av build_zip.sh til ssb-chart-skill.zip, og CI sjekker at den committede zip-en stemmer. docs, CLAUDE.md, DEVLOG.md og scripts følger ikke med.">
+<title>Ingen skript sjekker innholdet i ssb-chart. Hex-verdiene holdes like med grep mot color-system.md, og kodesnuttene i format-guidelines.md kontrolleres mot reglene i SKILL.md for hånd. SKILL.md, references, README, CHANGELOG og LICENSE pakkes av build_zip.sh til ssb-chart-skill.zip, og CI sjekker at den committede zip-en stemmer. docs, CLAUDE.md, DEVLOG.md og scripts følger ikke med.</title>
+<style>
+svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --ink2: #4C5765; --line: #C3CBD5; --accent: #0A6A88; --tag: #DDE3EA;
+  --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, "Liberation Sans", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+@media (prefers-color-scheme: dark) { svg.dg { --bg: #10151B; --surface: #18202A; --panel: #141B23; --ink: #E3E8EE; --ink2: #9AA6B3; --line: #3A4552; --accent: #5DB9D7; --tag: #27313C; } }
+.dg .bg { fill: var(--bg); }
+.dg .title { font-size: 15px; font-weight: 600; }
+.dg text { font-family: var(--sans); font-size: 12px; fill: var(--ink); }
+.dg .t { font-size: 13px; font-weight: 600; }
+.dg .n { fill: var(--ink2); font-weight: 500; }
+.dg .mn { font-family: var(--mono); font-size: 12px; }
+.dg .m { font-family: var(--mono); font-size: 11px; }
+.dg .r { font-family: var(--mono); font-size: 11px; fill: var(--ink2); }
+.dg .lbl { font-size: 11px; fill: var(--ink2); }
+.dg .cap { font-family: var(--mono); font-size: 11px; fill: var(--ink2); letter-spacing: .08em; font-weight: 600; }
+.dg .hot-t { fill: var(--accent); font-weight: 600; font-size: 11px; }
+.dg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.dg .ext { fill: var(--bg); stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .quiet { fill: none; stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .panel { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+.dg .pill { fill: var(--surface); stroke: var(--ink2); stroke-width: 1; }
+.dg .wire { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .route { stroke-dasharray: 5 4; }
+.dg .hot { stroke: var(--accent); stroke-width: 2.4; fill: none; }
+.dg .brk { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .mk { fill: var(--ink2); }
+.dg .mk-hot { fill: var(--accent); }
+.dg .tagbox { fill: var(--tag); stroke: var(--line); stroke-width: 1; }
+.dg .tagtx { font-family: var(--mono); font-size: 9.5px; font-weight: 600; fill: var(--ink2); }
+.dg .quiet-t { fill: var(--ink2); }
+</style>
+<rect width="1040" height="356" class="bg"/>
+<text x="16" y="24" class="title">ssb-chart · sjekk og pakking</text>
+<text x="1024" y="24" text-anchor="end" class="r">v1.3 · tegnet 2026-10-15</text>
+<g transform="translate(0 16)">
+<defs>
+  <marker id="f2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+</defs>
+
+<!-- Source files -->
+<rect x="16" y="40" width="270" height="40" rx="5" class="box"/>
+<text x="30" y="57" class="mn">SKILL.md</text>
+<text x="30" y="72" class="lbl">prinsipper, rendringsmål, palett, sjekkliste</text>
+
+<rect x="16" y="88" width="270" height="40" rx="5" class="box"/>
+<text x="30" y="105" class="mn">references/*.md</text>
+<text x="30" y="120" class="lbl">4 referansefiler, lastes ved behov</text>
+
+<rect x="16" y="136" width="270" height="40" rx="5" class="box"/>
+<text x="30" y="153" class="mn">README.md · CHANGELOG.md</text>
+<text x="30" y="168" class="lbl">installasjon og endringslogg</text>
+
+<rect x="16" y="184" width="270" height="40" rx="5" class="box"/>
+<text x="30" y="201" class="mn">LICENSE</text>
+<text x="30" y="216" class="lbl">MIT, ligger i repo-roten</text>
+
+<rect x="16" y="232" width="270" height="40" rx="5" class="quiet"/>
+<text x="30" y="249" class="mn quiet-t">docs/</text>
+<text x="30" y="264" class="lbl">dette skillkartet, ikke i zip</text>
+
+<rect x="16" y="280" width="270" height="40" rx="5" class="quiet"/>
+<text x="30" y="297" class="mn quiet-t">CLAUDE.md · DEVLOG.md · scripts/</text>
+<text x="30" y="312" class="lbl">internt, aldri i zip</text>
+
+<!-- Bracket: packed (items 1–4) -->
+<path d="M292 44 H300 V220 H292" class="brk"/>
+<line x1="300" y1="214" x2="394" y2="214" class="wire" marker-end="url(#f2a)"/>
+<text x="347" y="208" text-anchor="middle" class="lbl">pakkes</text>
+
+<!-- Bracket: checked by hand (items 1–2) -->
+<path d="M316 44 H324 V124 H316" class="brk"/>
+<line x1="324" y1="84" x2="394" y2="84" class="wire" marker-end="url(#f2a)"/>
+<text x="359" y="78" text-anchor="middle" class="lbl">regler</text>
+
+<!-- Checked by hand -->
+<rect x="396" y="40" width="320" height="128" rx="6" class="box"/>
+<text x="412" y="62" class="t">Sjekkes for hånd</text>
+<text x="412" y="84" class="lbl">Ingen skript sjekker innholdet</text>
+<text x="412" y="102" class="lbl">Snuttene i format-guidelines.md må følge SKILL.md:</text>
+<text x="412" y="118" class="lbl">legend aldri nederst, y-akse fra 0, kildelinje</text>
+<text x="412" y="138" class="lbl">jsonstat-to-chart.md er kjørt i node 2026-10-02</text>
+<text x="412" y="156" class="lbl">Hver regel sier hvilket rendringsmål den gjelder</text>
+
+<!-- Source of truth -->
+<rect x="796" y="40" width="228" height="128" rx="6" class="panel"/>
+<text x="812" y="62" class="t">Fasit for fargene</text>
+<text x="812" y="84" class="m">color-system.md</text>
+<text x="812" y="104" class="lbl">bygger på SSBs designsystem</text>
+<text x="812" y="120" class="lbl">og Plotly-malen</text>
+<text x="812" y="144" class="lbl">endres én hex, endres alle</text>
+<line x1="716" y1="96" x2="794" y2="96" class="wire" marker-end="url(#f2a)"/>
+<text x="756" y="90" text-anchor="middle" class="lbl">grep -rn</text>
+<line x1="796" y1="112" x2="718" y2="112" class="wire" marker-end="url(#f2a)"/>
+<text x="756" y="126" text-anchor="middle" class="lbl">alle treff</text>
+
+<!-- Build -->
+<rect x="396" y="184" width="320" height="60" rx="6" class="box"/>
+<text x="412" y="206" class="m">scripts/build_zip.sh</text>
+<text x="412" y="224" class="lbl">toppmappe ssb-chart/, brukerfiler + LICENSE</text>
+<line x1="716" y1="214" x2="794" y2="214" class="wire" marker-end="url(#f2a)"/>
+<text x="756" y="208" text-anchor="middle" class="lbl">bygger</text>
+
+<rect x="796" y="184" width="228" height="60" rx="6" class="box"/>
+<text x="812" y="206" class="m">ssb-chart-skill.zip</text>
+<text x="812" y="224" class="lbl">lastes opp i Claude.ai</text>
+<text x="396" y="270" class="lbl">CI zip-sync (check-chart-zip.yaml) bygger zip-en på nytt ved push</text>
+<text x="396" y="286" class="lbl">og kjører diff -r mot den committede</text>
+</g>
+</svg>

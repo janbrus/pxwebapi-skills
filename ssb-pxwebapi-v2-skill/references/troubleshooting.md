@@ -44,6 +44,8 @@ curl: (3) bad range in URL position 66:
 
 Bruk `curl -g` (`--globoff`), eller URL-kod hakeparentesene som `%5B`/`%5D` — API-et godtar begge. Det samme gjelder `[range(2020,2022)]`-uttrykk. Får du ingen JSON-respons i det hele tatt, sjekk dette først.
 
+`-g` koder ingenting. En 400 med HTML-siden «Your client has issued a malformed or illegal request» betyr som regel rå æ, ø eller å i URL-en. Prosentkod dem (`ø` → `%C3%B8`), eller bruk `curl -G --data-urlencode "query=…"` (verifisert 2026-10-14).
+
 ### 403 Forbidden
 
 Forespørselen er forstått men nektet.
@@ -187,6 +189,6 @@ Full respons, verifisert 2026-08-30:
 }
 ```
 
-`sourceReferences` er verdt å kjenne: det er SSBs egen kildehenvisningsstreng per språk («Kilde: Statistisk sentralbyrå» / «Source: Statistics Norway»), ved siden av kortformen skillen bruker i Steg 5 («Kilde: SSB, tabell {id}»). Merk også at `parquet` ligger i `dataFormats`.
+`sourceReferences` er verdt å kjenne: det er SSBs egen kildehenvisningsstreng per språk («Kilde: Statistisk sentralbyrå» / «Source: Statistics Norway»), ved siden av kortformen skillen bruker i Steg 5 («Kilde: SSB, tabell {id}. Sist oppdatert: {YYYY-MM-DD}.»). Merk også at `parquet` ligger i `dataFormats`.
 
 Verdiene kan endre seg — hardkod dem ikke. NB: `maxCallsPerTimeWindow` og `timeWindow` er nullstilt til `0` og ikke lenger i bruk; rate limit leses fra `x-ratelimit-*`-headerne — se `api-details.md`.

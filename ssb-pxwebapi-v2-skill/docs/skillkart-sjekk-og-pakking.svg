@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" class="dg" width="1040" height="356" viewBox="0 0 1040 356" role="img" aria-label="docs, SKILL.md og references sjekkes mot det levende SSB-API-et av check_examples.py og check_common_tables.py, ved push og hver mandag. SKILL.md, references, README, CHANGELOG og LICENSE pakkes av build_zip.sh til zip-filen. docs følger ikke med i zip. CLAUDE.md, DEVLOG.md, evals, scripts og .github er interne.">
-<title>docs, SKILL.md og references sjekkes mot det levende SSB-API-et av check_examples.py og check_common_tables.py, ved push og hver mandag. SKILL.md, references, README, CHANGELOG og LICENSE pakkes av build_zip.sh til zip-filen. docs følger ikke med i zip. CLAUDE.md, DEVLOG.md, evals, scripts og .github er interne.</title>
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" width="1040" height="356" viewBox="0 0 1040 356" role="img" aria-label="docs, SKILL.md og references sjekkes mot det levende SSB-API-et av check_examples.py og check_common_tables.py, ved push og manuelt. SKILL.md, references, README, CHANGELOG og LICENSE pakkes av build_zip.sh til zip-filen. docs følger ikke med i zip. CLAUDE.md, DEVLOG.md, evals, scripts og .github er interne.">
+<title>docs, SKILL.md og references sjekkes mot det levende SSB-API-et av check_examples.py og check_common_tables.py, ved push og manuelt. SKILL.md, references, README, CHANGELOG og LICENSE pakkes av build_zip.sh til zip-filen. docs følger ikke med i zip. CLAUDE.md, DEVLOG.md, evals, scripts og .github er interne.</title>
 <style>
 svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --ink2: #4C5765; --line: #C3CBD5; --accent: #0A6A88; --tag: #DDE3EA;
   --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, "Liberation Sans", sans-serif;
@@ -33,7 +33,7 @@ svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --
 </style>
 <rect width="1040" height="356" class="bg"/>
 <text x="16" y="24" class="title">ssb-pxwebapi-v2 · sjekk og pakking</text>
-<text x="1024" y="24" text-anchor="end" class="r">v1.6.1 · tegnet 2026-10-03</text>
+<text x="1024" y="24" text-anchor="end" class="r">v1.6.1 · tegnet 2026-10-03 · oppdatert 2026-10-13</text>
 <g transform="translate(0 16)">
           <defs>
             <marker id="f2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
@@ -90,8 +90,8 @@ svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --
           <text x="792" y="84">Feil: HTTP 4xx eller 5xx</text>
           <text x="792" y="102">Feil: discontinued: true</text>
           <text x="792" y="120">Advarsel: tittel, lastPeriod</text>
-          <text x="792" y="152" class="lbl">kjøres ved push/PR og hver</text>
-          <text x="792" y="168" class="lbl">mandag 06:00 UTC (GitHub Actions)</text>
+          <text x="792" y="152" class="lbl">kjøres ved push/PR eller</text>
+          <text x="792" y="168" class="lbl">manuelt (GitHub Actions)</text>
           <line x1="696" y1="108" x2="774" y2="108" class="wire" marker-end="url(#f2a)"/>
           <text x="736" y="102" text-anchor="middle" class="lbl">GET · POST</text>
           <line x1="776" y1="124" x2="698" y2="124" class="wire" marker-end="url(#f2a)"/>

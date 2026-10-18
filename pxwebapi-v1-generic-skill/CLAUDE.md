@@ -42,8 +42,14 @@ rather than presenting it as universal.
     filters, elimination rules, discovering aggregations, worked examples, cURL
   - `api-details.md` — URL structure, hierarchy navigation, `?query=` search syntax, output
     formats, PX-JSON, limits
-  - `json-stat2.md` — json-stat2 Dataset structure, row-major indexing, `role`-first analysis,
-    units, status codes (vendor-neutral; also applies to Eurostat and the World Bank)
+  - `json-stat2.md` — same layout as SSB's v2 file since 0.12.2: Contents, «How to read an
+    extract» (eight rules adapted to v1), then the format sections, with PX keywords in
+    parentheses and installations and dates inline. **v1 facts that differ from v2:** only the
+    data response is json-stat2; `category.index` follows the **table's** order, not the
+    request's (SSB and SCB v1, 2026-10-14) — don't port v2's "follows the request" text here;
+    mandatory notes exist (table and value level), but only in the data; SCB's v1 sets no
+    `role.geo`; `describedby` is URNs at SSB (two in one string on `Region`) and plain text at
+    SCB; no `link.related`, no `codelists`, `discontinued` always `null`
   - `troubleshooting.md` — HTTP codes and the three distinct v1 error payloads
   - `installations.md` — the broad inventory: 50 known v1 installations with status, languages
     and `?config` limits, grouped by country
@@ -59,7 +65,18 @@ rather than presenting it as universal.
   `CHANGELOG.md` header links to `DEVLOG.md` by full GitHub URL, because a relative link is dead
   inside the ZIP.
 - `evals/eval-scenarios.md` — end-to-end scenarios. Repo-internal, not shipped.
-- `docs/` — material for **agencies**, not for the model, and not shipped: `llms-template.txt`
+- `docs/` — material for **people**, not for the model, and not shipped. Two parts:
+
+  **The skill map** (for readers of the repo): `skill-map-workflow.svg` (the environment check,
+  Steps 1–5, the endpoint each step calls, the POST response as the only source of numbers) and
+  `skill-map-checks-and-packaging.svg` (no example checker, verification by hand, the ZIP build)
+  are hand-drawn and are the only copy of each drawing; `skill-map.html` wraps them with `<img>`
+  and prose. Each SVG carries its own `<style>` and an opaque background, since GitHub serves it
+  as an image and no page CSS or web font reaches it — size text for wide fallback fonts like
+  DejaVu Sans. Both name the version they were drawn from; no checker reads `.svg` or `.html`.
+  The siblings' `docs/` use the same layout.
+
+  **For agencies**: `llms-template.txt`
   (an llms.txt any v1 installation can fill in), `llms-example-statfin.txt` (the template filled in
   for Statistics Finland, every URL and the POST body checked live). Both follow the llmstxt.org
   **v2** format: free-text rules go
@@ -86,6 +103,8 @@ Every content change:
 3. Run `scripts/build_zip.sh` and commit the ZIP. CI will catch it if you forget.
 4. If a factual claim changed, do the **sibling check** below and record its outcome, including
    when the answer is "does not apply".
+5. If you changed a step, an endpoint or a limit that `docs/skill-map-workflow.svg` shows, redraw
+   it. It is outside the ZIP, so CI will not catch it drifting.
 
 **The README duplicates two things on purpose** — the seven-row installation table and the file
 tree. README is for humans, `SKILL.md` for the model. That means an installation change has to be
@@ -93,7 +112,7 @@ made in three places: `SKILL.md`, `README.md` and `references/installations.md`.
 
 ## Editing guidance
 
-- The **Data integrity — the base rule** section near the top of `SKILL.md` outranks everything else in the skill: never state a number not fetched from the API in that conversation, never blend other sources, never interpolate. Don't weaken, shorten or relocate it. It mirrors the same section in `generic-pxweb-v2-skill`, `ssb-pxwebapi-v2` (Norwegian) and `scb-pxwebapi-v2` (Swedish); a change to the rule belongs in all four. The v1 version deliberately differs on two points: the `status` bullet notes that symbols are per-PX-file (`DATASYMBOL1`–`6`), and the API-failure bullet notes that several v1 installations return a bare `Bad Request`, which makes a failed call easy to mistake for an empty result. There is no `discontinued` bullet — v1 has no such flag.
+- The **Data integrity — the base rule** section near the top of `SKILL.md` outranks everything else in the skill: never state a number not fetched from the API in that conversation, never blend other sources, never interpolate. Don't weaken, shorten or relocate it. It mirrors the same section in `generic-pxweb-v2-skill`, `ssb-pxwebapi-v2` (Norwegian) and `scb-pxwebapi-v2` (Swedish); a change to the rule belongs in all four. The v1 version deliberately differs on two points: the `status` bullet notes that symbols are per-PX-file (`DATASYMBOL1`–`6`), and the API-failure bullet notes that several v1 installations return a bare `Bad Request`, which makes a failed call easy to mistake for an empty result. There is no `discontinued` bullet — v1 has no such flag. Since 0.12.2 the mandatory-notes bullet is mirrored here; it adds that v1's metadata has no notes, so they arrive only with the data.
 - **Versioning:** `metadata.version` in `SKILL.md` frontmatter plus a `DEVLOG.md` and a `CHANGELOG.md` entry on every content change (semver; stay below 1.0.0 while the skill has no published distribution). A version that isn't bumped lies about copies being current.
 - **Verify against a live installation before changing a factual claim.** Everything currently in
   these files was reproduced with `curl` against SSB and/or SCB on 2026-08-28. Where a claim

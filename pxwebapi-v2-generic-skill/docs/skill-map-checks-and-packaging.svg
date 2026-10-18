@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" width="960" height="356" viewBox="0 0 960 356" role="img" aria-label="SKILL.md, references, README, CHANGELOG and LICENSE are packed by build_zip.sh into generic-pxweb-v2-skill.zip, and CI checks that the committed zip matches a fresh build. There is no example checker, because the examples are schematic. Facts are verified by hand against SSB, SCB and Latvia and dated in DEVLOG.md. docs, CLAUDE.md, DEVLOG.md, evals and scripts stay out of the zip.">
+<title>SKILL.md, references, README, CHANGELOG and LICENSE are packed by build_zip.sh into generic-pxweb-v2-skill.zip, and CI checks that the committed zip matches a fresh build. There is no example checker, because the examples are schematic. Facts are verified by hand against SSB, SCB and Latvia and dated in DEVLOG.md. docs, CLAUDE.md, DEVLOG.md, evals and scripts stay out of the zip.</title>
+<style>
+svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --ink2: #4C5765; --line: #C3CBD5; --accent: #0A6A88; --tag: #DDE3EA;
+  --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, "Liberation Sans", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+@media (prefers-color-scheme: dark) { svg.dg { --bg: #10151B; --surface: #18202A; --panel: #141B23; --ink: #E3E8EE; --ink2: #9AA6B3; --line: #3A4552; --accent: #5DB9D7; --tag: #27313C; } }
+.dg .bg { fill: var(--bg); }
+.dg .title { font-size: 15px; font-weight: 600; }
+.dg text { font-family: var(--sans); font-size: 12px; fill: var(--ink); }
+.dg .t { font-size: 13px; font-weight: 600; }
+.dg .n { fill: var(--ink2); font-weight: 500; }
+.dg .mn { font-family: var(--mono); font-size: 12px; }
+.dg .m { font-family: var(--mono); font-size: 11px; }
+.dg .r { font-family: var(--mono); font-size: 11px; fill: var(--ink2); }
+.dg .lbl { font-size: 11px; fill: var(--ink2); }
+.dg .cap { font-family: var(--mono); font-size: 11px; fill: var(--ink2); letter-spacing: .08em; font-weight: 600; }
+.dg .hot-t { fill: var(--accent); font-weight: 600; font-size: 11px; }
+.dg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.dg .ext { fill: var(--bg); stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .quiet { fill: none; stroke: var(--line); stroke-dasharray: 4 3; }
+.dg .panel { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+.dg .pill { fill: var(--surface); stroke: var(--ink2); stroke-width: 1; }
+.dg .wire { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .route { stroke-dasharray: 5 4; }
+.dg .hot { stroke: var(--accent); stroke-width: 2.4; fill: none; }
+.dg .brk { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+.dg .mk { fill: var(--ink2); }
+.dg .mk-hot { fill: var(--accent); }
+.dg .tagbox { fill: var(--tag); stroke: var(--line); stroke-width: 1; }
+.dg .tagtx { font-family: var(--mono); font-size: 9.5px; font-weight: 600; fill: var(--ink2); }
+.dg .quiet-t { fill: var(--ink2); }
+</style>
+<rect width="960" height="356" class="bg"/>
+<text x="16" y="24" class="title">generic-pxweb-v2-skill · checks and packaging</text>
+<text x="944" y="24" text-anchor="end" class="r">v0.11.1 · drawn 2026-10-06</text>
+<g transform="translate(0 16)">
+<defs>
+  <marker id="f2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk"/></marker>
+</defs>
+
+<!-- Source files -->
+<rect x="16" y="40" width="260" height="40" rx="5" class="box"/>
+<text x="30" y="57" class="mn">SKILL.md</text>
+<text x="30" y="72" class="lbl">workflow, rules, schematic examples</text>
+
+<rect x="16" y="88" width="260" height="40" rx="5" class="box"/>
+<text x="30" y="105" class="mn">references/*.md</text>
+<text x="30" y="120" class="lbl">4 reference files, loaded on demand</text>
+
+<rect x="16" y="136" width="260" height="40" rx="5" class="box"/>
+<text x="30" y="153" class="mn">README.md · CHANGELOG.md</text>
+<text x="30" y="168" class="lbl">installation and change log</text>
+
+<rect x="16" y="184" width="260" height="40" rx="5" class="box"/>
+<text x="30" y="201" class="mn">LICENSE</text>
+<text x="30" y="216" class="lbl">MIT, in the repository root</text>
+
+<rect x="16" y="232" width="260" height="40" rx="5" class="quiet"/>
+<text x="30" y="249" class="mn quiet-t">docs/</text>
+<text x="30" y="264" class="lbl">this skill map, for readers, not in the zip</text>
+
+<rect x="16" y="280" width="260" height="40" rx="5" class="quiet"/>
+<text x="30" y="297" class="mn quiet-t">CLAUDE.md · DEVLOG.md · evals/</text>
+<text x="30" y="312" class="lbl">+ scripts/ · internal, never in the zip</text>
+
+<!-- Bracket: packed (items 1–4) -->
+<path d="M282 44 H290 V220 H282" class="brk"/>
+<line x1="290" y1="214" x2="374" y2="214" class="wire" marker-end="url(#f2a)"/>
+<text x="332" y="208" text-anchor="middle" class="lbl">packed</text>
+
+<!-- Bracket: verified (items 1–2) -->
+<path d="M302 44 H310 V124 H302" class="brk"/>
+<line x1="310" y1="84" x2="374" y2="84" class="wire" marker-end="url(#f2a)"/>
+<text x="342" y="78" text-anchor="middle" class="lbl">facts</text>
+
+<!-- Verified by hand -->
+<rect x="376" y="40" width="290" height="128" rx="6" class="box"/>
+<text x="392" y="62" class="t">Verified by hand</text>
+<text x="392" y="84" class="lbl">No example checker: examples are schematic</text>
+<text x="392" y="100" class="lbl">({base_url}, {id}), so there is nothing to call</text>
+<text x="392" y="120" class="lbl">Facts: curl against SSB, SCB and Latvia,</text>
+<text x="392" y="136" class="lbl">each verification dated in DEVLOG.md</text>
+<text x="392" y="156" class="lbl">evals/: real runs after larger edits</text>
+
+<!-- Live installations -->
+<rect x="736" y="40" width="208" height="128" rx="6" class="panel"/>
+<text x="752" y="62" class="t">Live installations</text>
+<text x="752" y="84" class="m">data.ssb.no</text>
+<text x="752" y="102" class="m">statistikdatabasen.scb.se</text>
+<text x="752" y="120" class="m">api.stat.gov.lv</text>
+<text x="752" y="152" class="lbl">no CI job, no weekly run</text>
+<line x1="666" y1="96" x2="734" y2="96" class="wire" marker-end="url(#f2a)"/>
+<text x="700" y="90" text-anchor="middle" class="lbl">curl</text>
+<line x1="736" y1="112" x2="668" y2="112" class="wire" marker-end="url(#f2a)"/>
+<text x="700" y="126" text-anchor="middle" class="lbl">answers</text>
+
+<!-- Build -->
+<rect x="376" y="184" width="290" height="60" rx="6" class="box"/>
+<text x="392" y="206" class="m">scripts/build_zip.sh</text>
+<text x="392" y="224" class="lbl">copies the user files + LICENSE</text>
+<line x1="666" y1="214" x2="734" y2="214" class="wire" marker-end="url(#f2a)"/>
+<text x="700" y="208" text-anchor="middle" class="lbl">builds</text>
+
+<rect x="736" y="184" width="208" height="60" rx="6" class="box"/>
+<text x="752" y="206" class="m">generic-pxweb-v2-skill.zip</text>
+<text x="752" y="224" class="lbl">upload to Claude.ai</text>
+<text x="376" y="270" class="lbl">CI zip-sync (check-v2-generic-zip.yaml) rebuilds the zip on push</text>
+<text x="376" y="286" class="lbl">and runs diff -r against the committed one</text>
+</g>
+</svg>

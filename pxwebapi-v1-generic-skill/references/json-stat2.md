@@ -1,21 +1,56 @@
 # json-stat2 — format reference
 
 json-stat2 is an open format for statistical datasets (https://json-stat.org/). PxWebApi v1
-returns it when you ask for `"response": {"format": "json-stat2"}`, and the structure is the same
-one produced by PxWebApi v2, Eurostat and the World Bank. This file documents the format; v1's
-request shape lives in `query-syntax.md`.
+returns it when you ask for `"response": {"format": "json-stat2"}`, and the structure is the one
+PxWebApi v2, Eurostat and the World Bank produce too. This file describes the format as v1
+delivers it, and says where SSB's v1 and SCB's v1 differ. v1's request shape is in
+`query-syntax.md`.
 
-Two things are specific to v1 and worth stating up front:
+**Contents**
 
-- **Only the data response is json-stat2.** A GET on the table URL returns v1's own thin metadata
-  shape (`{"title", "variables": [{"code", "text", "values", "valueTexts", "elimination", "time"}]}`),
-  not a json-stat2 Dataset. v2 returns json-stat2 for both.
-- **The data response carries metadata that v1's metadata endpoint does not** — `role`, units and
-  decimals in particular. When metadata leaves you guessing, a minimal probe query is the answer.
+1. How to read an extract
+2. Dataset structure and indexing
+3. Shape variants
+4. The fields in the dataset
+5. `dimension` and `extension` per variable
+6. `extension` at the root and `extension.px`
+7. `status`, `note` and `link`
+8. What json-stat2 cannot express
+9. Tooling
 
 ---
 
-## Dataset structure
+## How to read an extract
+
+1. **Only the data response is json-stat2.** A GET on the table URL returns v1's own thin
+   metadata (`{"title", "variables": [{"code", "text", "values", "valueTexts", "elimination",
+   "time"}]}`). `role`, units, decimals, notes and `extension` arrive only with the data. When the
+   metadata leaves you guessing, run a `top`-1 probe query. (See "Dataset structure and
+   indexing")
+2. **Start with `role`, then look in `id`.** `metric` is what is measured and `time` is time.
+   `geo` is optional: SSB's v1 and Finland set it, SCB's v1 does not. Look for a geographic variable in `id`;
+   only when none exists — the table has none, or you eliminated it — do the figures cover the
+   whole country or area. Do not ask the user. (See "The fields in the dataset")
+3. **Positions follow the table's order, not your query's.** `value` is row-major, but v1 sorts
+   the values you asked for into the table's own order — the opposite of v2. Always look the
+   position up in `category.index`, iterate `id`, and never filter out `null`. (See "Dataset
+   structure and indexing")
+4. **Read `value` and `status` separately.** If the cell is `null`, show the symbol, never 0. If
+   it has a number, show the number with its flag. (SKILL.md Data integrity, and `status`)
+5. **Show mandatory notes.** `extension.noteMandatory` flags table notes, and
+   `categoryNoteMandatory` flags value notes. Both arrive with the data, and v1's metadata has
+   no notes at all. (SKILL.md Data integrity, and `note`)
+6. **Read eliminability from v1's metadata** (`variables[].elimination`), not from the data
+   response. (See `elimination`, and `query-syntax.md` for the three rules)
+7. **Treat `aggregallowed: false` as "do not sum or average".** Whether it also blocks `agg:`
+   varies by installation, and three of seven do not send it at all. (See `extension.px`)
+8. **State the `agg:`/`vs:` you used, the variables you eliminated and the frequency yourself.**
+   The response records none of them, and v1 has no `timeUnit`. (See "What json-stat2 cannot
+   express")
+
+---
+
+## Dataset structure and indexing
 
 ```json
 {
@@ -33,35 +68,13 @@ Two things are specific to v1 and worth stating up front:
 }
 ```
 
-### Key elements
-
-- **`id`** — variable names in order. This order governs all indexing: iterate `id`, never
-  `Object.keys(dimension)`. The two coincide at SSB (v1 and v2), SCB, Latvia and Eurostat
-  (verified 2026-10-02), but the specification does not promise it.
-- **`size`** — number of values per variable, same order as `id`.
-- **`value`** — flat array of all data values in **row-major order**: the last dimension in `id`
-  varies fastest, the first varies slowest (the C/NumPy convention). For `size = [s₀, s₁, …, sₙ]`
-  and category indices `(i₀, i₁, …, iₙ)`, the flat index is
-  `i₀·(s₁·s₂·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ` — each position times its dimension's *stride*, the
-  product of the sizes of every later dimension. Category positions come from
-  `dimension.{var}.category.index`. Worked example below.
-- **`dimension`** — per variable: codes (`category.index`), labels (`category.label`), units
-  (`category.unit`), and `extension`.
-- **`role`** — which variables are `time`, `geo` and `metric`. **Start your analysis here.**
-- **`status`** — flags on individual cells, keyed by index into `value`. Read it **alongside**
-  `value`: a missing-value symbol comes with a `null`, but a status can also flag a figure that
-  exists (provisional, estimated, a cell note). See "Status codes".
-- **`note`** — table-level caveats. Worth reading before interpreting a series; PxWeb often
-  records boundary changes and coverage gaps here.
-- **`extension`** — agency-specific metadata.
-
 Older serializers may omit `"version": "2.0"` (Statistics Faroe Islands currently does). The rest
 of the structure is unaffected.
 
-### Worked example: two dimensions that vary
-
-`id = ["Region", "ContentsCode", "Tid"]`, `size = [2, 1, 3]` — two regions, one measure, three
-years. Strides: `Region` 1·3 = 3, `ContentsCode` 3, `Tid` 1.
+`value` is row-major, as in C and NumPy. For `size = [s₀, s₁, …, sₙ]` and category indices
+`(i₀, i₁, …, iₙ)` the position is `i₀·(s₁·…·sₙ) + i₁·(s₂·…·sₙ) + … + iₙ`. With two regions and
+three years, `id = ["Region", "ContentsCode", "Tid"]` and `size = [2, 1, 3]`. Strides: `Region`
+1·3 = 3, `ContentsCode` 3, `Tid` 1.
 
 | Position in `value` | `Region` | `Tid` | Offset |
 |---|---|---|---|
@@ -69,12 +82,25 @@ years. Strides: `Region` 1·3 = 3, `ContentsCode` 3, `Tid` 1.
 | 3, 4, 5 | index 1 | index 0, 1, 2 | `1·3 + 0·3 + t·1` |
 
 The second region's third year is `1·3 + 0·3 + 2·1 = 5`, so `value[5]`. A dimension of size 1
-still has a stride, but always contributes 0. To test an implementation, use
-https://json-stat.org/samples/order.json, where every value is a string naming its own position
-(`A2B1C3`) and `category.index` is in array form. Position 11 in that file reads `A1B1C4` where it
-should read `A2B1C4` (a typo, checked 2026-10-02), so correct code "fails" exactly there.
+always contributes 0.
 
-### Shape variants
+**Which region is index 1 depends on the table, not on your query.** At SSB's v1, `item` values
+`["4601", "0301"]` on 07459 come back as `{"0301": 0, "4601": 1}`, and years asked for as
+`["2026", "2024", "2025"]` come back as `{"2024": 0, "2025": 1, "2026": 2}`. SCB's v1 does the
+same: `["0180", "0140"]` on `BefolkningNy` gives `{"0140": 0, "0180": 1}` (both 2026-10-14). v2
+does the opposite and keeps the order of the request, so code ported from a v2 client that
+assumes request order puts figures under the wrong labels. The keys of `dimension` come in `id`
+order at SSB's v1 and v2, SCB, Latvia and Eurostat (2026-10-02), but the specification does not
+promise it.
+
+To test an implementation, use https://json-stat.org/samples/order.json, where every value is a
+string naming its own position (`A2B1C3`) and `category.index` is in array form. Position 11 in
+that file reads `A1B1C4` where it should read `A2B1C4` (a typo, checked 2026-10-02), so correct
+code "fails" exactly there.
+
+---
+
+## Shape variants
 
 The json-stat 2.0 specification allows several shapes for the same information. PxWeb sends the
 first column; other producers use the second, and code written against PxWeb alone breaks on them:
@@ -92,61 +118,31 @@ Read `value[String(offset)]` there, and treat a missing key as `null`.
 
 ---
 
-## Start the analysis with `role`
+## The fields in the dataset
 
-- **`role.metric`** — what is being measured. In Nordic installations this is usually the
-  `ContentsCode` variable, but **check `role.metric` for the actual name** rather than assuming:
-  Statistics Finland calls it `contentscode`, and other installations differ again. Read
-  `dimension.{metric}.category.unit` for the unit and the number of decimals.
-- **`role.time`** — the time dimension.
-- **`role.geo`** — geography. **If `role.geo` is missing, the figures cover the installation's
-  whole country or area — do not ask the user.** In v1 this happens routinely, because
-  eliminating a geographic variable removes it from the response entirely.
-- Variables in `id` but not in `role` are breakdown dimensions — sex, age, industry, and so on.
+| Field | What it is |
+|---|---|
+| `id`, `size` | The variables in the order that governs indexing, and the number of values per variable |
+| `value` | The figures as one flat list, with `null` where a figure is missing |
+| `status` | Flags per cell, keyed by position in `value`. Absent when no cell is flagged |
+| `dimension` | Per variable: codes, labels, unit, notes, `extension` and `link` |
+| `role` | `time`, `metric` and, at SSB's v1 and Finland, `geo`. The other variables in `id` are breakdowns |
+| `note` | Table notes: boundary changes, base-year changes, coverage gaps |
+| `extension`, `link` | The installation's own fields and links, see below |
+| `label`, `source`, `updated` | Title, source and last update |
 
-Because v1's metadata endpoint has no `role`, this is also the reliable way to identify the
-metric on an unfamiliar installation: run a `top`-1 probe query and read `role` off the result.
-
----
-
-## What json-stat2 cannot express
-
-Worth knowing when moving between PX and json-stat, because the loss is silent:
-
-- **Time periodicity.** PX declares it explicitly (`TIMEVAL(...)=TLIST(A1|H1|Q1|M1|W1)`, which also
-  guarantees consecutive periods). json-stat2 has no standard field for it — `role.time` names the
-  time dimension but says nothing about its frequency. PxWebApi v2 works around this with
-  `timeUnit` on the table resource, *outside* the json-stat2 document; v1 does not expose it at all.
-  Consumers must infer frequency from the shape of the value codes, and those codes are not
-  guaranteed to be dates (see `query-syntax.md`).
-
-  Note that the absence is a PxWeb choice rather than a hard limit of the format: PxWeb already
-  ships PX header keywords inside the dataset under `extension.px` (see below), and TLIST simply is
-  not among them.
-- **The aggregation that produced a figure.** Eliminated dimensions vanish from `id` and
-  `dimension` entirely, so a dataset does not record what was summed away.
-- **Which codelist or valueset a code came from.** In v1 the `agg:`/`vs:` used in the request
-  leaves no trace in the response.
+Because v1's metadata has no `role`, the data response is also the reliable way to identify the
+metric on an unfamiliar installation: Statistics Finland calls it `contentscode`, and other
+installations differ again.
 
 ---
 
-## `extension.px` — PX keywords inside the dataset
+## `dimension` and `extension` per variable
 
-PxWeb adds a non-standard `extension.px` object at the top level of the **data** response, carrying
-part of the source PX file's header — `decimals`, `heading`/`stub` (the intended pivot layout),
-`official-statistics`, the subject classification and `aggregallowed`. It is the only place several
-of them appear; the metadata endpoint has none of them, and non-PxWeb json-stat producers have no
-`extension.px` at all.
-
-`aggregallowed` says whether summing the table is meaningful. Treat it as a hint only: it is
-**absent from three of the seven verified installations**, and where it is `false` the installations
-do not agree on what follows — SSB's v1 rejects `agg:` with 400, SCB's serves the data (verified
-2026-09-04). The full matrix, the controls behind it and the SSB-v1-vs-v2 difference are in
-`px-files-and-classifications.md`.
-
----
-
-## Units and decimals
+`dimension.{var}` has `category.index` (code → position) and `category.label` (code → name). The
+metric variable also has `category.unit` per value: `base` is the unit and `decimals` the number
+of decimals to show. Notes sit per variable (`note`) and per value (`category.note`, value code →
+list). None of this is in v1's metadata.
 
 ```json
 "ContentsCode": {
@@ -166,14 +162,70 @@ do not agree on what follows — SSB's v1 rejects `agg:` with 400, SCB's serves 
 }
 ```
 
-`unit.base` is the unit of measurement and `unit.decimals` how many decimals to display.
-`extension` frequently carries the reference period, whether the series is a stock or a flow,
-whether prices are current or fixed, and whether the series is seasonally adjusted — all of which
-belong in a careful presentation of the numbers, and none of which appear in v1 metadata.
+`dimension.{var}.extension` has these fields at SSB's v1 and SCB's v1 (2026-10-14). The PX keyword
+each comes from is in parentheses (source: `PxTools/PCAxis.Serializers`, `JsonStat2Serializer.cs`):
+
+| Field | Meaning |
+|---|---|
+| `elimination` (`ELIMINATION`) | Describes the extract, not the table — see below |
+| `eliminationValueCode` (`ELIMINATION`) | The total code, when the response includes it (SCB `Region` → `"00"`) |
+| `show` (`PRESTEXT`) | `code`, `value` or `code_value` |
+| `categoryNoteMandatory` (`VALUENOTEX`) | Which value notes must be shown: value code → index into `category.note`. SCB `Region`: `{"0140": {"1": true}}` |
+| `measuringType` (`STOCKFA`) | `Stock`, `Flow`, `Average` or `Other` |
+| `priceType` (`CFPRICES`) | `Current`, `Fixed` or `NotApplicable` |
+| `adjustment` (`DAYADJ`, `SEASADJ`) | `SesOnly`, `WorkAndSes` or `None` |
+| `basePeriod` (`BASEPERIOD`) | The base period of an index (SSB 14700) |
+| `refperiod` (`REFPERIOD`) | The reference time, e.g. `1.1.` for a stock |
+
+The last five sit on the metric variable only. They belong in a careful presentation of the
+numbers: an index without its base period is meaningless, and a fixed-price series compared with a
+current-price one is wrong. Unlike v2, there is no `codelists` field — v1 has no codelist
+endpoint — and no `alternativeText`.
+
+### `elimination`
+
+In a data response `elimination` describes the extract you received, not whether the variable
+may be left out: SSB's v1 says `false` for `Region` when you select `0301`, although its metadata
+says `true` (2026-10-14). The contract is `variables[].elimination` in v1's metadata, where an absent
+field means `false`. PX has two forms, `ELIMINATION("<variable>")=YES` (no total value; the API
+sums) and `ELIMINATION("<variable>")="<value name>"` (a named total), and v1 adds a third rule for
+variables without the keyword: omitting them returns **all** values instead of failing. The three
+rules are in `query-syntax.md`, and the PX side in `px-files-and-classifications.md`.
 
 ---
 
-## Status codes
+## `extension` at the root and `extension.px`
+
+The root `extension` has `contact`, `px` and, when the table has mandatory notes, `noteMandatory`
+(`NOTEX`). `discontinued` is always `null` (SSB's v1 and SCB's v1, 2026-10-14); v1 has no
+discontinued flag anywhere else either, so check titles and last periods instead (SKILL.md).
+
+PxWeb puts part of the source PX file's header in `extension.px`, only in the **data** response.
+Each key is a PX keyword in lower case (`AGGREGALLOWED` becomes `aggregallowed`). SSB's v1 and
+SCB's v1 send the same 14 keys as v2, with `copyright: false` (2026-10-14):
+
+| Key | Meaning |
+|---|---|
+| `contents` | The short title |
+| `heading`, `stub` | The publisher's pivot: the variables in the column head and in the stub |
+| `decimals` | The table's default number of decimals (per-value decimals are in `category.unit`) |
+| `aggregallowed` | Whether summing is meaningful — see below |
+| `tableid`, `matrix` | The table ID |
+| `subject-code`, `subject-area` | The subject classification |
+| `language` | Follows the URL's language at SSB and SCB. File-based installations may report the PX file's main language instead: Finland returns `fi` on an `/en/` URL (2026-10-14) |
+| `official-statistics`, `copyright`, `descriptiondefault`, `infofile` | Flags and a reference from the PX file |
+
+`aggregallowed` is a hint about interpretation. It is **absent at three of the seven verified
+installations**, and where it is `false` the installations do not agree on what follows — SSB's
+v1 rejects `agg:` with 400, SCB's serves the data (verified 2026-09-04). The full matrix, the
+controls behind it and the SSB-v1-vs-v2 difference are in `px-files-and-classifications.md`.
+Non-PxWeb json-stat producers have no `extension.px` at all.
+
+---
+
+## `status`, `note` and `link`
+
+### `status`
 
 `value` and `status` are two parallel channels. Read them separately:
 
@@ -205,21 +257,52 @@ in the table's `note`; PxWeb has no field for it, while Eurostat explains its sy
 `extension.status.label`. Never treat any of them as zero, and never filter `null`s out of
 `value` before indexing: a `null` holds its position, and removing it shifts every later cell.
 
+### `note`
+
+v1's metadata endpoint has no notes, so the data response is the only place they appear. Two
+levels have been seen flagged as mandatory (2026-10-14):
+
+| Level | The notes | Which must be shown | Seen at |
+|---|---|---|---|
+| Table | `note` (root, list) | `extension.noteMandatory`, keyed by index: `{"1": true}` means `note[1]` | SSB's v1 (14700), SCB's v1 (`BefolkningNy`) |
+| Value | `dimension.{var}.category.note` (value code → list) | `dimension.{var}.extension.categoryNoteMandatory`, value code → index: `{"0140": {"1": true}}` means `category.note["0140"][1]` | SCB's v1 |
+
+A third level, per variable (`dimension.{var}.extension.noteMandatory`), exists at SCB's v2
+(population per month, `Alder`); no v1 table with such a note has been checked. Look for it. The index differs per table, so resolve it rather than assuming the first
+note. Value-level notes come only for the values you selected.
+
+### `link`
+
+`link.describedby` per variable differs between the two relational installations (2026-10-14):
+
+- **SSB's v1** sends URNs, and a variable can carry two in one space-separated string:
+  `{"Region": "urn:ssb:classification:klass:104 urn:ssb:classification:klass:131"}`. On the
+  metric variable the key is the value code (`{"KpiIndMnd": "urn:ssb:conceptvariable:vardok:2755"}`).
+  The trailing number is a Klass id, resolvable as `https://www.ssb.no/klass/klassifikasjoner/104`
+  or `https://data.ssb.no/api/klass/v1/classifications/104`; a VarDok URN resolves as
+  `https://www.ssb.no/a/metadata/conceptvariable/vardok/2755/nb` (`/nb`, `/nn` or `/en`).
+- **SCB's v1** sends plain text, not a URN: `{"Kon": "Kön"}`.
+
+Neither sends `link.related`, which SSB's and SCB's v2 do.
+
 ---
 
-## Classification links
+## What json-stat2 cannot express
 
-Some agencies attach classification URNs:
+Worth knowing when moving between PX and json-stat, because the loss is silent:
 
-```json
-"link": { "describedby": [ { "extension": { "Region": "urn:ssb:classification:klass:104" } } ] }
-```
-
-At SSB the trailing number is a Klass id, resolvable as
-`https://www.ssb.no/klass/klassifikasjoner/104` or
-`https://data.ssb.no/api/klass/v1/classifications/104`. Variable definitions appear as
-`urn:ssb:conceptvariable:vardok:2798` → `https://www.ssb.no/a/metadata/conceptvariable/vardok/2798/nb`
-(`/nb`, `/nn` or `/en`).
+- **Time periodicity.** PX declares it explicitly (`TIMEVAL(...)=TLIST(A1|H1|Q1|M1|W1)`, which also
+  guarantees consecutive periods). json-stat2 has no standard field for it — `role.time` names the
+  time dimension but says nothing about its frequency. PxWebApi v2 works around this with
+  `timeUnit` on the table resource, *outside* the json-stat2 document; v1 does not expose it at all.
+  Consumers must infer frequency from the shape of the value codes, and those codes are not
+  guaranteed to be dates (see `query-syntax.md`). The absence is a PxWeb choice rather than a hard
+  limit of the format: PxWeb already ships PX header keywords in `extension.px`, and TLIST simply
+  is not among them.
+- **The aggregation that produced a figure.** Eliminated dimensions vanish from `id` and
+  `dimension` entirely, so a dataset does not record what was summed away.
+- **Which codelist or valueset a code came from.** In v1 the `agg:`/`vs:` used in the request
+  leaves no trace in the response.
 
 ---
 

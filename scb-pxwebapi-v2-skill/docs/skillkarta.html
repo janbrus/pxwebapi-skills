@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>scb-pxwebapi-v2 skillkarta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column for prose, wide figures that scroll sideways on phones. Cool slate neutrals, one teal accent reserved for the data path. */
+:root {
+  --bg: #F3F5F8;
+  --surface: #FFFFFF;
+  --panel: #E8ECF1;
+  --ink: #17202B;
+  --ink2: #4C5765;
+  --line: #C3CBD5;
+  --accent: #0A6A88;
+  --tag: #DDE3EA;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10151B; --surface: #18202A; --panel: #141B23; --ink: #E3E8EE; --ink2: #9AA6B3;
+    --line: #3A4552; --accent: #5DB9D7; --tag: #27313C; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10151B; --surface: #18202A; --panel: #141B23; --ink: #E3E8EE; --ink2: #9AA6B3;
+  --line: #3A4552; --accent: #5DB9D7; --tag: #27313C; color-scheme: dark;
+}
+
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
+.page { max-width: 1100px; margin: 0 auto; padding-inline: 16px; padding-block: 40px 56px; display: grid; gap: 40px; }
+.prose { max-width: 66ch; }
+
+header { display: grid; gap: 10px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; color: var(--ink2); letter-spacing: .02em; }
+h1 { font-family: var(--display); font-weight: 600; font-size: clamp(30px, 5vw, 44px); line-height: 1.08; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 24px; line-height: 1.2; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+code { font-family: var(--mono); font-size: .9em; }
+
+.rule { display: grid; gap: 6px; padding-block: 18px; border-top: 2px solid var(--accent); border-bottom: 1px solid var(--line); }
+.rule .label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); font-weight: 600; }
+.rule .quote { font-family: var(--display); font-size: clamp(20px, 3vw, 26px); line-height: 1.25; text-wrap: balance; }
+.rule .note { color: var(--ink2); font-size: 14px; }
+
+section { display: grid; gap: 14px; }
+figure { margin: 0; display: grid; gap: 12px; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.scroll img { display: block; width: 100%; min-width: 880px; height: auto; max-width: none; }
+figcaption { color: var(--ink2); font-size: 14px; max-width: 72ch; }
+
+footer { color: var(--ink2); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
+footer a { color: var(--accent); }
+
+</style>
+</head>
+<body>
+<main class="page">
+  <header>
+    <div class="eyebrow">scb-pxwebapi-v2 · v0.11.1 · ritad 6 oktober 2026</div>
+    <h1>scb-pxwebapi-v2</h1>
+    <p class="prose">Skillen styr hur Claude hittar, hämtar och presenterar siffror från SCB:s Statistikdatabas via PxWebApi v2. Det första diagrammet visar arbetsflödet i en konversation. Det andra visar hur paketet kontrolleras mot det levande API:et och byggs till en zip-fil.</p>
+  </header>
+
+  <div class="rule prose">
+    <div class="label">Grundregel</div>
+    <div class="quote">Ange aldrig en siffra du inte har hämtat från API:et i denna konversation.</div>
+    <p class="note">Den markerade linjen i diagrammet nedan är den enda vägen en siffra kan ta in i svaret.</p>
+  </div>
+
+  <section>
+    <h2>Arbetsflödet i en konversation</h2>
+    <figure>
+      <div class="scroll">
+        <img src="skillkarta-arbetsflode.svg" width="960" height="1136" alt="Arbetsflöde i sex steg: förstå behovet, sök efter tabell, utforska metadata, bygg och kör query, presentera, sparad fråga. Steg 2, 3, 4 och 6 anropar SCB:s PxWebApi v2. Siffror i svaret kommer bara från data-svaret i steg 4. Svarar inte API:et säger svaret det och ger inga siffror.">
+      </div>
+      <figcaption>Sex steg i fast ordning. Steg 1 och 5 anropar inte API:et, och siffrorna i svaret kommer bara från <code>/data</code>-svaret i steg 4. Märket HTTP visar anrop som MCP-servern <code>pxweb-mcp</code> inte har. Grå filnamn är referensfilerna skillen läser i varje steg.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Så kontrolleras och paketeras skillen</h2>
+    <figure>
+      <div class="scroll">
+        <img src="skillkarta-kontroll-och-paketering.svg" width="960" height="356" alt="SKILL.md och references kontrolleras mot SCB:s levande API av check_examples.py, vid push och manuellt. SKILL.md, references, README, CHANGELOG och LICENSE packas av build_zip.sh till zip-filen, och CI kontrollerar att den incheckade zip-filen stämmer. docs följer inte med i zip:en. CLAUDE.md, DEVLOG.md, evals och scripts är interna.">
+      </div>
+      <figcaption>Prosan är testdata. Varje exempel-URL, POST-body och tabell-ID i <code>SKILL.md</code> och <code>references/</code> anropas mot det levande API:et. Kontrollen fäller också en tabell vars <code>lastPeriod</code> släpar efter, eftersom SCB fryser tabeller utan att sätta <code>discontinued</code>. Zip-filen får bara användarfilerna. <code>docs/</code> kontrolleras inte och följer inte med.</figcaption>
+    </figure>
+  </section>
+
+  <footer class="prose">Ritad från <code>SKILL.md</code> v0.11.1, <code>CLAUDE.md</code> och <code>README.md</code>. Ändras arbetsflödet måste diagrammet ritas om för hand. Skillen är inofficiell; SCB står inte bakom den. Källa: <a href="https://github.com/janbrus/pxwebapi-skills/tree/main/scb-pxwebapi-v2-skill">github.com/janbrus/pxwebapi-skills</a>.</footer>
+</main>
+</body>
+</html>

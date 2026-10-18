@@ -102,9 +102,13 @@ v2 metadata is a full json-stat2 Dataset with everything v1 leaves out:
 | **`role` (time/geo/metric)** | **no** | yes |
 | **Units and decimals** | **no** | yes (`category.unit`) |
 | **Codelists / aggregations** | **no** | yes (`extension.codelists`) |
-| **First/last period, discontinued** | **no** | yes (`extension`) |
+| **First/last period, discontinued** | **no** | yes, on the `/tables` hit and `GET /tables/{id}` (not in the dataset) |
 | **Time frequency** (PX `TLIST`) | **no** — infer from the code shape | yes, as `timeUnit` on the table resource |
-| Contacts, notes | limited | yes |
+| Contacts, notes | no — only in the json-stat2 data response | yes |
+
+One difference sits in the data response, and it breaks ported parsers: **v1 returns
+`category.index` in the table's order, v2 in the order of the request** (SSB and SCB,
+2026-10-14). See `json-stat2.md`.
 
 The gaps are the main practical cost of staying on v1. `role`, units and decimals do appear in
 the v1 *data* response, so a `top`-1 probe query recovers them. Codelists and aggregations are

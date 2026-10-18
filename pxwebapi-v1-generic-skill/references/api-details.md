@@ -134,6 +134,9 @@ Searching by the table number in the title is the quick way to resolve a number 
 last publication date: `?query=title:03013`.
 
 URL-encode as usual — space is `%20`, and `"` `(` `)` `[` `]` become `%22 %28 %29 %5B %5D`.
+Encode letters outside ASCII too (`ø` → `%C3%B8`): SSB's v1 answers a raw `ø` with 400 and an HTML
+page, while Finland, Estonia, the Faroe Islands and Greenland accept raw UTF-8 (2026-10-14).
+`curl -G --data-urlencode "query=…"` does it for you.
 
 `&filter=codes` is the one worth remembering: it searches the **value codes** inside tables, so
 `?query=KU091&filter=codes` finds every table containing Helsinki's municipality code (179 hits at

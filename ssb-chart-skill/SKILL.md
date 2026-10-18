@@ -12,7 +12,7 @@ description: >
   datakilder — da er en annen dataviz-skill riktig valg.
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "1.2"
+  version: "1.3"
   source: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-chart-skill
 ---
 
@@ -26,9 +26,9 @@ Denne skillen styrer visuell presentasjon av norsk offentlig statistikk fra SSB.
 
 1. **Én innsikt per diagram.** Hvert diagram formidler én tydelig observasjon. Flere historier → flere diagrammer.
 
-2. **Statistisk integritet.** SSB-data er offentlig statistikk — presisjon er avgjørende. Y-aksen på søylediagrammer starter ALLTID på 0. Tidsserier skal ha jevne intervaller. Enheter og måleperiode må alltid synliggjøres.
+2. **Statistisk integritet.** SSB-data er offentlig statistikk — presisjon er avgjørende. Y-aksen på søyle- og arealdiagrammer starter ALLTID på 0. Linjediagram kan avkortes når endringen er budskapet og startverdien står synlig på aksen. Tidsserier skal ha jevne intervaller. Enheter og måleperiode må alltid synliggjøres.
 
-3. **SSBs visuelle identitet.** Bruk SSBs offisielle farger, typografi og formspråk. Se `references/color-system.md` for komplett fargespesifikasjon.
+3. **SSBs visuelle identitet som standard.** SSBs farger, typografi og formspråk er standardvalget. Ber brukeren om egne farger, eller har rapporten en egen palett, bruk dem — men kontrastkravene i prinsipp 4, skillbarhet for fargeblinde og fast farge per kategori gjelder fortsatt. Se `references/color-system.md` for komplett fargespesifikasjon.
 
 4. **Tilgjengelighet (WCAG AA).** Ikke-tekstelementer: ≥3:1 kontrast. Tekst: ≥4.5:1 (≥3:1 for stor tekst). Aldri stol på farge alene — bruk form, mønster eller direkte merking som supplement.
 
@@ -40,9 +40,9 @@ Denne skillen styrer visuell presentasjon av norsk offentlig statistikk fra SSB.
 
 ## Avhengigheter til datakilden
 
-Denne skillen forutsetter at du har en JSON-Stat2-respons fra SSBs PxWebApi v2. **Dataintegritet-grunnregelen i `ssb-pxwebapi-v2` gjelder også her:** visualiser aldri et tall som ikke er hentet fra API-et i samme samtale. Et diagram gir tall mer autoritet enn en tabell gjør — en akse og en kildelinje får et husket tall til å se etterprøvbart ut. Kjerneprinsipp 2 og 6 dekker hvordan tallene skal *behandles*; grunnregelen dekker hvorvidt du har lov til å tegne dem i det hele tatt. For format-detaljer — row-major value-array, `role.time` / `role.metric` / `role.geo`, `dimension.{var}.category.index` og `category.unit.decimals`, status-koder `"."` / `".."` / `":"`, `extension.px.contents` — se `ssb-pxwebapi-v2`-skillens `references/json-stat2.md`. Ikke restate disse detaljene her; pek på dem.
+Denne skillen forutsetter at du har en JSON-stat2-respons fra SSBs PxWebApi v2. **Dataintegritet-grunnregelen i `ssb-pxwebapi-v2` gjelder også her:** visualiser aldri et tall som ikke er hentet fra API-et i samme samtale. Et diagram gir tall mer autoritet enn en tabell gjør — en akse og en kildelinje får et husket tall til å se etterprøvbart ut. Kjerneprinsipp 2 og 6 dekker hvordan tallene skal *behandles*; grunnregelen dekker hvorvidt du har lov til å tegne dem i det hele tatt. For format-detaljer — row-major value-array, `role.time` / `role.metric` / `role.geo`, `dimension.{var}.category.index` og `category.unit.decimals`, status-koder `"."` / `".."` / `":"`, `extension.px.contents` — se `ssb-pxwebapi-v2`-skillens `references/json-stat2.md`. Ikke restate disse detaljene her; pek på dem.
 
-Selve oppskriften for å gå fra JSON-Stat2-respons til et chart-config (labels, datasets, decimals, status som hull eller flagg) ligger i `references/jsonstat-to-chart.md`.
+Selve oppskriften for å gå fra JSON-stat2-respons til et chart-config (labels, datasets, decimals, status som hull eller flagg) ligger i `references/jsonstat-to-chart.md`.
 
 ---
 
@@ -52,14 +52,14 @@ Denne skillen brukes i to helt ulike rendringskontekster, og de deler IKKE samme
 
 **A. Inline chat-widget** (f.eks. `visualize:show_widget` / tilsvarende verktøy som rendrer direkte i samtalen)
 
-Disse verktøyene har sitt eget vertsdesignsystem (layout, CSS-variabler, typografi, mørk modus) som SSB-stilen ikke skal overstyre i sin helhet. Kun dette er SSB-styrt i en widget:
+Disse verktøyene har sitt eget vertsdesignsystem (layout, CSS-variabler, typografi, mørk modus) som SSB-stilen ikke skal overstyre i sin helhet. Kun dette styrer skillen i en widget:
 
-- **Data-blekk** — alt som koder en verdi: datalinjer, søyler, punkter, kartflater og heatmap-celler bruker SSB-paletten (`#1A9D49`, `#1D9DE2`, `#C78800` osv.), hardkodet som hex. Canvas-baserte biblioteker (Chart.js m.fl.) kan uansett ikke lese CSS-variabler, så hardkodet hex her er riktig og nødvendig, ikke et unntak fra prinsippet om å ikke finne opp farger.
+- **Data-blekk** — alt som koder en verdi: datalinjer, søyler, punkter, kartflater og heatmap-celler bruker SSB-paletten som standard (`#00824D`, `#1D9DE2`, `#C78800` osv.), hardkodet som hex. Canvas-baserte biblioteker (Chart.js m.fl.) kan uansett ikke lese CSS-variabler, så hardkodet hex her er riktig og nødvendig.
 
 Alt annet følger vertens konvensjoner, ikke tabellene lenger ned i denne skillen:
 
 - **Akser, rutenett, bakgrunn, generell tekst** — bruk vertens fargetoken/design (f.eks. `getComputedStyle` mot `--text-muted`, `--border` osv. der verten støtter det), ikke de hardkodede SSB-hex-verdiene fra «Tekst og merking» → «Akser».
-- **Mørk modus** — obligatorisk. Vertens tokens løser dette automatisk; hardkodede lys-modus-farger som `#274247` eller `#C3DCDC` skal ikke skrives direkte inn i widget-DOM-en.
+- **Mørk modus** — obligatorisk. Vertens tokens løser dette automatisk; hardkodede lys-modus-farger som `#274247` eller `#D9DFE0` skal ikke skrives direkte inn i widget-DOM-en.
 - **Tittel og kilde** — skrives IKKE inn i widgeten. Verten krever ofte at forklarende tekst ligger i selve chat-svaret, ikke i widget-koden. Skriv deklarativ tittel og kildelinje (jf. «Tekst og merking» → «Kilde») i svarteksten rundt widget-kallet i stedet.
 - **Tabeller** — rendres IKKE med SSB-tabellstilen i en widget. Bruk vanlig markdown-tabell i chat-svaret. Seksjonen «Tabellformatering» lenger ned gjelder ikke her.
 
@@ -79,18 +79,18 @@ Se `references/color-system.md` for komplett spesifikasjon med koder i alle form
 
 | Brukt på                                                                    | Gjelder                                                          |
 | --------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| **Data-blekk** — linjer, søyler, punkter, kartflater, heatmap-celler         | **Begge rendringsmål** — alltid SSB-farger, hardkodet som hex     |
+| **Data-blekk** — linjer, søyler, punkter, kartflater, heatmap-celler         | **Begge rendringsmål** — SSB-paletten som standard, hardkodet som hex |
 | **Chrome** — akser, rutenett, bakgrunn, tekst, tooltip, kort                 | **Kun frittstående leveranse** — i widget: vertens tokens         |
 
 Dette gjelder alle palettene under, også den sekvensielle rampen, den divergerende paletten og utheving-/semantikkfargene: fyller de en kartflate eller en heatmap-celle, er de data-blekk og gjelder begge rendringsmål; toner de et kort eller en bakgrunn, er de chrome og gjelder kun frittstående. Rekkefølgen og maks-antall-reglene under gjelder alltid, uavhengig av rendringsmål.
 
-I widget må lyse trinn kontrastsjekkes mot vertens bakgrunn (mørk modus): `#ECFEED` og nøytralpolen `#F0F8F9` er lys-modus-farger. Se `references/color-system.md` for konkrete varianter.
+Data-blekket må kontrastsjekkes mot den faktiske bakgrunnen (≥3:1). Mot hvitt forsvinner de lyseste trinnene (`#ECFEED`, nøytralpolen `#F0F8F9`); mot mørk bakgrunn forsvinner de mørke fargene (rang 5–8, de mørke endene av rampene), og `#00824D` ligger rundt 3:1. I mørk modus: bruk rang 1–4 + Grå, og la rampene slutte der kontrasten holder. Det samme gjelder brukerens egne farger. Se `references/color-system.md`.
 
 ### Kategorisk palett (bruk i denne rekkefølgen)
 
 | Rang | Navn           | Hex       | Rolle              |
 | ---- | -------------- | --------- | ------------------ |
-| 1    | SSB Grønn      | `#1A9D49` | Primær dataserie   |
+| 1    | SSB Grønn      | `#00824D` | Primær dataserie   |
 | 2    | SSB Blå        | `#1D9DE2` | Sekundær dataserie |
 | 3    | SSB Gull       | `#C78800` | Tertiær dataserie  |
 | 4    | SSB Rosa       | `#C775A7` | Fjerde serie       |
@@ -102,10 +102,10 @@ I widget må lyse trinn kontrastsjekkes mot vertens bakgrunn (mørk modus): `#EC
 
 **Regler:**
 
-- Maks 6–7 kategorier for søyler/ringdiagram. For **linjediagram er grensen lavere — maks 5 linjer** (flere overlapper og blir uleselige; bruk small multiples i stedet). Detaljer per diagramtype i `references/chart-selection.md`.
+- Maks 6–7 kategorier for søyler (kake og ring: maks 5). For **linjediagram er grensen lavere — maks 5 linjer** (flere overlapper og blir uleselige; bruk small multiples i stedet). Detaljer per diagramtype i `references/chart-selection.md`.
 - For interaktive visninger (apper, ikke statiske rapporter) der brukeren velger fritt: vis advarsel ved overskridelse, men render likevel. Grensen er en anbefaling for lesbarhet, ikke en hard begrensning på funksjonalitet.
 - Grupper det som faller utenfor som "Andre" med SSB Grå (for statiske visualiseringer).
-- SSB Grønn er alltid den viktigste serien.
+- Rang 1 er den viktigste serien.
 - Hold farge-til-kategori-mapping konsistent på tvers av alle diagrammer i en rapport.
 - For 2 serier: rang 1+2. For 3: rang 1+2+3. Osv.
 
@@ -113,17 +113,17 @@ I widget må lyse trinn kontrastsjekkes mot vertens bakgrunn (mørk modus): `#EC
 
 5-trinns grønn rampe for heatmaps og intensitet:
 
-`#ECFEED` → `#B6E8B8` → `#1A9D49` → `#075745` → `#274247`
+`#ECFEED` → `#A9D4B5` → `#66AB80` → `#00824D` → `#075745`
 
 ### Divergerende (negativ ← nøytral → positiv)
 
-- Negativ: `#A3136C` (mørk rosa)
-- Nøytral: `#F0F8F9` (lys)
-- Positiv: `#1A9D49` (grønn)
+`#0F2080` → `#1D9DE2` → `#F0F8F9` → `#C78800` → `#471F00`
+
+Blå under, oker over referansen, med lik lyshet per trinn. Skalaen er for avvik uten verdiladning (over/under gjennomsnitt); grønn leses lett som «bra». Når retningen faktisk er god eller dårlig, bruk de semantiske fargene med ▲/▼.
 
 ### Utheving
 
-- Fokus: `#1A9D49` (SSB Grønn) eller `#00824D` (SSB Grønn 4)
+- Fokus: `#00824D` (SSB Grønn)
 - Nedtonet: `#C3DCDC` (SSB Mørk 2)
 
 Brukt på dataserier er begge data-blekk og gjelder begge rendringsmål. Men `#C3DCDC` er en lys-modus-farge: i widget med mørk bakgrunn blir nedtonede serier nesten usynlige — bruk vertens dempede tekstfarge, eller nedtone med opasitet på SSB-fargen i stedet.
@@ -132,7 +132,7 @@ Brukt på dataserier er begge data-blekk og gjelder begge rendringsmål. Men `#C
 
 | Betydning       | Farge         | Hex       | Tillegg          |
 | --------------- | ------------- | --------- | ---------------- |
-| Positiv/vekst   | SSB Grønn     | `#1A9D49` | Alltid par med ▲ |
+| Positiv/vekst   | SSB Grønn     | `#00824D` | Alltid par med ▲ |
 | Negativ/nedgang | SSB Mørk Rosa | `#A3136C` | Alltid par med ▼ |
 | Nøytral         | SSB Grå       | `#909090` | —                |
 
@@ -146,15 +146,15 @@ Gjelder begge rendringsmål når fargen ligger på selve datamerket (søyle, pil
 
 | Element         | Font             | Størrelse | Vekt    | Farge                  |
 | --------------- | ---------------- | --------- | ------- | ---------------------- |
-| Diagramtittel   | Roboto Condensed | 20px      | Bold    | `#274247`              |
-| Aksetittel      | Open Sans        | 14px      | Regular | `#274247`              |
+| Diagramtittel   | Open Sans        | 20px      | Bold    | `#274247`              |
+| Benevning       | Open Sans        | 14px      | Regular | `#274247`              |
 | Akselabels      | Open Sans        | 12px      | Regular | `#274247`              |
-| Kilde/fotnote   | Open Sans        | 11px      | Regular | `#909090`              |
-| Direkte merking | Open Sans        | 12px      | Bold    | Seriens farge          |
+| Kilde/fotnote   | Open Sans        | 11px      | Regular | `#274247`              |
+| Direkte merking | Open Sans        | 12px      | Bold    | `#274247`              |
 | Tabell-header   | Roboto Condensed | 18px      | Bold    | `#FFFFFF` på `#274247` |
 | Tabellceller    | Open Sans        | 16px      | Regular | `#162327`              |
 
-**Fallback-fonter:** Arial, Helvetica, sans-serif
+**Fontene lastes ikke fra nett.** Bruk rekkefølgen `'Open Sans', Arial, sans-serif`: Open Sans hvis den er installert hos brukeren, ellers Arial.
 
 ---
 
@@ -166,14 +166,14 @@ Se `references/chart-selection.md` for detaljert beslutningsmatrise. Hurtigguide
 | ---------------------- | ---------------------------------------- | ----------------------------------- |
 | Trend over tid         | Linjediagram                             | Kakediagram, søyler med >8 perioder |
 | Sammenligne kategorier | Horisontale søyler (sortert)             | Kakediagram, 3D-søyler              |
-| Del av helhet          | Ringdiagram (maks 5 segmenter)           | Kakediagram med >6 segmenter        |
+| Del av helhet          | Kake- eller ringdiagram (maks 5 deler)   | Over 5 deler, 3D                    |
 | Rangering              | Horisontale søyler (sortert etter verdi) | Usorterte søyler                    |
 | Fordeling              | Histogram                                | Kakediagram                         |
 | Geografi               | Kartdiagram (choropleth)                 | Tabell med 400 kommuner             |
 | KPI / enkelttall       | Scorecard (stort tall)                   | Diagram der ett tall holder         |
 | Korrelasjon            | Spredningsdiagram                        | Dobbel y-akse                       |
 
-**Alltid unngå:** 3D-effekter, doble y-akser, kakediagrammer (bruk ringdiagram), avkortet y-akse på søyler, bakgrunnsbilder bak diagrammer, tunge rutenett.
+**Alltid unngå:** 3D-effekter, doble y-akser, avkortet y-akse på søyler og areal, bakgrunnsbilder bak diagrammer, tunge rutenett.
 
 **Spesielt for SSB-data:**
 
@@ -189,7 +189,7 @@ Se `references/chart-selection.md` for detaljert beslutningsmatrise. Hurtigguide
 **Deklarative titler** — Oppsummer innsikten, ikke beskriv diagrammet:
 
 - Nei: "Befolkningsutvikling i Norge 2015–2025"
-- Ja: "Norges befolkning passerte 5.6 millioner i 2025"
+- Ja: "Norges befolkning passerte 5,6 millioner i 2025"
 
 **Bygg tittel fra `extension.px.contents`.** SSB returnerer en kort tabelltittel her (f.eks. `"07459: Befolkning,"`). Bruk den som utgangspunkt, men rens først:
 
@@ -203,21 +203,21 @@ Hvis du ikke kan utvide deklarativt fra konteksten, bruk minimum den rensede con
 
 **Akser:**
 
-- Merk begge akser med enheter (gjelder alltid, begge rendringsmål)
+- Merk aksene med enhet (gjelder alltid, begge rendringsmål). Y-aksens benevning står vannrett i fast posisjon over aksen, ikke rotert langs den. Ta enheten fra dataene (`category.unit[kode].base`, samme sted som desimalene) — den er skrevet ut og følger `lang`: «Prosent», «Mill. kr», «Antall». Ved egne beregninger setter du enheten og antall desimaler selv, ut fra hva tallet er — arv dem ikke fra kildetallene. Serier med ulik enhet hører ikke på samme akse.
 - Bruk forkortelser: k, mill., mrd.
-- Frittstående leveranse: rutenett lett stiplet `#C3DCDC` eller ingen, akselinjer tynn `#274247`
+- Frittstående leveranse: rutenett heltrukket lys grå `#D9DFE0`, også loddrett i linjediagram; nullinje og akselinje tynn `#899597`. Stiplet er forbeholdt prognoser og brudd.
 - Inline widget: bruk vertens gridline-/akselinjetokens i stedet for disse hex-verdiene — se «Rendringsmål»
 
 **Kilde** — Kilde og siste oppdateringsdato skal alltid følge med, men plasseringen avhenger av rendringsmål:
 
-- **Frittstående leveranse:** skrives nederst i selve diagrammet/dokumentet i `#909090`, som beskrevet under.
+- **Frittstående leveranse:** skrives nederst i selve diagrammet/dokumentet i `#274247`, som beskrevet under.
 - **Inline widget:** skrives i chat-svarteksten rett under/over widget-kallet, ikke inni widget-koden — se «Rendringsmål».
 
 Formulering (gjelder begge):
 
 - Norsk: `Kilde: SSB, tabell {id}. Sist oppdatert: {YYYY-MM-DD}.`
 - English: `Source: Statistics Norway, table {id}. Last updated: {YYYY-MM-DD}.`
-- Flere tabeller kombinert: `Kilde: SSB, tabellene {id1}, {id2}, …` (list opp alle — utelat ingen).
+- Flere tabeller kombinert: list opp alle — utelat ingen — med datoen per tabell når de er oppdatert ulike dager: `Kilde: SSB, tabellene {id1} og {id2}. Sist oppdatert: {dato1} ({id1}) og {dato2} ({id2}).` / `Source: Statistics Norway, tables {id1} and {id2}. Last updated: {date1} ({id1}) and {date2} ({id2}).` Samme dato for alle: oppgi den én gang.
 - For andre språk (sv, dk osv.): følg samme struktur og oversett `Kilde` / `Sist oppdatert`. Ikke oversett navnet `SSB` / `Statistics Norway`.
 
 Velg språk basert på `lang`-parameteren som ble brukt mot API-et (`lang=no` → norsk, `lang=en` → engelsk). Se `ssb-pxwebapi-v2`-skillens språk-seksjon for fullstendig regel.
@@ -228,7 +228,7 @@ Eksempel:
 Kilde: SSB, tabell 07459. Sist oppdatert: 2026-02-27.
 ```
 
-**Annotasjoner** — Korte notater direkte på diagrammet for anomalier eller vendepunkter. Tekst i `#909090`, koblet til data med tynn `#C3DCDC` linje. Maks 2–3 per diagram.
+**Annotasjoner** — Korte notater direkte på diagrammet for anomalier eller vendepunkter. Tekst i `#274247`, koblet til data med tynn `#899597` linje. Maks 2–3 per diagram.
 
 ---
 
@@ -268,8 +268,8 @@ Før du leverer en visualisering, verifiser:
 - [ ] Rendringsmål avklart FØRST: inline widget eller frittstående leveranse? (se «Rendringsmål»)
 - [ ] Deklarativ tittel som oppsummerer innsikten — i widget: i chat-teksten, ikke inni widget-koden
 - [ ] Riktig diagramtype for data og budskap
-- [ ] Y-aksen starter på 0 for søylediagrammer
-- [ ] Data-blekk (serier, kartflater, heatmap-celler) i riktig kategorisk rekkefølge (SSB-paletten) — gjelder begge rendringsmål
+- [ ] Y-aksen starter på 0 for søyle- og arealdiagram
+- [ ] Data-blekk (serier, kartflater, heatmap-celler) i riktig kategorisk rekkefølge (SSB-paletten eller brukerens farger) — gjelder begge rendringsmål
 - [ ] Fargetilordning konsistent på tvers av alle diagrammer
 - [ ] Direkte merking brukt der mulig
 - [ ] Akser merket med enheter
@@ -279,9 +279,9 @@ Før du leverer en visualisering, verifiser:
 - [ ] Diagrammet fungerer uten farge (form/label-backup)
 - [ ] Mørk modus fungerer — vertens tokens i widget; sjekk kontrast manuelt i frittstående HTML/PDF
 - [ ] Ingen dekorative elementer (3D, skygger, rammer)
-- [ ] Maks 6–7 kategorier (rest gruppert som "Andre")
+- [ ] Maks 6–7 kategorier i søyler og 5 deler i kake/ring (rest gruppert som "Andre"); maks 5 linjer (ellers small multiples)
 - [ ] Én tydelig innsikt per diagram
-- [ ] Norsk tallformat (mellomrom som tusenskilletegn)
+- [ ] Tallformat etter `lang`: `1 234,5` (no), `1,234.5` (en)
 - [ ] Fonter: Roboto Condensed + Open Sans kun for frittstående leveranse; vertens typografi i widget
 - [ ] Tabeller: markdown i chat-tekst for widget; SSB-tabellstil kun for frittstående leveranse
 

@@ -1,6 +1,6 @@
 # Claude-instruksjon: SSB PxWebApi v2
 
-*Kondensert fra `ssb-pxwebapi-v2` SKILL.md v1.6.2. Lim inn i Claude Project-instruksjoner, egendefinerte instruksjoner eller som systemprompt via API. Full skill med referansefiler: [`../SKILL.md`](../SKILL.md) og [`../references/`](../references/), eller <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>*
+*Kondensert fra `ssb-pxwebapi-v2` SKILL.md v1.6.3. Lim inn i Claude Project-instruksjoner, egendefinerte instruksjoner eller som systemprompt via API. Full skill med referansefiler: [`../SKILL.md`](../SKILL.md) og [`../references/`](../references/), eller <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>*
 
 ---
 
@@ -23,6 +23,7 @@ I tillegg:
 - **Vis `extension.noteMandatory`-noter.** SSB har flagget dem fordi tallet trenger forbeholdet. De følger med i data-responsen.
 - **Sjekk `discontinued` og `lastPeriod`** på søketreffet eller `GET /tables/{id}`. `discontinued` står bare når tabellen er avsluttet (`true`); mangler feltet, er tabellen aktiv. Serien fortsetter ofte i en ny tabell.
 - **Si fra om tallene er foreløpige.** Gjelder nasjonalregnskap og KOSTRA.
+- **Kall SSBs prognoser og framskrivinger det de er.** De er SSB-tall, men ikke statistikk. I 12880 er de fire siste årene alltid prognoser (`top(4)`), merket bare i noten. For en framskriving, oppgi alternativet (14746: `Personer` er hovedalternativet MMMM).
 
 ## Endepunkter
 
@@ -33,7 +34,7 @@ Alle tar `lang=no` eller `lang=en`.
 ## Arbeidsflyt — hopp aldri over metadata
 
 1. **Avklar behovet:** fenomen, geografi, tidsperiode, nedbrytning. Er brukeren vag, still **ett** oppfølgingsspørsmål.
-2. **Søk:** norske fagtermer (`konsumprisindeks`, ikke `KPI`; `folkemengde`, ikke `befolkning`), trunkér med `*`. **Standardoperatoren er AND** — flere ord gir færre treff, og ett ord som ikke står i tabellen nuller lista. Presenter 3–5 treff med ID, tittel, `lastPeriod`, `timeUnit`, `discontinued`. Anbefal én.
+2. **Søk:** SSBs fagtermer på samme språk som `lang` (`konsumprisindeks`, ikke `inflasjon`; `brukte boliger`, ikke `boligpriser`), trunkér med `*`. **Standardoperatoren er AND** — flere ord gir færre treff, og ett ord som ikke står i tabellen nuller lista. Standard er 20 treff per side; sjekk `page.totalElements`. Presenter 3–5 treff med ID, tittel, `lastPeriod`, `timeUnit`, `discontinued`. Anbefal én.
 3. **Metadata:** start i `role`. `role.metric` = hva som måles (se `category.unit`), `role.time` = tid, `role.geo` = geografi. **Mangler `role.geo`, gjelder tallene hele Norge — ikke spør.**
 4. **Query:** POST for komplekse uttrekk, GET for delbare URL-er.
 5. **Presenter:** markdown-tabell, kilde, tolkning.
@@ -43,7 +44,7 @@ Alle tar `lang=no` eller `lang=en`.
 - **Les `elimination` kun fra metadata.** I en data-respons betyr feltet noe annet og villeder deg. Utelater du en eliminerbar variabel, **forsvinner den helt** fra responsen — ikke som en «total»-rad. Noter selv hva som ble summert bort.
 - `Tid` og `ContentsCode` er alltid obligatoriske. Mangler en obligatorisk variabel: 400 `Missing selection for mandantory variable` (sic).
 - Uttrykk: `top(N)`, `top(N,offset)`, `bottom(N)`, `from()`, `to()`, `range()`, `*`, wildcards `46*` og `??`. Kan blandes med enkeltkoder: `["2015","top(2)"]`.
-- **I GET må uttrykk med komma stå i hakeparenteser:** `valueCodes[Tid]=[range(2020,2022)]`. Uten dem: 400 `Illegal selection expression`. `%2C` hjelper ikke. POST trenger dem ikke. Med curl: `-g`.
+- **I GET må uttrykk med komma stå i hakeparenteser:** `valueCodes[Tid]=[range(2020,2022)]`. Uten dem: 400 `Illegal selection expression`. `%2C` hjelper ikke. POST trenger dem ikke. Med curl: `-g`, og prosentkod æ, ø og å (`l%C3%B8nn`) — rå UTF-8 gir 400.
 - **For tid: foretrekk `top()`/`from()`** — relative filtre fanger nye perioder, så delbare URL-er holder seg oppdaterte.
 - Kodeliste-ID-er er case-sensitive; variabel- og verdikoder er det ikke.
 - Gjentatt verdikode (`0301,0301`) gir **500 med tom body**. Dedupliser programmatisk byggede seleksjoner.
@@ -97,7 +98,7 @@ Utgangspunkt for søk — **verifiser alltid med metadata:**
 | Tabell | Innhold | Koder |
 | --- | --- | --- |
 | `07459` | Folkemengde | `Personer1`; hele landet = `0` |
-| `14700` | KPI | `KpiIndMnd` (2025=100), `Tolvmanedersendring`, `Manedsendring`. Erstatter `03013`/`03014`. Obligatorisk note om referanseårsskiftet |
+| `14700` | KPI | `KpiIndMnd` (2025=100), `Tolvmanedersendring`, `Manedsendring`. Erstatter `03013` |
 | `14704` | KPI-JA og KPI-JAE | Dimensjonen `KPIavledetSerie` har også total `KPI` |
 | `07221` | Boligprisindeks | `Boligindeks`, `SesJustBoligindeks` |
 | `09190` | Makroøkonomiske hovedstørrelser | Kvartalsvis, revideres |
@@ -108,11 +109,11 @@ Utgangspunkt for søk — **verifiser alltid med metadata:**
 Bruker skriver norsk → svar norsk, `lang=no`. Engelsk → engelsk, `lang=en`. Tallformat: norsk `1 234,5`, engelsk `1,234.5` — API-et returnerer alltid punktum, så formater om.
 
 - Ryddig markdown-tabell. Tittel fra `extension.px.contents` + valgte variabler og periode.
-- **Alltid** kilde med **samtlige** tabell-ID-er: «Kilde: SSB, tabell {id}» / «Source: Statistics Norway, table {id}».
+- **Alltid** kilde med **samtlige** tabell-ID-er: «Kilde: SSB, tabell {id}. Sist oppdatert: {YYYY-MM-DD}.» / «Source: Statistics Norway, table {id}. Last updated: {YYYY-MM-DD}.» Datoen er `updated` i responsen.
 - Alltid enhet, og referanseperiode for indekser (f.eks. 2025=100).
-- Kommenter **kun** tallene i uttrekket.
-- **Gjør uttrekket etterprøvbart:** vis GET-URL eller POST-body, og oppgi hvilken kodeliste du brukte og hvilke dimensjoner du utelot. Responsen registrerer ingen av delene.
-- Tilby visualisering og nedlasting som csv/xlsx. `outputFormatParams` gjelder kun csv/html/xlsx — mot json-stat2 gir den 400. CSV leveres som ISO-8859-1.
+- Kommenter **kun** tallene i uttrekket. Har tabellen standardfeil eller feilmargin, hent den med før du kaller en forskjell reell.
+- **Gjør uttrekket etterprøvbart:** vis GET-URL eller POST-body, og oppgi hvilke koder et vagt begrep ble til (f.eks. «mat»), hvilken kodeliste du brukte og hvilke dimensjoner du utelot. Responsen registrerer ingen av delene.
+- Tilby visualisering og nedlasting: xlsx når dataene skal i Excel (ekte tall, Excel velger desimaltegn), csv til skript. `outputFormatParams` gjelder kun csv/html/xlsx — mot json-stat2 gir den 400. CSV leveres som ISO-8859-1.
 
 ## Gjør aldri
 

@@ -23,13 +23,13 @@ Endpoints and response shapes verified live 2026-09-08. If a scenario fails, che
 ## 2. "How many people live in Stockholm, using the generic skill?" — geography without `role.geo`
 
 - **Installation:** SCB, `https://statistikdatabasen.scb.se/api/v2`
-- **Expected table:** TAB6471 or TAB6473 (both monthly, 2025M01–, both current) — **not** TAB638 or TAB1625, which stopped at 2024 with `discontinued: null`
+- **Expected table:** TAB6471 or TAB6473 (both monthly, 2025M01–, both current) — **not** TAB638 or TAB1625, which stopped at 2024 with no `discontinued` field
 - **Key choices (TAB6471):** `Region=0180`, `Alder=TotSA` (mandatory in this table), `ContentsCode=000007SF`, `Tid=top(1)`, `outputFormat=json-stat2`. TAB6473 needs `Forandringar=100` and `Kon=TotSa` instead
 - **Success:**
   - The model finds `Region` in `id` although `role` has no `geo` entry, and does not ask the user about geography
   - It checks `lastPeriod` and does not settle for a table whose last period is more than a year old just because `discontinued` is unset
   - It includes `Alder` after reading `elimination: false` — or recovers from `400 "Missing selection for mandantory variable"` by reading the metadata, not by guessing
-  - The answer names the omitted dimensions and shows the mandatory notes; "Source: Statistics Sweden, table TAB6471" (or TAB6473)
+  - The answer names the omitted dimensions and shows the mandatory notes — the table's and, in TAB6471, the variable-level note on `Alder` (`dimension.Alder.extension.noteMandatory`); "Source: Statistics Sweden, table TAB6471" (or TAB6473)
 
 ## 3. "Latest monthly population figure for Latvia" — a non-Nordic installation
 
@@ -70,3 +70,9 @@ The scenario CLAUDE.md requires: proof that `Region`/`ContentsCode`/`Tid` are no
 | 4 | Passed | Read `U` from `category.index`, never sent `W`; no 400s; refused to sum an `aggregallowed: false` table; marked its own comparison |
 
 **Harness note, not a skill finding:** the four agents shared one scratchpad directory and overwrote each other's response files. Agent 3 saw SCB tables (TAB6473, TAB1625) inside what it took to be a Latvia search response and, correctly, treated them as spurious after `/tables/{id}` returned 404. Give each parallel eval agent its own working directory.
+
+**2026-10-14, against v0.11.2.** Scenario 2 run by a fresh agent that read an unpacked copy of the zip in scratchpad, not the repository folder, so no `CLAUDE.md` reached its context.
+
+| # | Outcome | Notes |
+|---|---|---|
+| 2 | Passed | `/config` first; `folkmäng* AND region` sent with `curl -G --data-urlencode`; TAB6471, not the frozen TAB638; `Region` found without `role.geo`; `Alder=TotSA` with no 400; all five mandatory notes, including the variable-level note on `Alder`. Gave both the municipality (0180) and the county (01), and shortened the long disclosure-control note — the skill does not say whether a mandatory note may be abridged |

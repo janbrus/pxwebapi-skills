@@ -14,7 +14,7 @@ description: >
   `ssb-pxwebapi-v2` or `scb-pxwebapi-v2` instead.
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.12.1"
+  version: "0.12.2"
 ---
 
 # PxWebApi v1 — Generic Skill
@@ -35,6 +35,7 @@ Official statistics carry an agency's name. A wrong number under that citation d
 - **No interpolation or projection.** A period missing from the extract is missing from the answer.
 - **Mark your own calculations.** Growth rates, shares and sums are yours, not the agency's — show which fetched numbers they rest on, and keep the API's decimals.
 - **Show `status` values as they are.** Missing, provisional and confidential values belong in the table, not hidden or replaced by zero. In v1 the symbols are defined per PX file (`DATASYMBOL1`–`6`), so they vary between agencies and even between tables — read them, don't assume `.` and `..`.
+- **Show mandatory notes.** When a note is flagged mandatory (`extension.noteMandatory` for the table, `categoryNoteMandatory` for a value), the agency has decided the note travels with the figure. Omitting it presents the number without the caveat the agency attached. v1's metadata has no notes, so they arrive only with the data — see `references/json-stat2.md`.
 
 Not finding the number is a valid answer. An honest "not found", with suggested search terms, beats a plausible number that is wrong.
 

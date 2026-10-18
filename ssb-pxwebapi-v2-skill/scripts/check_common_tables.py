@@ -12,7 +12,9 @@ fetches `/tables/{id}`, and reports drift on:
 Note: the markdown "Frekvens" column describes *publication cadence* (e.g. a
 table published quarterly may still have annual time-series data). The API's
 `timeUnit` describes the *time dimension granularity* — these are not the same
-thing, so we don't equate them. timeUnit is only used for the staleness check.
+thing, so we don't equate them. timeUnit drives the staleness check; the only use
+of "Frekvens" is a multi-year cadence ("Minst hvert 5. år"), which widens the
+allowed lag for annual tables to the cycle plus two years.
 
 Exit code: 0 if no errors, 1 otherwise. Warnings do not fail CI.
 
@@ -72,14 +74,17 @@ def fetch(tid: str, retries: int = 4) -> dict[str, Any]:
     raise RuntimeError("unreachable")
 
 
-def staleness_warning(time_unit: str, last_period: str) -> str | None:
+def staleness_warning(time_unit: str, last_period: str, md_freq: str = "") -> str | None:
     """Return a warning string if lastPeriod looks unexpectedly old."""
     today = dt.date.today()
     try:
         if time_unit == "Annual":
             year = int(last_period)
-            if today.year - year > 2:
-                return f"lastPeriod={last_period} is >2 years behind {today.year}"
+            # Frekvens «Minst hvert 5. år» (Forbruksundersøkelsen 14100): allow the cycle plus two years
+            cycle = re.search(r"hvert (\d+)\. år", md_freq)
+            allowed = int(cycle.group(1)) + 2 if cycle else 2
+            if today.year - year > allowed:
+                return f"lastPeriod={last_period} is >{allowed} years behind {today.year}"
         elif time_unit == "Monthly" and "M" in last_period:
             y, m = last_period.split("M")
             ref = dt.date(int(y), int(m), 1)
@@ -139,7 +144,7 @@ def check_row(lineno: int, tid: str, md_title: str, md_freq: str) -> Result:
     if md_tokens and len(md_tokens & label_tokens) / len(md_tokens) < 0.4:
         warnings.append(f"title drift: md={md_title!r} api={label!r}")
 
-    stale = staleness_warning(time_unit, last_period)
+    stale = staleness_warning(time_unit, last_period, md_freq)
     if stale:
         warnings.append(stale)
 

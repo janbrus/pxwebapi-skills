@@ -2,6 +2,96 @@
 
 Vedlikeholderens logg: hva som er endret, hva som er verifisert mot live API, hvor og når, og utfallet av hver søskensjekk. Den er repo-intern og følger ikke med i zip-en. Brukerne leser den korte [`CHANGELOG.md`](CHANGELOG.md); hver versjon står i begge filene. Fram til 2026-10-05 *var* denne fila `CHANGELOG.md`, så eldre oppføringer sier «denne loggen» eller «changelog» der de mener denne fila.
 
+## 1.6.3 — 2026-10-13
+
+Sju deler, besluttet av vedlikeholder 2026-10-13 og gjennomført 2026-10-13/14: KPI-avrundingsstøy ut (A), xlsx til Excel (B), AKU med 3MGG (C), `llms.txt` (D), Forbruksundersøkelsen og søk (F), slanking av `SKILL.md` (G) og prosentkoding (H). I tillegg står datoen i kildehenvisningen. Del E porterte json-stat2-forbedringene til søsknene, som har egne versjoner (se søskensjekk). Alle kall er GET eller POST mot `/tables/{id}/data` — ingen `POST /savedqueries`.
+
+### A. KPI-avrundingsstøy ut
+
+* Avvik i KPI-endringstall som skyldes avrunding, er forklart i SSBs obligatoriske note på 14700 og er riktige (vedlikeholder, 2026-10-13). Skillen trakk dem fram som et problem; det er tatt ut av `SKILL.md` (Dataintegritet og Steg 5), `json-stat2.md` (regel 4 og `note`-delen), `common-tables.md`, `brukerveiledning.md` og `instruks-kort.md`. Den generelle regelen om å vise obligatoriske noter står
+
+### B. xlsx til Excel
+
+* `output-formats.md` har ny seksjon «xlsx: anbefalt til Excel» med en eksempel-URL (13760, 3MGG) som `check_examples.py` kaller. Verifisert 2026-10-13/14: tallcellene er numeriske (`t="n"`) med tallformat `0.0`, fila er lik for `lang=no` og `lang=en`, `..` står som tekst, og noter, tegnforklaring, måleenhet, kilde og «Sist endret» følger med. Excel velger selv desimaltegn
+* Eval 7 (2026-10-14) fant at xlsx med alle variabler i `stub` skriver stub-tekstene bare på første rad i hver blokk (07221, kontrollert samme dag). Langformat-avsnittet i `output-formats.md` sier nå at det gjelder csv, og at xlsx må fylles ned før pivotering. «Fila er lik for begge språk» er presisert til tallene og tallformatet
+* **Rettet:** `api-details.md:15` og CSV-delen i `output-formats.md` sa at xlsx gir komma «på norsk». Det er Excel, ikke `lang`, som avgjør
+* `SKILL.md` Steg 5, `instruks-kort.md`, `brukerveiledning.md` og eval 12 anbefaler xlsx når fila skal i Excel. `CLAUDE.md` Layout-punktet om `output-formats.md` sier det samme
+* **SCB, ikke portert:** SCB-xlsx har tallene som tekst (`t="s"`, TAB6471), og TAB6596 gir 500 på xlsx men 200 på csv og json-stat2 (2026-10-14). SCB-skillen er ikke endret
+
+### C. AKU med 3MGG
+
+* 13760 har `Justering` = `T`, `3MGG`, `S` og `IS`, og noten anbefaler trend eller 3MGG. 3MGG er oppkalt etter midtre måned, så siste måned er `..` (2026M08 `..`, 2026M07 med tall, 2026-10-13). `common-tables.md` har fått «bruk `Justering=3MGG`» i raden og et avsnitt om `top(2)` og tremånedersperioden. Eval 4 er oppdatert
+
+### D. `llms.txt`
+
+* «14700 replaces 03013/03014» er rettet til «14700 replaces 03013, and 14701 replaces 03014»
+* Søketipset sa «norske fagtermer, også på engelsk». Søkeindeksen følger `lang`: `konsumprisindeks` gir 0 treff med `lang=en`, `consumer price index` gir 21 med `lang=en` og 0 med `lang=no` (2026-10-13). Ny tekst: fagtermer på samme språk som `lang`. Eksempellenken `query=folkemengde&lang=en` (13 treff om Longyearbyen) er byttet til `query=consumer%20price%20index&lang=en` (21 treff, 14700 nr. 6)
+
+### F. Forbruksundersøkelsen og søk
+
+Kilde: forbedringsplanen fra en claude.ai-økt om 14100, vurdert mot regelen om bare generell verdi. Kuttet: COICOP-kodelister (står generelt i `codelists-and-filters.md`), MCP-prefiks, `curl -G` (tatt inn igjen som del H), egen versjon, referansetabell med tall, søskentabeller og en kodeliste for «mat».
+
+* `common-tables.md`: 14100 under «Inntekt og skatt», med en setning om Forbruksundersøkelsen (publisert 2012 og 2022, heretter minst hvert femte år, brudd mot 10235 m.fl.). `check_common_tables.py` varsler alltid om `lastPeriod` 2022, og det er ventet
+* `SKILL.md` Steg 2: `pageSize` standard 20; søket leter ikke i emnenavnene i `paths`; sjekk `page.totalElements`; velg et åpenbart riktig treff og si hvorfor
+* **Rettet: fagtermtipset.** «folkemengde (ikke befolkning)» stemte ikke: `folkemengde` gir 33 treff uten 07459, og `befolkning` har 07459 som nr. 45. «KPI» og «jobber» var svake eksempler. Nye eksempler, sjekket live: `inflasjon` 0 treff, `konsumprisindeks` 17 (14700 nr. 13), `boligpriser` 1 (prognosetabellen 12880), `brukte boliger` 3 (07221 først). Rettet i `SKILL.md`, `instruks-kort.md`, `brukerveiledning.md`, eval 1 og skillkartet `docs/skillkart-arbeidsflyt.svg` (teksten målt med DejaVu Sans: 293 av 336 px)
+* `SKILL.md` Steg 5: hent standardfeil eller feilmargin før en forskjell kalles reell (rundt 30 tabeller har det: `standardfeil` 15, `feilmargin` 12, `konfidensintervall` 6); oppgi hvilke koder et vagt begrep ble til
+* `mcp-tools.md`: kommaseparerte verdier i eksempelet; `search_tables` gir bare første side (20 treff), uten total
+* Ny eval 19 (transport mot mat i 14100), uten tall
+* Verifisert 2026-10-13/14: `pageSize` 20 og `totalElements`; `forbruksundersøkelse*`, `arbeidskraftundersøkelsen`, `levekårsundersøkelsen` og `kostrahoved` gir 0 treff; 14100 `firstPeriod` = `lastPeriod` = 2022, `updated` 2024-03-25, `ContentsCode` `Utgift`/`AndForbrUtg`/`Standardfeil`; hyppigheten fra `ssb.no/fbu`
+
+### G. Slanking av `SKILL.md`
+
+* **380 → 340 linjer, 27 191 → 24 016 tegn (−11,7 %)**, målt mot 1.6.2. Planen regnet med rundt 20 %; vedlikeholderen beholdt sju av kuttene
+* **Strøket (dobbeltomtale):** `lang`-linja (standard `no` står i Språk), linja om at HTTP er eneste kanal (`mcp-tools.md`), `pastDays`-punktet, «`firstPeriod`/`lastPeriod` ligger ikke her», pekeren til `json-stat2.md` i Steg 3 (slått sammen med den første), rate limit-setningen, skjermvisning for sq-lenker (`saved-queries.md:42`), «Presenter data uten enhet» og noter-punktet i Steg 5 (regelen står i Dataintegritet, som har fått «følger med i data-responsen»)
+* **Strøket eller kortet (står i referansefil):** tre setninger i v1-rutingen, fire `/savedqueries`-rader til én, KOSTRA-avsnittet i Steg 1 (vedlikeholderens ordlyd), totalkodesetningen, Defaultselection, eksempel 5 (Excel; `output-formats.md` har samme POST-linje og et xlsx-eksempel)
+* **Strøket etter vedlikeholderens beslutning 2026-10-13:** R-pakken `PxWebApiData`, «Lagre» i Steg 4 (flyttet til Fallback punkt 2), parquet-setningen
+* **Eksempel 6 strøket fordi det var misvisende:** `query=population&lang=en` gir 395 treff, og 07459 er nr. 57 (2026-10-13)
+* **Beholdt etter vedlikeholderens beslutning 2026-10-14:** responsstrukturen for søketreff, `elimination: true` etter POST-eksempelet, avsnittet etter GET-eksempelet, Norges Bank i Steg 1, `id`/`dimension` i Steg 3, «Kodelister og filtrering», egne beregninger og `status` i Steg 5. Regelen er at en linje kan stå der agenten handler, og bare kan strykes hvis innholdet står et annet sted. Den står nå i `CLAUDE.md`
+* Pekere rettet: `saved-queries.md:3`, `mcp-tools.md:25`, regel 4 i `json-stat2.md`, Steg 3 (noter → Dataintegritet), eval 7
+
+### H. Prosentkoding
+
+* Eval-agenten i SCB-runden fant det 2026-10-14: `curl -g` koder ingenting. Rå `ø` gir 400 med en HTML-side hos SSB, i søket og i ethvert parameter; prosentkodet (`l%C3%B8nn`) gir 200. Hos SCB og Latvia gir rå UTF-8 200 og 0 treff. Ingen skill sa det, og `check_examples.py` koder URL-ene selv
+* `SKILL.md` Verktøyvalg, `instruks-kort.md` og `llms.txt` har én setning; `troubleshooting.md` forklarer HTML-400-en. Ingen SSB-eksempel-URL har rå æ, ø eller å
+
+### Kildehenvisning med dato
+
+* «Kilde: SSB, tabell {id}. Sist oppdatert: {YYYY-MM-DD}.», samme form som i `ssb-chart-skill` (vedlikeholder, 2026-10-14). Datoen er `updated` i data-responsen, som er lik `updated` på `GET /tables/{id}` (07459, 2026-10-14). Rettet i Språk og eksempel 1 i `SKILL.md`, `instruks-kort.md`, `brukerveiledning.md`, `llms.txt`, `troubleshooting.md` og fire eval-kriterier
+
+### Sjekker og evaler
+
+* `check_examples.py`: 45 eksempler, 0 feil (48 før G; eksempel 5 og 6 er borte). `check_common_tables.py`: 91 tabeller, 0 feil, 1 ventet varsel (14100, `lastPeriod` 2022)
+* **Evaler 2026-10-14**, ekte kjøringer med ferske agenter som leste en utpakket kopi av zip-fila (ingen `CLAUDE.md` i konteksten). Fem av dem stoppet på øktgrensen og ble gjenopptatt. Flere fikk 429 fra SSB fordi agentene delte IP; `curl --retry` med `retry-after` løste det. Alle elleve bestod:
+  * **2 (KPI siste år):** 14700 og 14701, begge tolkningene av «siste år», obligatorisk note vist ordrett, kilde med dato
+  * **4 (arbeidsledighet):** 13760 med 3MGG, perioden juni–august oppgitt, 2026M08 `..` forklart
+  * **7 (Excel):** xlsx med `UseTexts` levert. **Fant:** stub-tekstene står bare på første rad i hver blokk (rettet i `output-formats.md`, se B)
+  * **8 (engelsk):** søket med `population` ga 395 treff uten 07459 på side 1; agenten gikk via `common-tables.md` og brukte både 07459 og 01222 (kvartal), med én kildelinje og dato per tabell
+  * **10 (styringsrente):** rutet til `norges-bank-api`, ingen rentetall. **Rettet:** Steg 1 sa at dataene «ikke [er] i Statistikkbanken», men 10701 har NIBOR og foliorenten månedlig (siste 2026M08, oppdatert 2026-09-25, kontrollert 2026-10-14). Steg 1 og eval 10 sier nå at Norges Bank er primærkilden, og at 10701 kommer senere (vedlikeholder, 2026-10-14)
+  * **11 (delbar URL):** `[range(2020,2022)]`, 200, `curl -g`, fast vindu forklart
+  * **12 (KPI csv):** `??` og `2024*`, note vist, xlsx tilbudt. Agenten gjorde selv csv om til desimalkomma og UTF-8 i stedet for å vise Power Query-oppskriften
+  * **13 (lagret spørring):** GET mot `/savedqueries/10119120` og `/data`, skjermvisning forklart fra `saved-queries.md`, `from()`-URL tilbudt. **Rettet:** `saved-queries.md` sa at kommaformen `SeparatorSemicolon,IncludeTitle` gir begge mot `/savedqueries/{id}/data`; der gir den bare semikolon, mens gjentatt parameter gir begge (kontrollert 2026-10-14). `output-formats.md` sier nå at begge former bare virker mot `/tables/{id}/data`
+  * **16 (KOSTRA Bergen):** 12134, Klass-oppslag (EKG12), `EAK` og `EAKUO`, bruddnoten, revidert ut fra `updated`. **Rettet:** `kostra.md` hadde verdiene for akkurat dette spørsmålet i det verifiserte eksempelet, og 13526-eksempelet hadde også tall. Tallene er fjernet fra begge (vedlikeholder, 2026-10-14), så en modell ikke kan svare fra skillteksten. Formen står: enhet og desimaler, `..` for Oslo (kontrollert samme dag) og bruddnoten
+  * **17 (KOSTRA administrasjon):** 12362, Trondheim som antatt svar på oppfølgingsspørsmålet, `KOSbelopinnbygge0000`, SSBs advarsel om effektivitet. Fant at `kostra.md` ikke nevner tjenesteområdene `FGK1a`–`FGK1c`, og at KOSTRA-setningen i Steg 1 manglet den lukkende tankestreken før «er» (rettet samme dag)
+  * **19 (forbruk):** 14100, standardfeil brukt til å vurdere forskjellen, matkodene oppgitt (`01`, med `01.1` og `11.1` ved siden), egne beregninger merket, 2022
+
+### Søskensjekk
+
+* **Del E (2026-10-13/14):** `scb-pxwebapi-v2` 0.11.2, `generic-pxweb-v2-skill` 0.11.2 og `generic-pxweb-v1-skill` 0.12.2 har fått 1.6.2-formen på `json-stat2.md`, med fakta verifisert per installasjon (se deres DEVLOG). Funn som ikke gjelder SSB: SCB setter obligatoriske noter per variabel og per verdi, `link.related` står også i SCBs data-svar, og v1 sorterer `category.index` i tabellens rekkefølge. SCB og generisk v2 har også fått F-setningene (ett treff, usikkerhet) og H
+* **`ssb-chart-skill`: ingen endring.** `jsonstat-to-chart.md` peker til formelen, `role`, `category.index`, `decimals`, statustegnene og `extension.px.contents` i `json-stat2.md`, og alt dette står uendret. Kildelinja med dato hadde chart-skillen allerede
+* Fagtermtipset (F) gjelder ikke søsknene: SCB har indeks per språk, men ber ikke om svenske termer med `lang=en`
+
+### Utenom planen
+
+* **Mandagskjøringen i GitHub Actions er fjernet** (vedlikeholder, 2026-10-13): `check-tables.yaml` kjører nå ved push/PR og manuelt (`workflow_dispatch`). `CLAUDE.md`, rot-`README.md` og `docs/skillkart-sjekk-og-pakking.svg` (med alt-teksten i `skillkart.html`) er rettet, og samme endring er gjort i `scb-pxwebapi-v2`
+* **Rettet: fylkeseksemplet i `SKILL.md`** (funnet av eval-kjøringen for `ssb-chart-skill` 1.3, 2026-10-15, der agenten leste denne skillen fra den utpakkede zip-en). «Sammenlign befolkning i alle fylker» sa at `agg_KommFylker` med `*` «begrenser * til kun fylkeskodene». API-et gir 18 koder: de 15 fylkene og `F-21` Svalbard, `F-22` Jan Mayen og `F-23` «Kontinentalsokkelen og uoppgitt», alle med 0 i 07459 (2026). En agent som stolte på teksten, ville fått tre rader som ikke er fylker i rangeringer og diagrammer, og feil nevner i snitt per fylke. Teksten sier nå hva lista inneholder, og at de tre skal tas ut. `codelists-and-filters.md` hadde det riktig i tabellen over fylkeslister («18 koder (også Jan Mayen og kontinentalsokkelen)»), men typeoversikten øverst sa «18 fylker»; nå «18 koder». Kontrollert 2026-10-15: begge listene summerer til 5 627 400, lik `Region=0`, og `agg_Fylker2024` gir 16 koder (fylkene + Svalbard med 0). Eksemplet beholder `agg_KommFylker`, som gir sammenhengende serier bakover i tid. Søskensjekk: `scb-pxwebapi-v2` har ikke noe länseksempel med `*` og kodeliste; gjelder ikke
+* Samme eval fant at 09842 (BNP per innbygger) slutter i 2024 (sist oppdatert 2025-06-20, 2015-priser), mens 09189 har 2025 i 2023-priser. Det er SSBs publiseringstakt (vedlikeholder, 2026-10-15), så `common-tables.md` er ikke endret
+* **Nytt: nevneren i egne per innbygger-tall** (vedlikeholder, 2026-10-16). Eval-agenten måtte regne BNP per innbygger selv og valgte på eget initiativ middelfolkemengde (03037) framfor folketallet 1. januar (07459) — riktig valg, men skillen var taus. «Merk egne beregninger» i dataintegritetsavsnittet sier nå: størrelser målt over en periode (BNP, inntekt, konsum) deles på middelfolkemengden, størrelser målt på et tidspunkt på folketallet samme dato; si hvilken nevner du brukte; bruk SSBs ferdige per innbygger-tall når de finnes. Regelen gjelder agentens egne beregninger, ikke SSBs praksis: vedlikeholderen er i tvil om den er gjennomført overalt i SSB, og 09842 oppgir ikke nevneren — metadataene har `measuringType: Flow` men `refperiod: "01.01."` (2026-10-16). 03037 og 07459 er aktive (siste periode 2025 og 2026). `docs/instruks-kort.md` sier fortsatt «Merk egne beregninger» og er ikke utvidet. Søskensjekk: `scb-pxwebapi-v2` har samme regel («Märk dina egna beräkningar», `SKILL.md:37`), uten noe om nevneren. Ikke portert: SCBs tabeller for middelfolkemengde er ikke kontrollert, og avgjørelsen gjaldt SSB
+* **Etter eval 2 for `ssb-chart-skill`** (2026-10-16, agenten leste denne skillen fra den utpakkede 1.6.3-zip-en):
+  - Regelen «bruk SSBs ferdige per innbygger-tall» hadde et blindt punkt. 09842 mangler Fastlands-Norge, slutter i 2024 og bygger på revisjonen før 09189 (2015- mot 2023-priser); volumendring per innbygger avledet av 09842 avvek fra den fra 09189 med opptil 0,8 prosentpoeng (2022: 2,3 mot 3,1, agentens beregning). Agenten valgte bort 09842 med god grunn, men regelen sa ikke når. Nå: bruk det ferdige tallet med mindre det mangler serier eller perioder du trenger, eller bygger på en eldre revisjon enn tallene det skal sammenlignes med; regn da selv og si hvorfor (vedlikeholder, 2026-10-16)
+  - 03037 sto i `SKILL.md` som nevner, men ikke i `common-tables.md`. Ny rad under Befolkning rett etter 07459, og «middelfolkemengde» i Innhold-lista
+  - **`check_common_tables.py` varsler ikke lenger om 14100** (vedlikeholder: Forbruksundersøkelsen kommer minst hvert femte år, så `lastPeriod` 2022 er ikke et varsel verdt). Sjekkeren tillot høyst to års etterslep for alle årlige tabeller. Nå leser den frekvenskolonnen: står det «hvert N. år», tillates N + 2 år. Ingen tabell er unntatt ved navn, og en vanlig årlig tabell som slutter i 2022, varsles fortsatt; en femårstabell som stopper i 2018, varsles også. `check_common_tables.py --md references/common-tables.md`: 92 tabeller, 0 feil, 0 varsler (2026-10-16). Punktene om det ventede 14100-varselet lenger opp i 1.6.3 gjaldt før denne endringen. Søskensjekk: `scb-pxwebapi-v2` har ikke `check_common_tables.py`; gjelder ikke
+* **Prognoser og framskrivinger** (vedlikeholder, 2026-10-16). 12880 har både regnskap og prognoser, men prognoseårene er merket bare i datasettnoten («Prognoser for inneværende og framtidige år», obligatorisk), ikke i `status`; `top(1)` gir altså en prognose. Vedlikeholderen: prognosene er alltid de fire siste årene. Kontrollert 2026-10-16: `top(4)` = 2026–2029, `[top(1,4)]` = 2025, `[top(5,4)]` = 2021–2025, og BNP- og fastlandsvolum i 12880 er lik 09189 i alle 35 år 1991–2025. `common-tables.md` beskrev 12880 bare som prognosetabell; setningen under tabellen sier nå alt dette. `SKILL.md`: «Ingen interpolering eller framskriving» ble «… egen framskriving», så den ikke leses som et forbud mot SSBs framskrivinger, og fikk en setning: SSBs prognoser (12880) og framskrivinger (14746) er SSB-tall, men ikke statistikk — kall prognoser prognoser, og oppgi alternativet for en framskriving (14746: `Personer` = hovedalternativet MMMM; de åtte andre er `Personer1`–`Personer8`). Vedlikeholderen påpekte at prognose og framskriving er ulike ting; et første forslag hadde kalt begge prognoser. `docs/instruks-kort.md` har fått samme regel som eget punkt under «I tillegg» (etter et sideagent-varsel: kortet sier at det er kondensert fra 1.6.3, og uten regelen kunne en prognose for 2029 bli lagt fram som statistikk); regelen om nevneren i per innbygger-tall er ikke tatt med i kortet. `brukerveiledning.md` nevner bare at agenten ikke skal framskrive hull selv, og er ikke endret. Søskensjekk: `ssb-chart-skill` sier «Marker prognoser/framskrivninger med stiplet linje», ingen endring; `scb-pxwebapi-v2` ikke vurdert (SCBs prognosetabeller er ikke kontrollert)
+
 ## 1.6.2 — 2026-10-11
 
 Tre ting: `references/codelists-and-filters.md` er bygd om, slik at de generelle reglene og filteruttrykkene kommer først, `references/json-stat2.md` er bygd om med reglene først og formatet etterpå, og lagrede spørringer er flyttet ut av `SKILL.md` til ny `references/saved-queries.md`. En grundig gjennomlesing med live-sjekk 2026-10-10 fant samtidig feil som hadde stått siden første versjon. Vedlikeholderens egne ucommittede endringer etter 1.6.1 er også med (se nederst). Alle kall er GET eller POST mot `/tables/{id}/data` og `/codelists` — ingen `POST /savedqueries`.

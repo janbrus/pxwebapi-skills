@@ -8,6 +8,18 @@ What was verified, on which installations and when, is in the maintainer's log,
 [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/pxwebapi-v1-generic-skill/DEVLOG.md). It is in the
 repository, not in the ZIP.
 
+## 0.12.2 — 2026-10-14
+
+- **New: in a v1 response, positions follow the table's order, not the order you asked for** — the opposite of v2.
+  Always look the position up in `category.index`; a parser written for v2 puts figures under the wrong labels.
+- **New: show mandatory notes.** v1 flags them per table and per value, and they arrive only with the data response.
+- **Corrected:** a missing `role.geo` does not mean the whole country — SCB's v1 never sets it. Look for a geographic
+  variable in `id` first.
+- **Corrected:** percent-encode letters outside ASCII in a search; SSB's v1 rejects a raw `ø` with 400.
+- New: `references/json-stat2.md` starts with reading rules, and describes `extension`, `extension.px`, notes and
+  `link` as SSB's and SCB's v1 send them.
+- New in the repository, not in the ZIP: a skill map in `docs/`.
+
 ## 0.12.1 — 2026-09-28
 
 - **Corrected: a table or database that does not exist returns 400, not 404**, at all seven verified installations. A 400

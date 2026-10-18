@@ -8,8 +8,8 @@ Rules for agents using this API:
 
 - Never state a figure you have not fetched from the API in the current session. Do not fill gaps from memory, other sources, interpolation or extrapolation. If the API fails or the table is not found, say so.
 - Workflow: search (`GET /tables?query=`) → inspect metadata (`GET /tables/{id}/metadata`) → fetch data (`GET` or `POST /tables/{id}/data`). Do not skip the metadata step: variable codes and value codes must be read from metadata, never guessed. Table IDs are permanent; codes and codelists are not.
-- Search with Norwegian subject terms, even when answering in English: `konsumprisindeks` rather than `KPI`, `folkemengde` rather than `befolkning`. The search engine is Lucene, so `title:`, wildcards and `AND`/`OR` work.
-- Check `discontinued` and `lastPeriod` on `GET /tables/{id}`. `discontinued` is present only when the table is discontinued (`true`), and it is not set in metadata or data responses. Series often continue in a new table (CPI: 14700 replaces 03013/03014).
+- Search with SSB's subject terms in the language of `lang`: `konsumprisindeks` with `lang=no`, `consumer price index` with `lang=en`. Everyday words miss: `inflasjon` gives 0 hits, and `boligpriser` finds only a macroeconomic forecast table. The search engine is Lucene, so `title:`, wildcards and `AND`/`OR` work. Percent-encode æ, ø and å in URLs (`l%C3%B8nn`); raw UTF-8 returns 400.
+- Check `discontinued` and `lastPeriod` on `GET /tables/{id}`. `discontinued` is present only when the table is discontinued (`true`), and it is not set in metadata or data responses. Series often continue in a new table (CPI: 14700 replaces 03013, and 14701 replaces 03014).
 - A variable may be left out of a query only if its metadata says `elimination: true`. `Tid` (time) and `ContentsCode` (the measure) can never be left out.
 - Aggregating codelists change the value codes: `codelist[Region]=agg_KommFylker` uses `F-` prefixed county codes, `agg_KommSummer` uses `K-` prefixed municipality codes. `top(n)`, `from(x)`, `range(a,b)` and `*` work in `valueCodes`.
 - Limits: 800,000 cells per request (read the current value from `GET /config`) and a rate limit announced in the `x-ratelimit-*` response headers (40 requests per minute at the time of writing). GET URLs over about 2,100 characters fail; use POST instead.
@@ -17,7 +17,7 @@ Rules for agents using this API:
 - Show the `status` symbols (`.` not applicable, `..` not available, `:` confidential) and any note flagged `noteMandatory`. A symbol can also flag a figure that exists (`*` provisional): show the figure with it. Say when figures are preliminary; national accounts and KOSTRA are revised.
 - KOSTRA tables differ from the rest: `KOK…`/`KOS…` variable IDs instead of `Region`, special group codes (`EAK`, `EKG…`), and no eliminable variables.
 - Mark your own calculations (growth rates, shares, sums) as your own. Keep the precision given by `category.unit.decimals`. The API always uses a decimal point.
-- Cite as "Source: Statistics Norway, table {id}" (Norwegian: "Kilde: SSB, tabell {id}").
+- Cite as "Source: Statistics Norway, table {id}. Last updated: {YYYY-MM-DD}." (Norwegian: "Kilde: SSB, tabell {id}. Sist oppdatert: {YYYY-MM-DD}."), with the date from `updated` in the response.
 
 ## API documentation
 
@@ -30,7 +30,7 @@ Rules for agents using this API:
 
 ## Example requests
 
-- [Search for tables](https://data.ssb.no/api/pxwebapi/v2/tables?query=folkemengde&lang=en): table IDs, titles, `firstPeriod`/`lastPeriod`, subject paths
+- [Search for tables](https://data.ssb.no/api/pxwebapi/v2/tables?query=consumer%20price%20index&lang=en): table IDs, titles, `firstPeriod`/`lastPeriod`, subject paths
 - [Table info](https://data.ssb.no/api/pxwebapi/v2/tables/07459?lang=en): population by region, sex and age; check `discontinued`
 - [Table metadata](https://data.ssb.no/api/pxwebapi/v2/tables/07459/metadata?lang=en): variables, value codes, codelists, elimination flags and notes
 - [Population of Oslo, latest year](https://data.ssb.no/api/pxwebapi/v2/tables/07459/data?lang=en&valueCodes[Region]=0301&valueCodes[ContentsCode]=Personer1&valueCodes[Tid]=top%281%29): a json-stat2 response

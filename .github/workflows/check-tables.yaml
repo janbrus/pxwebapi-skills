@@ -24,8 +24,6 @@ on:
       - 'ssb-pxwebapi-v2-skill/ssb-pxwebapi-v2-skill.zip'
       - '.github/workflows/check-tables.yaml'
       - 'LICENSE'
-  schedule:
-    - cron: '0 6 * * 1'   # mandag 06:00 UTC — fanger drift i SSB-tabeller
   workflow_dispatch:
 
 defaults:

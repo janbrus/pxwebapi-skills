@@ -42,11 +42,15 @@ generic-pxweb-v2-skill/
 ├── README.md                      # This file
 ├── CHANGELOG.md                   # Version history; the current version is metadata.version in SKILL.md
 ├── generic-pxweb-v2-skill.zip     # Packaged skill — upload to Claude.ai, or unpack into .agents/skills/ for ChatGPT/Codex
-└── references/                    # Loaded on demand
-    ├── json-stat2.md              # json-stat2 format spec (Dataset, row-major indexing, extension, status codes — also applies to Eurostat, World Bank)
-    ├── api-details.md             # /config, rate limiting, output formats, and the verified per-installation comparison table
-    ├── codelists-and-filters.md   # Codelists, filter expressions (and which ones do not exist), time-code formats per installation
-    └── troubleshooting.md         # The five 400 titles, PX-instead-of-JSON, default selection, search returning 0 hits
+├── references/                    # Loaded on demand
+│   ├── json-stat2.md              # json-stat2 as PxWebApi v2 delivers it: seven reading rules first, then the fields, mandatory notes at three levels, status and links per installation (shape variants also cover Eurostat)
+│   ├── api-details.md             # /config, rate limiting, output formats, and the verified per-installation comparison table
+│   ├── codelists-and-filters.md   # Codelists, filter expressions (and which ones do not exist), time-code formats per installation
+│   └── troubleshooting.md         # The five 400 titles, PX-instead-of-JSON, default selection, search returning 0 hits
+└── docs/                          # Extra: not shipped in the zip
+    ├── skill-map-workflow.svg     # Diagram of the workflow: Steps 1–6 and the API call in each step
+    ├── skill-map-checks-and-packaging.svg  # Diagram of what is verified by hand and what goes in the zip
+    └── skill-map.html             # Both diagrams with explanations. Open in a browser from a cloned repository
 ```
 
 `CLAUDE.md`, `DEVLOG.md`, `scripts/` and `evals/` in the repository are maintainer-internal and are not part of the package.
@@ -63,7 +67,7 @@ generic-pxweb-v2-skill/
 
    The package contains only the user-facing files (`SKILL.md`, `README.md`, `CHANGELOG.md`, `references/`) plus `LICENSE` under the top-level folder `generic-pxweb-v2-skill/`.
 
-2. Go to **Settings > Features > Skills**
+2. Go to **Settings > Skills**
 3. Upload the ZIP file
 
 ### Claude Code

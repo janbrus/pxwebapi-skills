@@ -78,19 +78,24 @@ generic-pxweb-v1-skill/
 │   ├── query-syntax.md       # Query body, filters, elimination, aggregations, cURL
 │   ├── api-details.md        # URL structure, navigation, search, formats, limits
 │   ├── px-files-and-classifications.md  # PX files, .vs/.agg, PX keywords behind the metadata
-│   ├── json-stat2.md         # json-stat2 format spec (also Eurostat, World Bank)
+│   ├── json-stat2.md         # json-stat2 as v1 delivers it: reading rules first, table-order indexing, mandatory notes, links
 │   ├── troubleshooting.md    # HTTP codes and the three v1 error payloads
 │   ├── installations.md      # 50 known v1 installations: status, languages, ?config limits
 │   └── v1-vs-v2.md           # Translation guide, and using v2 to fill v1's gaps
-├── docs/                     # For agencies, not shipped: llms.txt template and a filled-in Finland example
+├── docs/                     # Not shipped
+│   ├── llms-template.txt     # For agencies: an llms.txt any v1 installation can fill in
+│   ├── llms-example-statfin.txt          # The template filled in for Statistics Finland
+│   ├── skill-map-workflow.svg            # Diagram: environment check, Steps 1–5, the API call in each step
+│   ├── skill-map-checks-and-packaging.svg  # Diagram: what is verified by hand and what goes in the ZIP
+│   └── skill-map.html        # Both diagrams with explanations. Open in a browser from a cloned repository
 ├── evals/                    # Repo-internal: scenarios for testing the skill end to end
 └── scripts/
     └── build_zip.sh          # Builds the distribution ZIP (user-facing files only)
 ```
 
 `SKILL.md`, `README.md`, `CHANGELOG.md` and `references/` are what ships, together with `LICENSE` from the repository root. `DEVLOG.md`,
-`CLAUDE.md`, `evals/` and `scripts/` are repo-internal and deliberately excluded from the ZIP. `docs/` is written for agencies that publish an
-`llms.txt`, not for the model, so it stays out of the ZIP too.
+`CLAUDE.md`, `evals/` and `scripts/` are repo-internal and deliberately excluded from the ZIP. `docs/` is written for people, not for the
+model: an `llms.txt` template for agencies, and a skill map of the workflow. It stays out of the ZIP too.
 
 ## Installation
 
@@ -98,7 +103,7 @@ generic-pxweb-v1-skill/
 
 1. Build the ZIP with `scripts/build_zip.sh` — do not zip the folder by hand, or
    repo-internal files end up in the package
-2. Go to **Settings > Features > Skills**
+2. Go to **Settings > Skills**
 3. Upload the ZIP file
 
 ### Claude Code

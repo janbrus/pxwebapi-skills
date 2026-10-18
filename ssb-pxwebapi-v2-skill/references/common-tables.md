@@ -4,11 +4,11 @@ Kurert liste over mye etterspurte tabeller, basert på faktisk bruk. Bekreft med
 
 **Innhold**
 
-1. Befolkning: folketall, befolkningsendringer, innvandrere, grunnkretser, framskrivinger, levealder, døde per uke, navn
+1. Befolkning: folketall, middelfolkemengde, befolkningsendringer, innvandrere, grunnkretser, framskrivinger, levealder, døde per uke, navn
 2. Priser og inflasjon: KPI, KPI-JAE, drivstoff, strøm
 3. Arbeid og lønn: lønn etter yrke, utdanning og alder, lønnsindeks, ledige stillinger, sysselsetting, arbeidsledighet (AKU)
 4. Nasjonalregnskap og makroøkonomi: BNP, konjunkturprognoser, utenriksregnskap, renter
-5. Inntekt og skatt: inntekt, fradrag og skatt, medianinntekt for husholdninger
+5. Inntekt og skatt: inntekt, fradrag og skatt, medianinntekt for husholdninger, forbruksutgift
 6. Utenrikshandel: eksport og import etter vare og land
 7. Bolig og eiendom: boligprisindeks, kvadratmeterpris, boligmasse, igangsatte boliger, leie
 8. Byggekostnader: byggekostnadsindekser for boliger og vei
@@ -31,6 +31,7 @@ Kurert liste over mye etterspurte tabeller, basert på faktisk bruk. Bekreft med
 | ID    | Tittel                                                                  | Frekvens    | Typisk bruk                                                 |
 | ----- | ----------------------------------------------------------------------- | ----------- | ----------------------------------------------------------- |
 | 07459 | Alders- og kjønnsfordeling i kommuner, fylker og hele landet            | Årlig       | Folketall, aldersfordeling, kommunesammenligninger          |
+| 03037 | Middelfolkemengde, etter kjønn, tiårige aldersgrupper og sivilstand     | Årlig       | Nevner for egne per innbygger-tall av BNP, inntekt o.l.     |
 | 01222 | Endringar i befolkninga i løpet av kvartalet, kommuner/fylker           | Kvartalsvis | Befolkningsendringer per kvartal                            |
 | 06913 | Endringer i kommuner, fylker og hele landets befolkning                 | Årlig       | Fødte, døde, inn/utvandring, historisk fra 1951             |
 | 05184 | Innvandrere, etter kjønn og landbakgrunn                                | Årlig       | Innvandrerbefolkning etter kjønn og landbakgrunn (fra 1970) |
@@ -61,7 +62,7 @@ Tabell 07459 er den mest brukte befolkningstabellen. Den dekker alle kommuner, f
 | 09654 | Priser på drivstoff                                   | Månedlig    | Bensin- og dieselpriser per liter                                                 |
 | 09387 | Kraftpris, nettleie og avgifter for husholdninger     | Kvartalsvis | Strømpriser for husholdninger                                                     |
 
-KPI (14700): Basisår 2025=100. `ContentsCode` "KpiIndMnd" = indeks, "Tolvmanedersendring" = 12-måneders endring. Årlig KPI (14701): "KpiAar" = årsgjennomsnittet av indeksen, "Aarsendring" = endringen i årsgjennomsnittet, i prosent. Kontrakter som viser til KPI, bruker oftere endringen desember–desember i 14700 ("Tolvmanedersendring" for desember) enn årsendringen i 14701. Det er to ulike mål, og de gir ulike tall. Både 03013 (månedlig) og 03014 (årlig) er avsluttet; 14700 erstatter 03013, og 14701 erstatter 03014. For perioder til og med 2025 avviker endringstallene i 14700 og 14701 ofte fra dem som ble publisert i 03013 og 03014, i hovedsak på grunn av avrunding etter omregningen til 2025=100. KPI-JAE (14704) er populært kalt kjerneinflasjon og brukes mye i pengepolitisk analyse.
+KPI (14700): Basisår 2025=100. `ContentsCode` "KpiIndMnd" = indeks, "Tolvmanedersendring" = 12-måneders endring. Årlig KPI (14701): "KpiAar" = årsgjennomsnittet av indeksen, "Aarsendring" = endringen i årsgjennomsnittet, i prosent. Kontrakter som viser til KPI, bruker oftere endringen desember–desember i 14700 ("Tolvmanedersendring" for desember) enn årsendringen i 14701. Det er to ulike mål, og de gir ulike tall. Både 03013 (månedlig) og 03014 (årlig) er avsluttet; 14700 erstatter 03013, og 14701 erstatter 03014. KPI-JAE (14704) er populært kalt kjerneinflasjon og brukes mye i pengepolitisk analyse.
 
 ---
 
@@ -79,8 +80,10 @@ KPI (14700): Basisår 2025=100. `ContentsCode` "KpiIndMnd" = indeks, "Tolvmanede
 | 11587 | Ledige stillinger, etter næring (sesongjustert)                               | Kvartalsvis    | Etterspørsel etter arbeidskraft                                           |
 | 13979 | Lønnstakere og jobber i utleie av arbeidskraft (næring 78.2)                  | Kvartalsvis    | Bemanningsbransjen, etter yrke og arbeidssted, fylkesnivå                 |
 | 05111 | Personer, etter arbeidsstyrkestatus, kjønn og alder                           | Årlig          | Sysselsatte, arbeidsledige og personer utenfor arbeidsstyrken (fra 1972-) |
-| 13760 | Arbeidsledige og sysselsatte, personer og prosent                             | Månedlig       | Arbeidsstyrken og arbeidsledighet, AKU, sesongjusert                      |
+| 13760 | Arbeidsledige og sysselsatte, personer og prosent                             | Månedlig       | AKU-ledighet og sysselsetting — bruk `Justering=3MGG`                     |
 | 13470 | Næringsfordeling  blant sysselsatte                                           | Årlig (4. kv.) | Sysselsatte per næring (NACE 5-siffer) og kommune/fylke                   |
+
+AKU (13760): Bruk `Justering=3MGG` (sesongjustert, tremåneders glidende gjennomsnitt), som SSBs note anbefaler. Tallet er oppkalt etter midtre måned, så siste måned er `..`. Hent `Tid=top(2)`, bruk den siste måneden som har tall, og oppgi tremånedersperioden i svaret.
 
 ---
 
@@ -97,7 +100,7 @@ KPI (14700): Basisår 2025=100. `ContentsCode` "KpiIndMnd" = indeks, "Tolvmanede
 | 10748 | Renter på nye boliglån, etter utlånstype og bindingstid  | Månedlig                       | Boliglånsrenter, utvalg banker/kredittforetak                                  |
 | 07200 | Renter på utestående utlån, etter långiver og sektor     | Kvartalsvis                    | Utlånsrenter totaltelling, historisk fra 1979-                                 |
 
-Tabell 12880 er unik fordi den inneholder SSBs egne prognoser for makroøkonomiske størrelser fire år fremover.
+Tabell 12880 har både regnskap og SSBs prognoser: 43 hovedstørrelser fra 1991 (vekst i prosent der ikke annet står; BNP og BNP Fastlands-Norge er lik 09189). De fire siste årene er alltid prognoser (`top(4)`), merket bare i noten, ikke i `status`. Siste regnskapsår er `[top(1,4)]`, de fem siste `[top(5,4)]`. Kall prognosene prognoser.
 
 ---
 
@@ -107,6 +110,9 @@ Tabell 12880 er unik fordi den inneholder SSBs egne prognoser for makroøkonomis
 | ----- | --------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
 | 03068 | Skattepliktig inntekt, fradrag og skatt, bosatte 17+ år, gjennomsnitt | Årlig    | Gjennomsnittlig bruttoinntekt, lønn, fradrag og skatt for personer per kommune/fylke (fra 1993-) |
 | 06944 | Inntekt for husholdninger, etter husholdningstype. Antall og median. Delområder (K) (B) | Årlig | Medianinntekt per kommune, bydel **og delområde** (`vs_Delomraader01`) — eneste av de 90 bydel-tabellene med delområdenivå |
+| 14100 | Utgift per husholdning per år, etter vare- og tjenestegruppe | Minst hvert 5. år | Forbruksutgift og andel per COICOP-gruppe, med standardfeil |
+
+Forbruksundersøkelsen er en utvalgsundersøkelse, publisert 2012 og 2022 og heretter minst hvert femte år. 2022 har brudd mot de avsluttede seriene (10235 m.fl.).
 
 ---
 

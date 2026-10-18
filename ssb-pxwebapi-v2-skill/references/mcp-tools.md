@@ -15,14 +15,14 @@ Innholdet under er verifisert mot kildekoden i v2.0.0 (sjekket 2026-06-12).
 | `get_code_list`      | `GET /codelists/{id}`      | `code_list_id`, `language`                                                       |
 | `list_recent_tables` | `GET /tables?pastDays=N`   | `days`, `language`                                                               |
 
-`query_table` mapper objektene til URL-parametre: `value_codes: { "Region": "0301", "Tid": "top(5)" }` blir `valueCodes[Region]=0301&valueCodes[Tid]=top(5)`; `code_list` blir `codelist[Var]` og `output_values` blir `outputValues[Var]`. Filtersyntaks (`top()`, `from()`, `range()`, wildcards) og kodelisteprefikser (`F-`/`K-`) er identiske med GET-kanalen — se `codelists-and-filters.md`.
+`query_table` mapper objektene til URL-parametre: `value_codes: { "Region": "0301,4601", "Tid": "top(5)" }` blir `valueCodes[Region]=0301,4601&valueCodes[Tid]=top(5)`, så flere verdier skrives kommaseparert i én streng; `code_list` blir `codelist[Var]` og `output_values` blir `outputValues[Var]`. Filtersyntaks (`top()`, `from()`, `range()`, wildcards) og kodelisteprefikser (`F-`/`K-`) er identiske med GET-kanalen — se `codelists-and-filters.md`.
 
 ## Begrensninger — bruk HTTP når
 
 - **Du trenger `/savedqueries`, `/tables/{id}/defaultselection` eller `/config`** — disse er ikke eksponert som verktøy.
-- **Du søker tabeller og trenger Steg 2-feltene:** `search_tables` returnerer kun `id` + tittel — `lastPeriod`, `timeUnit`, `discontinued`, `variableNames` og `paths` (kortnavn-utledningen) mangler, og det finnes ingen paginering (`pageNumber`/`pageSize`). Kall `get_table_info` per kandidat, eller søk via HTTP.
+- **Du søker tabeller og trenger Steg 2-feltene:** `search_tables` returnerer kun `id` + tittel — `lastPeriod`, `timeUnit`, `discontinued`, `variableNames` og `paths` (kortnavn-utledningen) mangler, og det finnes ingen paginering (`pageNumber`/`pageSize`): du får bare første side (20 treff), uten total. Kall `get_table_info` per kandidat, eller søk via HTTP.
 - **Du vil se metadata med kodeliste aktivert:** `fetch_metadata` støtter ikke `codelist[Var]`-parameteren (jf. fylkeseksemplet i SKILL.md) — slå opp kodelisten med `get_code_list` i stedet.
-- **Du trenger `outputFormatParams`:** `query_table` eksponerer ikke `UseCodesAndTexts`, `IncludeTitle`, `heading`/`stub` eller CSV-separatorer — formatert eksport (f.eks. Excel-eksemplet i SKILL.md) krever HTTP.
+- **Du trenger `outputFormatParams`:** `query_table` eksponerer ikke `UseCodesAndTexts`, `IncludeTitle`, `heading`/`stub` eller CSV-separatorer — formatert eksport (f.eks. xlsx, se `output-formats.md`) krever HTTP.
 
 ## Konfigurasjon
 

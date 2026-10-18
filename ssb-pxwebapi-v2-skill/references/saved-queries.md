@@ -1,6 +1,6 @@
 # Lagrede spørringer
 
-En lagret spørring er en seleksjon SSB lagrer under en ID, slik at den kan kjøres igjen. Endepunktene står i API-oversikten i `SKILL.md`.
+En lagret spørring er en seleksjon SSB lagrer under en ID, slik at den kan kjøres igjen. Endepunktene står under.
 
 ## Førstevalget er en vanlig URL
 
@@ -46,6 +46,6 @@ GET /savedqueries/10119120
 GET /savedqueries/10119120/data
 ```
 
-Den første viser definisjonen (tabell 08655), den andre leverer fila. 10119120 er lagret som `csv` med `SeparatorSemicolon` og `IncludeTitle`, men `/data` gir komma og ingen tittelrad; med `?outputFormat=csv&outputFormatParams=SeparatorSemicolon,IncludeTitle` kommer begge med (verifisert 2026-10-11). Et Power Query-oppsett som venter semikolon, kan derfor feile selv om ID-en virker. Hent dataene herfra, og tilby en vanlig GET-URL med `top()`/`from()` og eksplisitte `outputFormatParams` som brukeren kan legge inn i Power Query i stedet.
+Den første viser definisjonen (tabell 08655), den andre leverer fila. 10119120 er lagret som `csv` med `SeparatorSemicolon` og `IncludeTitle`, men `/data` gir komma og ingen tittelrad. Med `?outputFormat=csv&outputFormatParams=SeparatorSemicolon&outputFormatParams=IncludeTitle` kommer begge med. Kommaformen (`SeparatorSemicolon,IncludeTitle`) gir her bare semikolon, selv om den virker mot `/tables/{id}/data` (verifisert 2026-10-14). Et Power Query-oppsett som venter semikolon, kan derfor feile selv om ID-en virker. Hent dataene herfra, og tilby en vanlig GET-URL med `top()`/`from()` og eksplisitte `outputFormatParams` som brukeren kan legge inn i Power Query i stedet.
 
 Feilkoder (400 uten `outputFormatParams`, 404 for feil ID): se `troubleshooting.md`.

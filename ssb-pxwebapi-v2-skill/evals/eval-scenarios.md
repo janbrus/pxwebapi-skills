@@ -11,9 +11,9 @@ før du antar at skillen er problemet.
 ## 1. «Hvor mange bor i Oslo?»
 
 - **Forventet tabell:** 07459
-- **Sekvens:** (`GET /tables?query=folkemengde` hvis ukjent) → `GET /tables/07459/metadata` → `POST /tables/07459/data`
+- **Sekvens:** (07459 fra `common-tables.md`; søket finner den ikke på første side) → `GET /tables/07459/metadata` → `POST /tables/07459/data`
 - **Nøkkelvalg:** `Region=0301`, `ContentsCode=Personer1`, `Tid=top(1)`
-- **Suksess:** Ett tall med årstall og «Kilde: SSB, tabell 07459»
+- **Suksess:** Ett tall med årstall og «Kilde: SSB, tabell 07459. Sist oppdatert: {dato}.»
 
 ## 2. «KPI siste år»
 
@@ -32,8 +32,8 @@ før du antar at skillen er problemet.
 
 - **Forventet tabell:** 13760 (AKU månedlig)
 - **Sekvens:** søk («arbeidsledige» / AKU) → metadata → data
-- **Nøkkelvalg:** riktig ContentsCode for arbeidsledige; vær eksplisitt om sesongjustert vs. ujustert; `Tid=top(1)`
-- **Suksess:** Nyeste måned (AKU har ~2 mnd publiseringsetterslep), enhet tydelig (prosent av arbeidsstyrken vs. antall i 1000)
+- **Nøkkelvalg:** riktig ContentsCode for arbeidsledige; `Justering=3MGG`; `Tid=top(2)` (siste måned er `..`)
+- **Suksess:** Siste tilgjengelige 3MGG-tall med tremånedersperioden oppgitt, enhet tydelig (prosent av arbeidsstyrken vs. antall i 1000)
 
 ## 5. «Lakseeksport denne uka»
 
@@ -50,14 +50,14 @@ før du antar at skillen er problemet.
 ## 7. «Eksporter boligprisindeksen til Excel»
 
 - **Forventet tabell:** 07221
-- **Nøkkelvalg:** `outputFormat=xlsx`, `outputFormatParams=UseCodesAndTexts`/`IncludeTitle`; `ContentsCode=Boligindeks` (IKKE `KvPris` — finnes ikke i 07221)
+- **Nøkkelvalg:** `outputFormat=xlsx` med `outputFormatParams` fra `output-formats.md` (`UseTexts` eller `UseCodesAndTexts`); `ContentsCode=Boligindeks` (IKKE `KvPris` — finnes ikke i 07221)
 - **Suksess:** Gyldig xlsx-fil levert
 
 ## 8. «What is the population of Norway?» (engelsk)
 
 - **Forventet tabell:** 07459 med `lang=en`
 - **Nøkkelvalg:** `Region=0`, `ContentsCode=Personer1`, `Tid=top(1)`
-- **Suksess:** Svar på engelsk, engelsk tallformat (komma som tusenskilletegn), «Source: Statistics Norway, table 07459». Fasiten er *formen*, ikke verdien — et bestemt folketall skal ikke stå her, for da belønner scenarioet et tall gjengitt fra hukommelsen i stedet for et hentet tall
+- **Suksess:** Svar på engelsk, engelsk tallformat (komma som tusenskilletegn), «Source: Statistics Norway, table 07459. Last updated: {date}.». Fasiten er *formen*, ikke verdien — et bestemt folketall skal ikke stå her, for da belønner scenarioet et tall gjengitt fra hukommelsen i stedet for et hentet tall
 
 ## 9. «Folketallet i Norge i 1875»
 
@@ -66,7 +66,7 @@ før du antar at skillen er problemet.
 
 ## 10. «Hva er styringsrenten?»
 
-- **Forventet atferd:** Rutes til `norges-bank-api`-skillen (hvis tilgjengelig) — ikke SSB-tabeller; sentralbankdata finnes ikke i Statistikkbanken
+- **Forventet atferd:** Rutes til `norges-bank-api`-skillen (hvis tilgjengelig) — Norges Bank er primærkilden; Statistikkbanken har bare foliorenten som månedsserie (10701), som kommer senere
 - **Suksess:** Ingen forsøk på å besvare med SSB-uttrekk. Generell regel som også gjelder alle scenariene over: presentasjonen kommenterer kun tall fra det hentede uttrekket — aldri innblandede tall fra andre kilder
 
 ## 11. «Lag en delbar URL for folketallet i Oslo 2020–2022»
@@ -79,7 +79,7 @@ før du antar at skillen er problemet.
 
 - **Forventet tabell:** 14700
 - **Nøkkelvalg:** `valueCodes[Tid]=2024*` (ikke 12 oppramsede måneder), `valueCodes[VareTjenesteGrp]=??` eller `codelist[VareTjenesteGrp]=agg_CoiCop2018Kpi011`, `ContentsCode=KpiIndMnd`, `outputFormat=csv&outputFormatParams=SeparatorSemicolon,UseTexts` og alle variabler i `stub` (pivotvennlig)
-- **Suksess:** Én GET-URL som gir 200; svaret sier at csv er Latin-1 og at desimalpunktum må byttes i Power Query; obligatorisk note fra 14700 om referanseår vises
+- **Suksess:** Én GET-URL som gir 200; svaret sier at csv er Latin-1 og at desimalpunktum må byttes i Power Query; anbefaler xlsx hvis fila skal åpnes i Excel; obligatorisk note fra 14700 om referanseår vises
 
 ## 13. «Her er en gammel lagret spørring: https://www.ssb.no/statbank/sq/10119120 — kan du hente dataene?»
 
@@ -103,7 +103,7 @@ før du antar at skillen er problemet.
 - **Forventet tabell:** 12134 (Utvalgte nøkkeltall for kommuneregnskap, kommunekonsern (K)) — kjennes igjen på `kostrahoved` i `paths`; ikke 07459-logikk med `Region`
 - **Sekvens:** (`GET /tables?query=kostra kommuneregnskap` hvis ID ukjent) → `GET /tables/12134/metadata` → Klass-oppslag av Bergens gruppe (`correspondencetables/2840`: 4601 → `EKG12`, ikke gjettet) → data
 - **Nøkkelvalg:** `valueCodes[KOKkommuneregion0000]=4601,EKG12,EAKUO` (landet *uten* Oslo for økonominøkkeltall), `ContentsCode` valgt etter label «netto driftsresultat i prosent …» fra metadata (`KOSAGD230000` per 2026-09-20 — leses, ikke huskes), `Tid=top(5)`; ingen dimensjon utelatt
-- **Suksess:** fem årsverdier med enhet prosent og desimaler fra `category.unit.decimals`; den obligatoriske noten om brudd i KOSTRA-gruppene 2019/2020 vist; svaret sier at tallene er reviderte (juni-utgave) ut fra `updated`, at gruppe- og landstall er SSBs egne veide gjennomsnitt (ikke egen sum), og «Kilde: SSB, tabell 12134». Brukes en `KOS…`-kode uten forutgående metadata-kall i samme samtale, er scenarioet feilet
+- **Suksess:** fem årsverdier med enhet prosent og desimaler fra `category.unit.decimals`; den obligatoriske noten om brudd i KOSTRA-gruppene 2019/2020 vist; svaret sier at tallene er reviderte (juni-utgave) ut fra `updated`, at gruppe- og landstall er SSBs egne veide gjennomsnitt (ikke egen sum), og «Kilde: SSB, tabell 12134. Sist oppdatert: {dato}.». Brukes en `KOS…`-kode uten forutgående metadata-kall i samme samtale, er scenarioet feilet
 
 ## 17. «Hvor mye bruker kommunen min på administrasjon per innbygger?»
 
@@ -115,4 +115,10 @@ før du antar at skillen er problemet.
 
 - **Forventet tabell:** 07459 med kodeliste `agg_TiAarigGruppering` på `Alder` (lagt til i 1.6.2, verifisert 2026-10-11)
 - **Nøkkelvalg:** `codelist[Alder]=agg_TiAarigGruppering` med kodelistens egne koder `F90-99` og `F100G10+`, lest fra `GET /codelists/agg_TiAarigGruppering` eller metadata — ikke `90-99`, og ikke uten kodeliste (begge gir 400 `Non-existent value`). I en GET-URL skrives `+` som `%2B` (`F100G10%2B`); i POST går `"F100G10+"` rett. Alternativet uten kodeliste er å summere enkeltaldrene selv, med `105+` som `%2B` i GET, og merke summen som egen beregning. `Region=0`, `Tid=top(1)`
-- **Suksess:** to tall for siste år med enhet personer og «Kilde: SSB, tabell 07459»; svaret oppgir kodelisten og at kjønn er utelatt (summert over begge kjønn). Ingen 400 på grunn av rå `+` i URL-en
+- **Suksess:** to tall for siste år med enhet personer og «Kilde: SSB, tabell 07459. Sist oppdatert: {dato}.»; svaret oppgir kodelisten og at kjønn er utelatt (summert over begge kjønn). Ingen 400 på grunn av rå `+` i URL-en
+
+## 19. «Hvor mye bruker en husholdning på transport i forhold til mat?»
+
+- **Forventet tabell:** 14100 (Forbruksundersøkelsen, fra `common-tables.md`), valgt med begrunnelse — ikke en KPI-tabell
+- **Nøkkelvalg:** `VareTjenesteGruppe` med koder lest fra metadata for «mat» og «transport» (f.eks. `01` eller `01.1`, og `07`), `ContentsCode` = `Utgift` og/eller `AndForbrUtg` **og** `Standardfeil`, `Tid=2022`
+- **Suksess:** svaret sier hvilke koder «mat» og «transport» ble til, viser standardfeilen før det kaller forskjellen reell, merker forholdstallet som egen beregning, og oppgir at siste periode er 2022 (utvalgsundersøkelse, minst hvert femte år). Ingen tall i fasiten

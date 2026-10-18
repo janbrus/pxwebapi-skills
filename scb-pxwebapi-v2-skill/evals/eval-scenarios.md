@@ -15,16 +15,16 @@ Endpoints, koder och svarsformer verifierade live 2026-09-07 och 2026-09-08. Fal
 ## 1. «Hur många bor i Stockholm?» — aktualitet och obligatoriska noter
 
 Det scenario som fällde v0.11.0:s första utkast: SKILL.md pekade på TAB638, som slutar
-2024 med `discontinued: null`. Två oberoende körningar upptäckte det via `pastDays`.
+2024 utan `discontinued`-fält. Två oberoende körningar upptäckte det via `pastDays`.
 
 - **Förväntad tabell:** TAB6471 (månad, 2025M01–). **Inte** TAB638 (fryst på 2024) och inte TAB5444 (fryst på 2024M12)
-- **Sekvens:** (`GET /tables?query=folkmängden+per+månad` om okänd — 2 träffar, TAB6471 först) → `GET /tables/TAB6471/metadata` → `POST /tables/TAB6471/data`
+- **Sekvens:** (`GET /tables?query=folkm%C3%A4ngden+per+m%C3%A5nad` om okänd — 2 träffar, TAB6471 först; rå ä och å ger 0) → `GET /tables/TAB6471/metadata` → `POST /tables/TAB6471/data`
 - **Nyckelval:** `Region=0180`, `Alder=TotSA`, `ContentsCode=000007SF`, `Tid=top(1)`
 - **Succé:**
   - Modellen kontrollerar `lastPeriod` och väljer inte en tabell vars senaste period ligger långt bak, även om `discontinued` inte är satt
   - `Alder` är med i selektionen. Den har `elimination: false` här (till skillnad från i TAB638) — utelämnas den blir svaret `400 "Missing selection for mandantory variable"`
   - Ett tal med period och «Källa: SCB, tabell TAB6471»; `Kon` anges som utelämnad dimension
-  - **Svaret återger de obligatoriska noterna.** TAB6471 har `noteMandatory: {"0": true, "1": true, "2": true, "3": true}` — fyra stycken, varav den första är CKM-bruset
+  - **Svaret återger de obligatoriska noterna.** TAB6471 har `noteMandatory: {"0": true, "1": true, "2": true, "3": true}` — fyra stycken, varav den första är CKM-bruset. Även variabelnoten på `Alder` (`dimension.Alder.extension.noteMandatory: {"0": true}`, uppnådd ålder vid årets slut) återges
   - Summerar modellen något själv, säger den att CKM gör totalen osäkrare än delarna
   - Svenskt talformat (mellanslag som tusentalsavgränsare)
 
@@ -34,7 +34,7 @@ Det scenario som fällde v0.11.0:s första utkast: SKILL.md pekade på TAB638, s
 - **Sekvens:** sök (`konsumentprisindex totalt` ger TAB6596 på plats 1) → metadata → data
 - **Nyckelval:** `ContentsCode=00000808` (index) eller `00000804` (årsförändring), `Tid=top(13)`
 - **Succé:**
-  - Modellen väljer TAB6596. TAB5737 har `discontinued: null` — det enda som avslöjar att serien stannat är titeln («uppdateras ej efter 2025M12») och `lastPeriod`. Skillen ska få modellen att läsa `lastPeriod`, inte bara flaggan
+  - Modellen väljer TAB6596. TAB5737 saknar `discontinued`-fältet — det enda som avslöjar att serien stannat är titeln («uppdateras ej efter 2025M12») och `lastPeriod`. Skillen ska få modellen att läsa `lastPeriod`, inte bara flaggan
   - Basperioden (2020=100) anges i svaret
 
 ## 3. «Befolkning per kommungrupp» — kodlista, och `Region` utan `role.geo`
@@ -72,3 +72,9 @@ Scenario 1 och 4 fann samma fel oberoende av varandra, vilket är det starkaste 
 att köra evalen som körningar: `check_examples.py` gav grönt på TAB638 hela tiden, eftersom
 tabellen svarar 200 och saknar `discontinued`. Sedan dess har kontrollskriptet en
 aktualitetssjekk som hade fångat det.
+**2026-10-14, mot v0.11.2.** Scenario 1 kört av en färsk agent med `SKILL.md` + `references/` och `curl`.
+Miljön laddade skillens `CLAUDE.md` i agentens kontext, så körningen var inte helt ren.
+
+| # | Utfall | Kommentar |
+|---|---|---|
+| 1 | Passerade | TAB6471, `Alder=TotSA`, `Kon` angiven som utelämnad, alla fem obligatoriska noterna inklusive variabelnoten på `Alder`. Fann att `Kon` summeras i farten i TAB638 men har totalkoden `TotSa` i TAB6471 (rättat i v0.11.2), och att sökexemplet med rå å/ä ger 0 träffar med `curl -g` (inte ändrat) |

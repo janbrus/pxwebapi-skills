@@ -2,7 +2,7 @@
 
 Denne veiledningen forklarer hvordan du bruker Claude-skillen for SSBs Statistikkbank.
 
-Skillen vedlikeholdes på <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>; denne veiledningen ligger i `docs/` der. Denne veiledningen dekker **v1.6.2**. Sjekk repoet for nyere versjon og endringslogg.
+Skillen vedlikeholdes på <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>; denne veiledningen ligger i `docs/` der. Denne veiledningen dekker **v1.6.3**. Sjekk repoet for nyere versjon og endringslogg.
 
 ## Forutsetninger
 
@@ -63,7 +63,7 @@ Skillen trigger automatisk når du stiller spørsmål om norsk statistikk. Du tr
 Når du spør «Hvor mange bor i Oslo?», skjer dette:
 
 1. **Forstå behovet** — fenomen, geografi, tidsperiode, nedbrytning. Er spørsmålet vagt, stiller Claude *ett* oppfølgingsspørsmål
-2. **Søk** — `GET /tables?query=folkemengde` finner kandidattabeller
+2. **Søk** — 07459 står i lista over vanlige tabeller; ellers søker Claude med SSBs fagtermer
 3. **Metadata** — `GET /tables/07459/metadata` gir variabler, koder, kodelister og enheter. Dette steget hoppes aldri over
 4. **Query** — data hentes med eksplisitt seleksjon
 5. **Presenter** — tabell, kilde med tabellnummer, enhet og kontekst
@@ -146,7 +146,7 @@ Claude tilpasser automatisk språk i API-kall (`lang=no` eller `lang=en`), tallf
 
 Skillen presenterer data på en fast måte. Noen av elementene er lette å overse:
 
-**Kilde med tabellnummer.** «Kilde: SSB, tabell 07459». Er flere tabeller brukt, listes alle.
+**Kilde med tabellnummer og dato.** «Kilde: SSB, tabell 07459. Sist oppdatert: 2026-02-25.» Datoen er når SSB sist oppdaterte tabellen. Er flere tabeller brukt, listes alle.
 
 **Enhet.** Antall, prosent, indeks eller kroner. For indekser oppgis referanseperioden, f.eks. 2025=100.
 
@@ -158,7 +158,7 @@ Skillen presenterer data på en fast måte. Noen av elementene er lette å overs
 | `..` | Tallgrunnlag mangler — ikke innkommet, eller for usikkert til publisering |
 | `:` | Vises ikke av konfidensialitetshensyn |
 
-**Obligatoriske noter.** Noen tabeller har noter SSB har bestemt skal følge tallet. KPI-tabellene har for eksempel en note om at referanseåret ble 2025=100 fra 2026, og at endringstall beregnet fra disse seriene kan avvike fra publiserte endringstall. Når du ser en slik note, er den der fordi SSB har flagget den.
+**Obligatoriske noter.** Noen tabeller har noter SSB har bestemt skal følge tallet. Når du ser en slik note, er den der fordi SSB har flagget den.
 
 **Merking av egne beregninger.** Ber du om vekst i prosent, andeler eller en sum, vil skillen si at beregningen er dens egen og vise hvilke hentede tall den bygger på.
 
@@ -205,13 +205,13 @@ Etter at data er hentet: «vis dette som graf» eller «lag et diagram». Med `s
 
 ### Be om annet filformat
 
-«Eksporter dette som Excel» eller «gi meg dette som CSV». Merk at CSV fra SSB leveres i tegnsettet ISO-8859-1, ikke UTF-8 — relevant hvis du leser fila i Python eller R.
+«Eksporter dette som Excel» eller «gi meg dette som CSV». Skal fila åpnes i Excel, anbefaler skillen xlsx: tallene kommer som ekte tall, og Excel viser desimalkomma etter egen språkinnstilling. Merk at CSV fra SSB leveres i tegnsettet ISO-8859-1, ikke UTF-8 — relevant hvis du leser fila i Python eller R.
 
 ## Hva gjør du hvis noe ikke fungerer?
 
 ### Claude finner ikke riktig tabell
 
-Bruk norske fagtermer. SSB skriver «konsumprisindeks» (ikke «KPI»), «folkemengde» (ikke «befolkning»), «sysselsatte» (ikke «ansatte»).
+Bruk SSBs fagtermer. Søk «konsumprisindeks», ikke «inflasjon» (0 treff), og «brukte boliger», ikke «boligpriser». Engelske søk (`lang=en`) trenger engelske termer, f.eks. «consumer price index».
 
 To ting er verdt å vite om søket:
 
