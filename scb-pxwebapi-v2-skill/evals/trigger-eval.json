@@ -1,0 +1,22 @@
+[
+  {"id": "S-T1", "should_trigger": true, "route": "scb (enkelt tal)",
+   "query": "hur många bor i sverige just nu?"},
+  {"id": "S-T2", "should_trigger": true, "route": "scb (KPIF)",
+   "query": "Vad var KPIF-inflationen i september jämfört med samma månad i fjol? Behöver det till ett hyresavtal"},
+  {"id": "S-T3", "should_trigger": true, "route": "scb (engelska)",
+   "query": "what's the population of malmö? need it for a report tomorrow"},
+  {"id": "S-T4", "should_trigger": true, "route": "scb (kommun, tidsserie)",
+   "query": "Kan du ta fram befolkningsutvecklingen i Uppsala kommun de senaste tio åren som en tabell?"},
+  {"id": "S-T5", "should_trigger": true, "route": "scb (lön per yrke)",
+   "query": "vad tjänar en sjuksköterska i snitt i sverige? undrar om jag är underbetald"},
+  {"id": "S-T6", "should_trigger": true, "route": "scb (utrikeshandel)",
+   "query": "Hur mycket exporterade Sverige till Norge förra året, uppdelat på de största varugrupperna?"},
+  {"id": "S-N1", "should_trigger": false, "route": "ssb-pxwebapi-v2",
+   "query": "Hvor mange bor i Bergen kommune nå?"},
+  {"id": "S-N2", "should_trigger": false, "route": "ingen skill (Riksbanken)",
+   "query": "Vad är Riksbankens styrränta nu och när är nästa räntebesked?"},
+  {"id": "S-N3", "should_trigger": false, "route": "ikke scb (Finland, v1)",
+   "query": "Hur många invånare har Helsingfors stad idag?"},
+  {"id": "S-N4", "should_trigger": false, "route": "ingen skill (data finns redan)",
+   "query": "Här är siffrorna jag hämtade från SCB igår: 2022 10,52 milj, 2023 10,55 milj, 2024 10,57 milj. Gör ett linjediagram i matplotlib"}
+]

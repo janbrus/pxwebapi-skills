@@ -1,0 +1,22 @@
+[
+  {"id": "G-T1", "should_trigger": true, "route": "generic v2 (Latvia)",
+   "query": "What is the population of Riga according to the Latvian statistics office?"},
+  {"id": "G-T2", "should_trigger": true, "route": "generic v2 (Latvia, CPI)",
+   "query": "I need monthly consumer price changes for Latvia for the last two years, as a table"},
+  {"id": "G-T3", "should_trigger": true, "route": "generic v2 (API-spørsmål)",
+   "query": "how do I use the codelist parameter in PxWebApi v2? I'm querying api.stat.gov.lv and keep getting 400"},
+  {"id": "G-T4", "should_trigger": true, "route": "generic v2 (latvisk)",
+   "query": "Cik iedzīvotāju šobrīd ir Latvijā?"},
+  {"id": "G-T5", "should_trigger": true, "route": "generic v2 (Latvia, region)",
+   "query": "unemployment rate in latvia by region for the latest year please"},
+  {"id": "G-T6", "should_trigger": true, "route": "generic v2 (kode)",
+   "query": "Write me a Python function that fetches a table from any PxWebApi v2 endpoint into a pandas DataFrame, and try it against Statistics Latvia"},
+  {"id": "G-N1", "should_trigger": false, "route": "ssb-pxwebapi-v2",
+   "query": "Hvor mange bor i Oslo nå?"},
+  {"id": "G-N2", "should_trigger": false, "route": "scb-pxwebapi-v2",
+   "query": "Hur många bor i Göteborgs kommun idag?"},
+  {"id": "G-N3", "should_trigger": false, "route": "ingen skill (Eurostat)",
+   "query": "How does Latvia's GDP per capita in PPS compare with the EU average? Use Eurostat"},
+  {"id": "G-N4", "should_trigger": false, "route": "generic-pxweb-v1-skill",
+   "query": "My POST to https://pxweb.stat.fi/PxWeb/api/v1/fi/StatFin/vaerak/statfin_vaerak_pxt_11ra.px with {\"query\":[{\"code\":\"Vuosi\",\"selection\":{\"filter\":\"top\",\"values\":[\"1\"]}}],\"response\":{\"format\":\"json-stat2\"}} returns 400 – what's wrong?"}
+]
