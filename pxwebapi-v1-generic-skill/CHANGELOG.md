@@ -8,6 +8,11 @@ What was verified, on which installations and when, is in the maintainer's log,
 [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/pxwebapi-v1-generic-skill/DEVLOG.md). It is in the
 repository, not in the ZIP.
 
+## 0.12.3 — 2026-10-21
+
+- New: Claude is told to load this skill before using MCP tools that query a PxWeb v1 API, such as the Pipeworx
+  agency packs, so the rules for table choice, codes, numbers and citation apply whatever the tool. Not yet tested.
+
 ## 0.12.2 — 2026-10-14
 
 - **New: in a v1 response, positions follow the table's order, not the order you asked for** — the opposite of v2.

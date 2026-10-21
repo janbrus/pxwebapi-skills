@@ -5,6 +5,37 @@ and the outcome of every sibling check. It is repo-internal and not in the ZIP. 
 short [`CHANGELOG.md`](CHANGELOG.md); every version appears in both files. Until 2026-10-03 this
 file *was* `CHANGELOG.md`, so older entries say "this changelog" where they mean this log.
 
+## 0.12.3 — 2026-10-21
+
+Started 2026-10-19 as a sibling of `ssb-pxwebapi-v2` 1.6.4 (see its DEVLOG for the finding), and
+released with it on 2026-10-21.
+
+- **New in the description:** "Load it before using MCP tools that query a PxWeb v1 API: the rules
+  for table choice, codes, numbers and citation apply whatever the tool." 823 → 962 characters.
+  Placed before the sentence that sends installations already on v2 to the v2 skills, in line
+  with the maintainer's rule that a v2 channel always wins when one is available (2026-10-19).
+  The longer variant with "e.g. the Pipeworx agency packs" would have left 29 characters
+- **v1 MCP servers exist.** Pipeworx has packs for Finland, Greenland, Iceland, Estonia, the
+  Faroe Islands and others. The READMEs for Finland (`@pipeworx/mcp-statfin-fi`) and Greenland
+  (`@pipeworx/mcp-stat-gl`), read 2026-10-19, show v1: a subject tree with `type: "l"`/`"t"` and
+  a `{query: [...], response: {...}}` body; the tools are `subjects`, `table_meta` and
+  `query_table`. Finland's `query_table` also takes a plain-English `select` and picks the codes
+  itself, which weakens the rule about verifying and stating codes
+- **Not tested.** No trigger set exists for this skill, and a test with Pipeworx means running
+  their package locally or sending queries to their gateway
+- **A larger trigger weakness, not addressed:** in the v2 skills' trigger tests (2026-10-18/19)
+  the v1-body near-misses were should-trigger queries for this skill. Sonnet 5.5 loaded it in 0
+  of 12 runs (6 against SSB's `/api/v0/`, 6 against Statistics Finland), Haiku 5.5 in 1 of 6
+  (SSB) and Opus 5.5 in 3 of 3 (SSB). The rest went straight to `curl`. This happens without any
+  MCP server, so the new sentence does not fix it
+- **README:** the install text was rewritten together with the other skills (see
+  `ssb-pxwebapi-v2` 1.6.4, part D): download option in step 1, Settings > Skills → + Add →
+  Upload skill, code execution and the installation's domain under Settings > Capabilities,
+  updating with ⋮ → Replace, and unpacking the ZIP instead of `cp -r` for Claude Code and
+  ChatGPT/Codex
+- **Sibling check:** the source is `ssb-pxwebapi-v2` 1.6.4. `scb-pxwebapi-v2` and
+  `generic-pxweb-v2-skill` got the same kind of sentence the same day
+
 ## 0.12.2 — 2026-10-14
 
 `references/json-stat2.md` now has the layout of `ssb-pxwebapi-v2` 1.6.2, adapted to v1, and the

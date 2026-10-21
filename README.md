@@ -6,7 +6,7 @@
 
 AI-skills for PxWeb-API-ene til SSB, SCB og andre statistikkbyråer — pluss kodeeksempler for PxWebApi v2. PxWeb er felles programvare for statstikkbanker som benyttes av de flest nordiske statstikkbyråene m.fl. Skillene er uoffiselle, men bygger på min erfaring med SSBs API og fra SSBs Informasjonstjeneste. Hverken SSB eller SCB står bak dem.
 
-Et *skill* (ferdighet) er ren kunnskap: en `SKILL.md` med arbeidsflyt og regler, samt referansefiler som lastes ved behov. De er i det åpne [Agent Skills](https://agentskills.io)-formatet. Det viser Claude, ChatGPT, Deepseek, Gemini og andre AI-verktøy som leser slike instruksjoner hvordan API-et fungerer. Den kan også leses av mennesker som dokumentasjon.
+Et *skill* (ferdighet) er ren kunnskap: en `SKILL.md` med arbeidsflyt og regler, samt referansefiler som lastes ved behov. De er i det åpne [Agent Skills](https://agentskills.io)-formatet og viser Claude, ChatGPT, Deepseek, Gemini og andre AI-verktøy som leser slike instruksjoner hvordan API-et fungerer. Den kan også leses av mennesker som dokumentasjon.
 
 Det kaller ikke API-et selv. For det trengs et verktøy som kan sende HTTP GET og POST — en MCP-server, `curl` via Bash, eller en R-/Python-klient. Se «Installasjon».
 
@@ -19,14 +19,14 @@ Det kaller ikke API-et selv. For det trengs et verktøy som kan sende HTTP GET o
 
 | Skill (installert navn)  | Mappe i repoet                                           | Dekker                                                                                                                                   | Språk           | Versjon | Status |
 | ------------------------ | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------- | ------ |
-| `ssb-pxwebapi-v2`        | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/)         | SSBs Statistikkbank via PxWebApi v2. Søk, metadata, kodelister, lagrede spørringer, outputformater, Klass/VarDok, ~90 kuraterte tabeller | norsk, engelsk  | 1.6.3   | stabil |
-| `scb-pxwebapi-v2`        | [scb-pxwebapi-v2-skill/](scb-pxwebapi-v2-skill/)         | SCB:s Statistikdatabas via PxWebApi v2                                                                                                   | svensk, engelsk | 0.11.2  | beta   |
-| `generic-pxweb-v2-skill` | [pxwebapi-v2-generic-skill/](pxwebapi-v2-generic-skill/) | Alle PxWebApi v2-installasjoner. Verifisert mot SSB, SCB og Latvia (CSP), med tabell over hva som varierer mellom dem                    | engelsk         | 0.11.2  | beta   |
-| `generic-pxweb-v1-skill` | [pxwebapi-v1-generic-skill/](pxwebapi-v1-generic-skill/) | Alle PxWebApi v1-installasjoner (den eldre, POST-baserte PxWeb 1.0-API-en). Sju verifisert, 50 kjente                                    | engelsk         | 0.12.2  | beta   |
-| `ssb-chart-skill`        | [ssb-chart-skill/](ssb-chart-skill/)                     | Visualisering av SSB-data i SSBs offisielle stil: palett, typografi, diagramvalg, json-stat2 → chart                                     | norsk           | 1.3     | stabil |
+| `ssb-pxwebapi-v2`        | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/)         | SSBs Statistikkbank via PxWebApi v2. Søk, metadata, kodelister, lagrede spørringer, outputformater, Klass/VarDok, ~90 kuraterte tabeller | norsk, engelsk  | 1.6.4   | stabil |
+| `scb-pxwebapi-v2`        | [scb-pxwebapi-v2-skill/](scb-pxwebapi-v2-skill/)         | SCB:s Statistikdatabas via PxWebApi v2                                                                                                   | svensk, engelsk | 0.11.3  | beta   |
+| `generic-pxweb-v2-skill` | [pxwebapi-v2-generic-skill/](pxwebapi-v2-generic-skill/) | Alle PxWebApi v2-installasjoner. Verifisert mot SSB, SCB og Latvia (CSP), med tabell over hva som varierer mellom dem                    | engelsk         | 0.11.3  | beta   |
+| `generic-pxweb-v1-skill` | [pxwebapi-v1-generic-skill/](pxwebapi-v1-generic-skill/) | Alle PxWebApi v1-installasjoner (den eldre, POST-baserte PxWeb 1.0-API-en). Sju verifisert, 50 kjente                                    | engelsk         | 0.12.3  | beta   |
+| `ssb-chart`              | [ssb-chart-skill/](ssb-chart-skill/)                     | Visualisering av SSB-data i SSBs offisielle stil: palett, typografi, diagramvalg, json-stat2 → chart                                     | norsk           | 1.3     | stabil |
 | `ssb-histstat`           | [ssb-histstat-skill/](ssb-histstat-skill/)               | SSBs digitaliserte historiske statistikk 1828–2010 (NOS, Statistisk årbok, folketellinger)                                               | norsk           | 0.9.0   | beta   |
 
-Versjonen står i `metadata.version` i hver `SKILL.md`. Hver mappe har en kort `CHANGELOG.md` som sier hva som er annerledes for brukerne, og en `DEVLOG.md` med hva som ble verifisert mot live API, med dato. Bare `CHANGELOG.md` følger med i zip-en. `ssb-histstat` har én logg. «Beta» betyr at skillen har færre verifiserte eksempler og evals enn SSB-skillen, ikke at den er ustabil i bruk.
+Versjonen står i `metadata.version` i hver `SKILL.md`. Hver mappe har en kort `CHANGELOG.md` som sier hva som er nytt for brukerne, og en `DEVLOG.md` med hva som ble verifisert mot live API, med dato. «Beta» betyr at skillen har færre verifiserte eksempler og evals enn SSB-skillen, ikke at den er ustabil i bruk.
 
 En språkmodell tolker spørringene og kan velge feil tabell, variabel eller periode. Brukeren må kontrollere tallene mot kilden.
 
@@ -35,7 +35,7 @@ En språkmodell tolker spørringene og kan velge feil tabell, variabel eller per
 Skillene ruter til hverandre, men blander aldri data. Et svar kommenterer kun tallene som er hentet i den samtalen.
 
 - **Norske tall i dag**, Statistisk sentralbyrå (SSB) → `ssb-pxwebapi-v2`. Svenske, SCB → `scb-pxwebapi-v2`.
-- **Vis det som graf** → `ssb-chart-skill`, som tar json-stat2-responsen fra SSB-skillen og styrer bare presentasjonen.
+- **Vis det som graf** → `ssb-chart`, som tar json-stat2-responsen fra SSB-skillen og styrer bare presentasjonen.
 - **Tall fra før ca. 1970** → `ssb-histstat`, som finner riktig publikasjon i historisk statistikk og sender serier som ligger i Statistikkbanken tilbake til SSB-skillen.
 - **Styringsrente, valutakurser, statsgjeld** → [norges-bank-api](https://github.com/avocodetoast/norges-bank-api-skill) (tredjepart, SDMX). SSB-skillen henviser dit i stedet for å svare.
 - **En annen PxWeb-installasjon** (Latvia, Finland, Island, Færøyene, Grønland, Estland m.fl. ) → `generic-pxweb-v2-skill` hvis den kjører v2, ellers `generic-pxweb-v1-skill`. En URL med `/api/v0/` eller `/api/v1/` er v1; `GET {base}/config` som returnerer `apiVersion` er v2.
@@ -44,23 +44,39 @@ Alle seks deler samme grunnregel, skrevet øverst i hver `SKILL.md`: **oppgi ald
 
 ## Installasjon
 
-**Claude.ai:** last ned zip-filen fra skillens mappe (bygget av `scripts/build_zip.sh` — ikke zip mappen selv, da følger repo-interne filer med) og last den opp under **Settings › Skills**.
+### Claude.ai og Claude desktop
 
-**Claude Code:** kopier mappen til skills-katalogen under det *installerte* navnet fra tabellen over. For fire av skillene er det litt forskjellig fra mappenavnet:
+**1. Installer.** Åpne zip-filen i skillens mappe på GitHub og klikk *Download raw file*. Zip-en er bygget av `scripts/build_zip.sh`. Ikke zip mappen selv, da følger repo-interne filer med. Gå så til **Settings > Skills** → **+ Add** → **Upload skill**, og velg zip-filen.
+
+![Installere en skill: Download raw file på GitHub, deretter Settings > Skills > Add > Upload skill i Claude](docs/img/claude-install-skill.png)
+
+**2. Slå på code execution og gi tilgang til API-et.** Under **Settings > Capabilities** må *Cloud code execution and file creation* være på, ellers virker ikke skills. Skal skillen hente data selv, slår du også på *Allow network egress* og legger byråets domene inn under *Additional allowed domains*: `*.ssb.no`, `*.scb.se` eller installasjonens domene. En lokal MCP-server i Claude Desktop kaller API-et fra din egen maskin og trenger ikke dette.
+
+![Settings > Capabilities: code execution, network egress og *.ssb.no under Additional allowed domains](docs/img/claude-allow-domain.png)
+
+**Oppdatere.** Last ned den nye zip-filen, åpne skillen under **Settings > Skills**, klikk **⋮** → **Replace** og velg zip-filen.
+
+![Oppdatere en skill: ⋮ > Replace på skillsiden](docs/img/claude-replace-skill.png)
+
+### Andre plattformer
+
+**Claude Code:** pakk ut zip-filen i `~/.claude/skills/` (eller `.claude/skills/` for ett prosjekt). Toppmappen i zip-en har det *installerte* navnet fra tabellen over:
 
 ```bash
-cp -r ssb-pxwebapi-v2-skill ~/.claude/skills/ssb-pxwebapi-v2
+unzip ssb-pxwebapi-v2-skill/ssb-pxwebapi-v2-skill.zip -d ~/.claude/skills/
 ```
 
-Eller symlenk fra et klonet repo. Da trenger en bare `git pull` for å oppdatere:
+Eller symlenk fra et klonet repo. Da trenger en bare `git pull` for å oppdatere. Bruk det installerte navnet, som for de fleste skillene er forskjellig fra mappenavnet:
 
 ```bash
 ln -s "$PWD/ssb-pxwebapi-v2-skill" ~/.claude/skills/ssb-pxwebapi-v2
 ```
 
-**ChatGPT og Codex:** samme mappe, kopiert eller symlenket til `~/.agents/skills/` (eller `.agents/skills/` i et repo) under det installerte navnet — etter [OpenAIs dokumentasjon](https://developers.openai.com/codex/skills/), ikke testet her. Frittstående skills virker i ChatGPT desktop-app, Codex CLI og IDE-utvidelsen; web og mobil krever plugin-pakking.
+**ChatGPT og Codex:** pakk ut zip-filen i `~/.codex/skills/` for alle prosjekter (Windows: `%USERPROFILE%\.codex\skills\`), eller i `.agents/skills/` for ett prosjekt. Toppmappen i zip-en har det installerte navnet. Se [OpenAIs dokumentasjon](https://developers.openai.com/codex/skills/). ChatGPTs `$skill-installer` henter mapper, ikke zip-filer, og tar da med de repo-interne filene. Frittstående skills virker i ChatGPT desktop-app, Codex CLI og IDE-utvidelsen; web og mobil krever plugin-pakking.
 
-**Verktøy for å kalle API-et** (skillene beskriver endepunktene, men henter ikke selv):
+### Verktøy for å kalle API-et - MCP
+
+Skillene beskriver endepunktene, men henter ikke selv:
 
 - [@jarib/pxweb-mcp](https://www.npmjs.com/package/@jarib/pxweb-mcp) — åpen MCP-server for PxWebApi v2. Standard er SSB; mot SCB eller andre startes den med `--url {base_url}`. SSB- og SCB-skillene har `references/mcp-tools.md` med verktøyoversikt og begrensninger.
 - `curl` via Bash — husk `-g`, ellers stopper curl på hakeparenteser, som i `valueCodes[Var]`.
@@ -125,16 +141,34 @@ A *skill* is knowledge only: a `SKILL.md` with workflow and rules, and reference
 
 | Skill (installed name)   | Folder                                                   | Covers                                                                                                                      | Language           | Version | Status |
 | ------------------------ | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------- | ------ |
-| `ssb-pxwebapi-v2`        | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/)         | Statistics Norway's Statbank via PxWebApi v2, incl. search, codelists, saved queries, output formats and ~90 curated tables | Norwegian, English | 1.6.3   | stable |
-| `scb-pxwebapi-v2`        | [scb-pxwebapi-v2-skill/](scb-pxwebapi-v2-skill/)         | Statistics Sweden's Statistikdatabasen via PxWebApi v2                                                                      | Swedish, English   | 0.11.2  | beta   |
-| `generic-pxweb-v2-skill` | [pxwebapi-v2-generic-skill/](pxwebapi-v2-generic-skill/) | Any PxWebApi v2 installation; verified against SSB, SCB and Latvia (CSP), with a table of what differs between them         | English            | 0.11.2  | beta   |
-| `generic-pxweb-v1-skill` | [pxwebapi-v1-generic-skill/](pxwebapi-v1-generic-skill/) | Any PxWebApi v1 installation (the older POST-only PxWeb 1.0 API); seven verified, 50 known                                  | English            | 0.12.2  | beta   |
-| `ssb-chart-skill`        | [ssb-chart-skill/](ssb-chart-skill/)                     | Charts in Statistics Norway's official style, from a json-stat2 response                                                    | Norwegian          | 1.3     | stable |
+| `ssb-pxwebapi-v2`        | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/)         | Statistics Norway's Statbank via PxWebApi v2, incl. search, codelists, saved queries, output formats and ~90 curated tables | Norwegian, English | 1.6.4   | stable |
+| `scb-pxwebapi-v2`        | [scb-pxwebapi-v2-skill/](scb-pxwebapi-v2-skill/)         | Statistics Sweden's Statistikdatabasen via PxWebApi v2                                                                      | Swedish, English   | 0.11.3  | beta   |
+| `generic-pxweb-v2-skill` | [pxwebapi-v2-generic-skill/](pxwebapi-v2-generic-skill/) | Any PxWebApi v2 installation; verified against SSB, SCB and Latvia (CSP), with a table of what differs between them         | English            | 0.11.3  | beta   |
+| `generic-pxweb-v1-skill` | [pxwebapi-v1-generic-skill/](pxwebapi-v1-generic-skill/) | Any PxWebApi v1 installation (the older POST-only PxWeb 1.0 API); seven verified, 50 known                                  | English            | 0.12.3  | beta   |
+| `ssb-chart`              | [ssb-chart-skill/](ssb-chart-skill/)                     | Charts in Statistics Norway's official style, from a json-stat2 response                                                    | Norwegian          | 1.3     | stable |
 | `ssb-histstat`           | [ssb-histstat-skill/](ssb-histstat-skill/)               | Statistics Norway's digitised historical statistics 1828–2010                                                               | Norwegian          | 0.9.0   | beta   |
 
 The skills route to each other but never blend data: an answer comments only on the figures fetched in that conversation, and every `SKILL.md` opens with the rule **never state a number that was not fetched from the API in this conversation.** For a country without a dedicated skill, use the generic v2 skill if the installation runs PxWebApi v2 (`GET {base}/config` returns `apiVersion`), otherwise the generic v1 skill (URLs containing `/api/v0/` or `/api/v1/`).
 
-**Installation:** in Claude.ai, upload the zip from the skill's folder (built by `scripts/build_zip.sh`) under **Settings › Features › Skills**. In Claude Code, copy or symlink the folder into `~/.claude/skills/` under the *installed name* from the table — for four of the six it differs from the folder name. For ChatGPT and Codex, put the same folder in `~/.agents/skills/` (or `.agents/skills/` in a repo) — per [OpenAI's documentation](https://developers.openai.com/codex/skills/), untested here. To call the API, use [@jarib/pxweb-mcp](https://www.npmjs.com/package/@jarib/pxweb-mcp) (`--url {base_url}` for anything but SSB), `curl -g`, or [PxWebApiData](https://cran.r-project.org/package=PxWebApiData) in R. Each skill's README has the details.
+### Claude.ai and Claude desktop
+
+**1. Install.** Open the zip file in the skill's folder on GitHub and click *Download raw file*. The zip is built by `scripts/build_zip.sh`; don't zip the folder yourself, or repo-internal files come along. Then go to **Settings > Skills** → **+ Add** → **Upload skill**, and pick the zip.
+
+![Installing a skill: Download raw file on GitHub, then Settings > Skills > Add > Upload skill in Claude](docs/img/claude-install-skill.png)
+
+**2. Turn on code execution and allow the API.** Under **Settings > Capabilities**, *Cloud code execution and file creation* must be on, or skills don't work. For the skill to fetch data itself, also turn on *Allow network egress* and add the agency's domain under *Additional allowed domains*: `*.ssb.no`, `*.scb.se` or the installation's domain. A local MCP server in Claude Desktop calls the API from your own machine and doesn't need this.
+
+![Settings > Capabilities: code execution, network egress and *.ssb.no under Additional allowed domains](docs/img/claude-allow-domain.png)
+
+**Update.** Download the new zip, open the skill under **Settings > Skills**, click **⋮** → **Replace** and pick the zip.
+
+![Updating a skill: ⋮ > Replace on the skill page](docs/img/claude-replace-skill.png)
+
+**Other platforms:** in Claude Code, unpack the zip into `~/.claude/skills/` (or `.claude/skills/` for one project); its top folder carries the *installed name* from the table. A symlink from a cloned repository stays current with `git pull`, but must use the installed name, which for most skills differs from the folder name. For ChatGPT and Codex, unpack the zip into `~/.codex/skills/` for all projects (Windows: `%USERPROFILE%\.codex\skills\`) or `.agents/skills/` for one project; the zip's top folder carries the installed name ([OpenAI's documentation](https://developers.openai.com/codex/skills/)). ChatGPT's `$skill-installer` fetches folders, not zips, and brings the repo-internal files along. 
+
+## MCP and tools
+To call the API, use [@jarib/pxweb-mcp](https://www.npmjs.com/package/@jarib/pxweb-mcp) (`--url {base_url}` for anything but SSB), `curl -g`, 
+or [PxWebApiData](https://cran.r-project.org/package=PxWebApiData) in R. Each skill's README has the details.
 
 **Quality:** every example URL, POST body and table ID written in the SSB and SCB skills is checked against the live API by `scripts/check_examples.py`, on every change via GitHub Actions, or on demand; all six skills have a zip-sync job. Four skills also carry eval scenarios that are run as real tool-using runs after larger edits.
 
@@ -147,4 +181,4 @@ The skills route to each other but never blend data: an answer comments only on 
 
 Background: [Statistics Norway's API user guide](https://www.ssb.no/en/api/pxwebapiv2), the [PxWebApi 2 User Guide (PxTools)](https://www.pxtools.net/PxWebApi/documentation/user-guide/) and [PxApiSpecs](https://github.com/PxTools/PxApiSpecs). SSB data is licensed under [CC BY 4.0](https://www.ssb.no/en/diverse/lisens). SCB and Statistics Latvia publish under CC0.
 
-**License:** the skills, scripts and code examples in this repository are licensed under the [MIT License](LICENSE), © 2026 Jan Bruusgaard. Every skill zip ships the licence text as `LICENSE`. MIT covers the code and text here, not the statistics fetched — those carry each agency's own licence.
+**License:** the skills, scripts and code examples in this repository are licensed under the [MIT License](LICENSE). Every skill zip ships the licence text as `LICENSE`. MIT covers the code and text here, not the statistics fetched — those carry each agency's own licence.

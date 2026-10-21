@@ -31,36 +31,42 @@ ssb-histstat-skill/
 
 ## Installasjon
 
-### Claude.ai
+### Claude.ai og Claude desktop
 
-1. Last ned [ssb-histstat-skill.zip](ssb-histstat-skill.zip), eller bygg den fra repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger `CLAUDE.md` og `scripts/` med). Pakken har toppmappe `ssb-histstat/`
-2. Gå til **Settings > Features > Skills**
-3. Last opp ZIP-filen
+1. Last ned [ssb-histstat-skill.zip](ssb-histstat-skill.zip) (*Download raw file* på GitHub), eller bygg den fra repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger `CLAUDE.md` og `scripts/` med). Pakken har toppmappe `ssb-histstat/`
+2. Gå til **Settings > Skills** → **+ Add** → **Upload skill**
+3. Velg ZIP-filen
+
+Under **Settings > Capabilities** må *Cloud code execution and file creation* være på. For å oppdatere laster du ned den nye ZIP-filen, åpner skillen under **Settings > Skills** og velger **⋮** → **Replace**. [Skjermbilder](https://github.com/janbrus/pxwebapi-skills#claudeai-og-claude-desktop).
 
 ### Claude Code
 
-Installert navn er `ssb-histstat`; mappen i repoet heter `ssb-histstat-skill`. Fra repo-roten:
+Pakk ut zip-filen i skills-katalogen. Toppmappen har det installerte navnet `ssb-histstat` (mappen i repoet heter `ssb-histstat-skill`):
 
 ```bash
-# Kopi, globalt (tilgjengelig i alle prosjekter)
-cp -r ssb-histstat-skill ~/.claude/skills/ssb-histstat
-
-# Eller symlenke fra et klonet repo — da holder git pull kopien oppdatert
-ln -s "$PWD/ssb-histstat-skill" ~/.claude/skills/ssb-histstat
+# Globalt (tilgjengelig i alle prosjekter)
+unzip ssb-histstat-skill.zip -d ~/.claude/skills/
 
 # Per prosjekt
-cp -r ssb-histstat-skill .claude/skills/ssb-histstat
+unzip ssb-histstat-skill.zip -d .claude/skills/
+
+# Eller symlenke fra roten av et klonet repo — da holder git pull kopien oppdatert
+ln -s "$PWD/ssb-histstat-skill" ~/.claude/skills/ssb-histstat
 ```
 
 ### ChatGPT og Codex
 
-ChatGPT og Codex leser skills i samme format fra `.agents/skills/` (ifølge [OpenAIs dokumentasjon](https://developers.openai.com/codex/skills/); ikke testet her). Pakk ut zip-filen, eller kopier mappen fra repoet:
+ChatGPT og Codex leser skills i samme format fra `~/.codex/skills/` for alle prosjekter (Windows: `%USERPROFILE%\.codex\skills\`) og fra `.agents/skills/` for ett prosjekt (se [OpenAIs dokumentasjon](https://developers.openai.com/codex/skills/)). Pakk ut zip-filen der. Toppmappen `ssb-histstat/` har det installerte navnet:
 
 ```bash
-cp -r ssb-histstat-skill ~/.agents/skills/ssb-histstat
+# Mac/Linux
+unzip ssb-histstat-skill.zip -d ~/.codex/skills/
+
+# Windows (PowerShell)
+Expand-Archive ssb-histstat-skill.zip -DestinationPath $env:USERPROFILE\.codex\skills
 ```
 
-Frittstående skills er tilgjengelige i ChatGPT desktop-app, Codex CLI og IDE-utvidelsen; på web og mobil må skillen pakkes som plugin.
+ChatGPTs `$skill-installer` henter mapper, ikke zip-filer, og tar da med de repo-interne filene. Frittstående skills er tilgjengelige i ChatGPT desktop-app, Codex CLI og IDE-utvidelsen; på web og mobil må skillen pakkes som plugin.
 
 ## Bruk sammen med søsken-skillen
 

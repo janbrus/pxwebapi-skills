@@ -2,6 +2,17 @@
 
 The maintainer's record: what changed, what was verified live, on which installations and when, and the outcome of every sibling check. It is repo-internal and not in the ZIP. Users read the short [`CHANGELOG.md`](CHANGELOG.md); every version appears in both files. Until 2026-10-05 this file *was* `CHANGELOG.md`, so older entries say "this log" or "the CHANGELOG" where they mean this file.
 
+## 0.11.3 — 2026-10-21
+
+Started 2026-10-19 as a sibling of `ssb-pxwebapi-v2` 1.6.4 (see its DEVLOG for the finding), and released with it on 2026-10-21. The test ran skill-creator's `run_eval.py` and stopped each session at its first tool call, so no data was fetched from any API.
+
+- **New in the description:** "Load it before using MCP tools that query a PxWebApi v2 installation (e.g. pxweb-mcp): the rules for table choice, codes, numbers and citation apply whatever the tool." 567 → 735 characters. It sits before the sentence that sends SSB and SCB questions to the dedicated skills, so that preference still has the last word. It says "PxWebApi v2", not "PxWeb", because Pipeworx's packs for v1 agencies (Finland, Iceland and others) are v1. Background: at SSB, Sonnet 5.5 loaded the skill first in only 5 of 30 runs with `pxweb-ssb` connected, and in 29 of 30 with the sentence
+- **Test 2026-10-19:** Sonnet 5.5, with `pxweb-lv` (`@jarib/pxweb-mcp --url https://api.stat.gov.lv/api/v2`) set up for the test sessions only via `--mcp-config` and `pxweb-ssb` hidden. 6 should-trigger queries and 4 near-misses, 3 runs each. Before: 6/18, 6/10 passed; only the API question and the code question loaded the skill, and all four Latvia data questions went straight to `pxweb-lv`. After: 15/18, 9/10. The Latvian-language query ("Cik iedzīvotāju šobrīd ir Latvijā?") still went to the MCP first in 2 of 3 runs, and the Riga query in 1 of 3. No false triggers before or after (Oslo → `ssb-pxwebapi-v2`, Göteborg → `scb-pxwebapi-v2`, Eurostat → WebFetch or `curl`, a Statistics Finland v1 body → `curl`). The synced copy `anthropic-skills:generic-pxweb-v2-skill`, with the old description, was present and never chosen. The query set is in `evals/trigger-eval.json` (added 2026-10-19), and `CLAUDE.md` describes how to run it
+- **Chart skill name:** the "offer to visualize" bullet now names `ssb-chart`, the chart skill's frontmatter `name`, instead of the repo folder name `ssb-chart-skill` (maintainer, 2026-10-19)
+- **README:** the install text was rewritten together with the other skills (see `ssb-pxwebapi-v2` 1.6.4, part D): Settings > Skills → + Add → Upload skill, code execution and the installation's domain under Settings > Capabilities, updating with ⋮ → Replace, and unpacking the ZIP instead of `cp -r` for Claude Code and ChatGPT/Codex
+- **Not added:** the "v2 always wins" rule (maintainer, 2026-10-19) went into the SSB and SCB skills' tool-selection sections. This skill has no MCP section
+- **Sibling check:** the source is `ssb-pxwebapi-v2` 1.6.4. `scb-pxwebapi-v2` and `generic-pxweb-v1-skill` got the same kind of sentence the same day
+
 ## 0.11.2 — 2026-10-14
 
 `references/json-stat2.md` now has the layout of `ssb-pxwebapi-v2` 1.6.2, with each varying fact scoped to SSB, SCB or Latvia. Nothing was translated across: several SSB facts do not hold at SCB. Verified with GET only on SCB (28 tables, 2026-10-13) and Latvia (12 tables, 2026-10-14); SSB facts are from its 1.6.2 sweep (2026-10-10/11).

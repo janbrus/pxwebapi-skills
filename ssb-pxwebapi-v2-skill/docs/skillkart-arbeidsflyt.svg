@@ -59,7 +59,7 @@ svg.dg { --bg: #F3F5F8; --surface: #FFFFFF; --panel: #E8ECF1; --ink: #17202B; --
           <line x1="276" y1="172" x2="208" y2="172" class="wire route" marker-end="url(#f1a)"/>
 
           <rect x="16" y="711" width="190" height="44" rx="6" class="ext"/>
-          <text x="30" y="730" class="mn">ssb-chart-skill</text>
+          <text x="30" y="730" class="mn">ssb-chart</text>
           <text x="30" y="746" class="lbl">visualiser uttrekket</text>
           <line x1="276" y1="733" x2="208" y2="733" class="wire route" marker-end="url(#f1a)"/>
 

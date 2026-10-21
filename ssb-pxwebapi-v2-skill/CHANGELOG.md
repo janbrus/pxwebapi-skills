@@ -4,6 +4,12 @@ Hva som er annerledes for deg som bruker skillen, nyeste først. Gjeldende versj
 
 Hva som er verifisert, hvor og når, står i vedlikeholderens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/ssb-pxwebapi-v2-skill/DEVLOG.md). Den ligger i repoet, ikke i zip-en.
 
+## 1.6.4 — 2026-10-21
+
+- Nytt: Er en MCP-server mot SSB tilkoblet, for eksempel pxweb-mcp, laster Claude skillen før den bruker verktøyene. Da gjelder reglene for tabellvalg, koder, tall og kildehenvisning også der. Uten skillen gikk Claude ofte rett til verktøyene. Dette er målt med servernavn som nevner SSB eller pxweb, så gi serveren et slikt navn, for eksempel `pxweb-ssb`.
+- Nytt: v2 vinner. Flere andre MCP-servere mot SSB bruker det gamle v0-API-et. Skillen bruker pxweb-mcp eller HTTP mot v2 når en av dem finnes, og et v0-verktøy bare når ingen v2-kanal finnes.
+- Visualiseringsskillen omtales med sitt installerte navn, `ssb-chart`, ikke `ssb-chart-skill`.
+
 ## 1.6.3 — 2026-10-13
 
 - **Rettet: søketipset om fagtermer.** «folkemengde» finner ikke 07459, og norske ord gir 0 treff med `lang=en`, fordi søket følger språket. De nye eksemplene er «konsumprisindeks» (ikke «inflasjon») og «brukte boliger» (ikke «boligpriser»), og med `lang=en` søker du på engelsk. Søket leter ikke i emnenavn, og gir 20 treff per side.

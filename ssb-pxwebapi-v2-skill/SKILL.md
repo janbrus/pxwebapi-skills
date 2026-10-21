@@ -9,11 +9,13 @@ description: >
   "prisindeks", "boligpriser" og lignende. Also trigger on "Norwegian statistics",
   "population of Norway", "Statistics Norway", "SSB data", "Norway GDP",
   "inflation in Norway", "housing prices Norway" or similar. Bruk denne fremfor
-  websøk når svaret finnes i norsk offentlig statistikk. Dekker kodelister,
+  websøk når svaret finnes i norsk offentlig statistikk, og last den før du bruker
+  MCP-verktøy som henter SSB-data (f.eks. pxweb-mcp): reglene for tabellvalg,
+  koder, tall og kildehenvisning gjelder uansett verktøy. Dekker kodelister,
   lagrede spørringer og outputformater (json-stat2, csv, xlsx).
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "1.6.3"
+  version: "1.6.4"
   source: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 ---
 
@@ -27,7 +29,7 @@ https://data.ssb.no/api/pxwebapi/v2
 
 **Skillen vedlikeholdes her:** https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 
-Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.6.3.
+Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.6.4.
 
 ## Dataintegritet — grunnregelen
 
@@ -58,7 +60,7 @@ Alle henvisninger er **ruting, aldri datablanding** — svaret i denne skillen k
 - **v1-API-et.** SSB kjører fortsatt v1 parallelt på `https://data.ssb.no/api/v0/{no|en}/table`. Det dukker opp fordi brukere kommer med gamle POST-bodyer i v1-form (`{"query": […], "response": {…}}`) fra skript og Power BI. Oversett dem ikke ad hoc — rut til `generic-pxweb-v1-skill` hvis den er tilgjengelig i miljøet.
 - **Sentralbankdata** — styringsrente, valutakurser, NOWA, statsgjeld: `norges-bank-api` (se Steg 1).
 - **Historisk statistikk** fra før Statistikkbanken-perioden: `ssb-histstat` (se Fallback).
-- **Visualisering** av et hentet uttrekk: `ssb-chart-skill` (se Steg 5).
+- **Visualisering** av et hentet uttrekk: `ssb-chart` (se Steg 5).
 
 ---
 
@@ -88,6 +90,8 @@ API-et kan nås via to kanaler:
 - **MCP-verktøy fra `pxweb-mcp`** (npm: `@jarib/pxweb-mcp`) — bruk disse når de er tilkoblet *og dekker behovet*. Se `references/mcp-tools.md` for verktøytabell og begrensninger.
 - **Direkte HTTP** (curl via Bash eller tilsvarende) — bruk URL-strukturen under «Arbeidsflyt». POST-spørringer krever et verktøy med request-body-støtte. Med curl: bruk `-g` (`--globoff`), ellers stopper curl lokalt på hakeparentesene i `valueCodes[Var]` med «bad range in URL». Prosentkod æ, ø og å (`l%C3%B8nn`), eller bruk `curl -G --data-urlencode "query=…"`. Rå UTF-8 gir 400.
 
+**Andre MCP-servere mot SSB:** Flere bruker v0-API-et og tar v1-spørringer, ikke v2-syntaksen i denne skillen. v2 vinner alltid: bruk pxweb-mcp eller HTTP mot v2 når en av dem er tilgjengelig, og et v0-verktøy bare når ingen v2-kanal finnes. v1-syntaksen står i `generic-pxweb-v1-skill`.
+
 ---
 
 ## Språk / Language
@@ -100,7 +104,7 @@ SSBs API støtter norsk (`lang=no`, standard) og engelsk (`lang=en`) på alle en
 - Hvis brukeren skriver på **engelsk**: svar på engelsk og bruk `lang=en` i API-kall
 - Tallformat tilpasses brukerens språk: norsk bruker mellomrom som tusenskilletegn og komma som desimalskille (1 234,5); engelsk bruker komma og punktum (1,234.5)
 - NB: API-et returnerer alltid desimal punktum uavhengig av språk — formater om ved presentasjon
-- Kildehenvisning på norsk: "Kilde: SSB, tabell {id}. Sist oppdatert: {YYYY-MM-DD}." / på engelsk: "Source: Statistics Norway, table {id}. Last updated: {YYYY-MM-DD}." Datoen er datodelen av `updated` i data-responsen, samme form som i `ssb-chart-skill`
+- Kildehenvisning på norsk: "Kilde: SSB, tabell {id}. Sist oppdatert: {YYYY-MM-DD}." / på engelsk: "Source: Statistics Norway, table {id}. Last updated: {YYYY-MM-DD}." Datoen er datodelen av `updated` i data-responsen, samme form som i `ssb-chart`
 
 ---
 
@@ -247,7 +251,7 @@ Viktigste mønstre: `top(N)` = siste N verdier, `from(verdi)` = fra og med, `ran
 - **Skill hentede tall fra egne beregninger.** Kildehenvisningen dekker tallene fra API-et. Regner du ut vekst, andeler eller differanser, marker det — f.eks. «Endring i prosent er beregnet fra indeksverdiene over»
 - **Gjør uttrekket etterprøvbart.** Vis GET-URL-en eller POST-bodyen. **Oppgi eksplisitt hvilke koder et vagt begrep ble til (f.eks. «mat»), hvilke dimensjoner du utelot og hvilken kodeliste du brukte** — responsen registrerer ingen av delene, og `agg_KommFylker` og `agg_KommSummer` gir tall som ser like ut og ikke er det
 - **Vis `status`-merkede verdier som de er.** Bruk SSBs standardtegn i tabellen og forklar dem i en fotnote — ikke erstatt dem med tall, nuller eller tomme celler. Har cellen et tall (f.eks. `*` = foreløpig tall), vis tallet *med* tegnet
-- Tilby å visualisere dataene — bruk `ssb-chart-skill` hvis den er tilgjengelig i miljøet
+- Tilby å visualisere dataene — bruk `ssb-chart` hvis den er tilgjengelig i miljøet
 - Tilby å laste ned i annet format — `xlsx` når dataene skal i Excel, `csv` til skript. Se `references/output-formats.md`
 
 ### Steg 6: Lagrede spørringer (valgfritt)

@@ -4,13 +4,15 @@ description: >
   Access official statistics from any PxWebApi v2 installation. Use when querying
   statistical databases from national statistical institutes running PxWebApi v2.
   Trigger on "PxWeb", "PxWebApi", "statistical database", "Statistikdatabasen",
-  "Statistics Latvia", "stat.gov.lv", or similar generic references. For Norwegian (SSB)
+  "Statistics Latvia", "stat.gov.lv", or similar generic references. Load it before
+  using MCP tools that query a PxWebApi v2 installation (e.g. pxweb-mcp): the rules
+  for table choice, codes, numbers and citation apply whatever the tool. For Norwegian (SSB)
   or Swedish (SCB) statistics specifically, prefer the dedicated `ssb-pxwebapi-v2` or
   `scb-pxwebapi-v2` skills which include agency-specific examples and table catalogs.
   Covers table search, metadata, data queries, codelists, and saved queries.
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.11.2"
+  version: "0.11.3"
 ---
 
 # PxWebApi v2 — Generic Skill
@@ -214,7 +216,7 @@ Default `json-stat2`; also `csv`, `xlsx`, `html`, `px`, `json-px`, and at some i
 - **Always** include source attribution listing **every table ID used** — if multiple tables were combined, list all of them; never omit a source table. `/config` `sourceReferences` gives the agency's own citation string per language
 - Explain what the numbers mean in context — in the user's language. If the table has a standard error, margin of error or confidence interval as a measure, fetch it too and look at it before calling a difference real
 - Present units clearly (count, percent, index, currency); for an index, give the base period
-- Offer to visualize the data or download in another format. If the data came from SSB and the `ssb-chart-skill` skill is available in the environment, use it for the visualization
+- Offer to visualize the data or download in another format. If the data came from SSB and the `ssb-chart` skill is available in the environment, use it for the visualization
 
 ### Step 6: Saved queries (optional)
 

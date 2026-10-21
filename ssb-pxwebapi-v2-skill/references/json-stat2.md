@@ -23,7 +23,7 @@ json-stat2 er et åpent format for statistiske datasett (https://json-stat.org/)
 4. **Vis obligatoriske noter.** `extension.noteMandatory` sier hvilke. (SKILL.md Dataintegritet, og `note`)
 5. **Les `elimination` bare fra metadata.** Totalkoden finner du via `category.label`, eller som `eliminationValueCode` i en data-respons. (Se `elimination`)
 6. **Står `aggregallowed: false`, skal tallene verken summeres eller gjennomsnittes.** Gjør du det likevel, merk det. Feltet stopper ingen spørring. (Se `extension.px`)
-7. **Oppgi selv kodelisten, de utelatte dimensjonene og `timeUnit`**, og send `timeUnit` videre til `ssb-chart-skill`. (SKILL.md Steg 5, og «Det json-stat2 ikke bærer»)
+7. **Oppgi selv kodelisten, de utelatte dimensjonene og `timeUnit`**, og send `timeUnit` videre til `ssb-chart`. (SKILL.md Steg 5, og «Det json-stat2 ikke bærer»)
 
 ---
 

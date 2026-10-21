@@ -2,6 +2,16 @@
 
 Underhållarens logg: vad som ändrats, vad som verifierats mot live API, var och när, och utfallet av varje syskonkontroll. Den är repo-intern och ingår inte i zip:en. Användare läser den korta [`CHANGELOG.md`](CHANGELOG.md); varje version står i båda filerna. Fram till 2026-10-05 *var* den här filen `CHANGELOG.md`, så äldre poster säger «denna logg» eller «CHANGELOG» när de menar den här filen.
 
+## 0.11.3 — 2026-10-21 (beta)
+
+Påbörjad 2026-10-19, som syskon till `ssb-pxwebapi-v2` 1.6.4 (se dess DEVLOG för upptäckten), och utgiven tillsammans med den 2026-10-21. Testet körde skill-creators `run_eval.py` och stoppade varje session vid första verktygsanropet, så inga data hämtades från API:et.
+
+- **Nytt i description:** websöknings-meningen fortsätter «…, och ladda den innan du använder MCP-verktyg som hämtar SCB-data (t.ex. pxweb-mcp): reglerna för tabellval, koder, siffror och källhänvisning gäller oavsett verktyg.» 787 → 952 tecken. Bakgrund: hos SSB laddade Sonnet 5.5 skillen först i bara 5 av 30 körningar med `pxweb-ssb` ansluten, och 29 av 30 med meningen
+- **Nytt i «Verktygsval»** (underhållaren, 2026-10-19: «v2 servere skal alltid vinne dersom den er tilgjengelig»): andra MCP-servrar mot SCB kan använda v1-API:et (`api.scb.se/OV0104/v1/doris/`); använd pxweb-mcp eller HTTP mot v2 när någon av dem finns, ett v1-verktyg bara när ingen v2-kanal finns, och v1-syntaxen står i `generic-pxweb-v1-skill`. Vilket API `@pipeworx/mcp-scb-se` använder är inte kontrollerat
+- **Test 2026-10-19:** Sonnet 5.5, med `pxweb-scb` (`@jarib/pxweb-mcp --url https://statistikdatabasen.scb.se/api/v2`) satt upp bara för testsessionerna via `--mcp-config` och `pxweb-ssb` dold. 6 frågor som ska trigga och 4 nästan-träffar, 3 körningar var. Före: 15/18, 9/10 godkända; alla tre missar gick direkt till `pxweb-scb`-verktygen (Malmö på engelska två gånger, sjuksköterskelön en gång). Efter: 18/18, 10/10. Inga falska träffar före eller efter (Bergen → `ssb-pxwebapi-v2`, Riksbanken och Helsingfors → websökning, diagram av färdiga siffror → `dataviz`). Frågesetet ligger i `evals/trigger-eval.json` (tillagt 2026-10-19), och `CLAUDE.md` beskriver hur det körs
+- **README:** installationstexten är omskriven tillsammans med de andra skillarna (se `ssb-pxwebapi-v2` 1.6.4, del D): Settings > Skills → + Add → Upload skill, code execution och `*.scb.se` under Settings > Capabilities, uppdatering med ⋮ → Replace, och uppackning av ZIP-filen i stället för `cp -r` för Claude Code och ChatGPT/Codex
+- **Syskonkontroll:** källan är `ssb-pxwebapi-v2` 1.6.4. `generic-pxweb-v2-skill` och `generic-pxweb-v1-skill` fick samma typ av mening samma dag
+
 ## 0.11.2 — 2026-10-14 (beta)
 
 `references/json-stat2.md` har fått samma uppbyggnad som i `ssb-pxwebapi-v2` 1.6.2, men med SCB:s egna fakta. Ingen text är översatt rakt av, eftersom flera SSB-fakta inte gäller här. Stickprov på 28 tabeller 2026-10-13 och kontroll 2026-10-14, bara GET.

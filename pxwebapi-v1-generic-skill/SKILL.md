@@ -8,13 +8,15 @@ description: >
   "Statistikkbanken API", "Statistikdatabasen API", or when a PxWeb URL contains
   `/api/v0/` or `/api/v1/`. Covers hierarchy navigation, table search, metadata,
   the JSON query body (`{"query": […], "response": {…}}`), the item/all/top/agg/vs
-  filters, elimination rules, output formats, and error handling.
+  filters, elimination rules, output formats, and error handling. Load it before
+  using MCP tools that query a PxWeb v1 API: the rules for table choice, codes,
+  numbers and citation apply whatever the tool.
   For installations already migrated to PxWebApi v2 (SSB `data.ssb.no/api/pxwebapi/v2`,
   SCB `statistikdatabasen.scb.se/api/v2`) prefer `generic-pxweb-v2-skill`,
   `ssb-pxwebapi-v2` or `scb-pxwebapi-v2` instead.
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.12.2"
+  version: "0.12.3"
 ---
 
 # PxWebApi v1 — Generic Skill

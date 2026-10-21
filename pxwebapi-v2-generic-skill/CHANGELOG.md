@@ -4,6 +4,11 @@ What is different for users of the skill, newest first. The current version is i
 
 What was verified, on which installations and when, is in the maintainer's log, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/pxwebapi-v2-generic-skill/DEVLOG.md). It is in the repository, not in the ZIP.
 
+## 0.11.3 — 2026-10-21
+
+- New: with an MCP server connected to a PxWebApi v2 installation, for example pxweb-mcp, Claude loads the skill before it uses the tools, so the rules for table choice, codes, numbers and citation apply there too. Measured against Statistics Latvia with the server named `pxweb-lv`; a question asked in Latvian still often went straight to the tools.
+- The chart skill is referred to by its installed name, `ssb-chart`, not `ssb-chart-skill`.
+
 ## 0.11.2 — 2026-10-14
 
 - **Corrected: mandatory notes can sit at three levels.** Besides the table's notes, SCB flags notes per variable (`Alder` in TAB6471) and per value (`categoryNoteMandatory`). The answer should show all of them.

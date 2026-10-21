@@ -9,8 +9,8 @@ Skillen vedlikeholdes på <https://github.com/janbrus/pxwebapi-skills/tree/main/
 Du trenger:
 
 1. **Claude Pro, Max, Team eller Enterprise** — skills krever betalt plan
-2. **Skillen installert** — lastet opp som ZIP under Settings > Skills
-3. **Code execution aktivert** — under Settings > Capabilities
+2. **Skillen installert** — lastet opp som ZIP under Settings > Skills → + Add → Upload skill ([skjermbilde](../../docs/img/claude-install-skill.png))
+3. **Code execution aktivert** — *Cloud code execution and file creation* under Settings > Capabilities
 4. **`*.ssb.no` tillatt i nettverksinnstillingene** (domain allowlist) se under
 
 Valgfritt, men anbefalt:
@@ -31,6 +31,10 @@ Skillen bruker to verter:
 | `www.ssb.no` | RSS-feeder (publiseringskalender), VarDok-definisjoner, «Om statistikken»-sider |
 
 `*.ssb.no` dekker begge. Må du begrense strengt, er `data.ssb.no` den som ikke kan utelates.
+
+I Pro og Max gjør du det selv under **Settings > Capabilities**: slå på *Allow network egress*, skriv `*.ssb.no` i *Additional allowed domains* og trykk *Add*.
+
+![Settings > Capabilities med *.ssb.no under Additional allowed domains](../../docs/img/claude-allow-domain.png)
 
 I Team og Enterprise styrer administrator dette under Admin settings > Capabilities. Bekreft syntaksen for jokertegn der. Det er ikke alltid '*'.
 
@@ -349,7 +353,7 @@ Koble til med:
 ```json
 {
   "mcpServers": {
-    "pxweb": {
+    "pxweb-ssb": {
       "type": "http",
       "url": "http://localhost:3000/mcp"
     }

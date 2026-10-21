@@ -47,40 +47,55 @@ ssb-pxwebapi-v2/
 
 ## Installasjon
 
-### Claude.ai
+### Claude.ai og Claude desktop
 
-1. Last ned ZIP-filen: [ssb-pxwebapi-v2-skill.zip](ssb-pxwebapi-v2-skill.zip), eller bygg den fra Github-repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger repo-interne filer med)
-2. Gå til **Settings > Skills** i Claude.ai
-3. Last opp ZIP-filen
+1. Last ned ZIP-filen: [ssb-pxwebapi-v2-skill.zip](ssb-pxwebapi-v2-skill.zip) (*Download raw file* på GitHub), eller bygg den fra Github-repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger repo-interne filer med)
+2. Gå til **Settings > Skills** → **+ Add** → **Upload skill**
+3. Velg ZIP-filen
+
+![Installere en skill: Download raw file på GitHub, deretter Settings > Skills > Add > Upload skill i Claude](../docs/img/claude-install-skill.png)
+
+For å oppdatere laster du ned den nye ZIP-filen, åpner skillen under **Settings > Skills** og velger **⋮** → **Replace**. 
+
+![Oppdatere en skill: ⋮ > Replace på skillsiden](../docs/img/claude-replace-skill.png)
+
+
+Under **Settings > Capabilities** må *Cloud code execution and file creation* være på. Skal skillen hente data selv, uten MCP-server, slår du også på *Allow network egress* og legger `*.ssb.no` inn under *Additional allowed domains*. 
+
+
+![Settings > Capabilities: code execution, network egress og *.ssb.no under Additional allowed domains](../docs/img/claude-allow-domain.png)
 
 ### Claude Code
 
-Kopier mappen til skills-katalogen under det installerte navnet `ssb-pxwebapi-v2` (mappen i repoet heter `ssb-pxwebapi-v2-skill`). Fra repo-roten:
+Pakk ut zip-filen i skills-katalogen. Toppmappen har det installerte navnet `ssb-pxwebapi-v2` (mappen i repoet heter `ssb-pxwebapi-v2-skill`):
 
 ```bash
-# Kopi, globalt (tilgjengelig i alle prosjekter)
-cp -r ssb-pxwebapi-v2-skill ~/.claude/skills/ssb-pxwebapi-v2
-
-# Eller symlenke fra et klonet repo — da holder git pull kopien oppdatert
-ln -s "$PWD/ssb-pxwebapi-v2-skill" ~/.claude/skills/ssb-pxwebapi-v2
+# Globalt (tilgjengelig i alle prosjekter)
+unzip ssb-pxwebapi-v2-skill.zip -d ~/.claude/skills/
 
 # Per prosjekt
-cp -r ssb-pxwebapi-v2-skill .claude/skills/ssb-pxwebapi-v2
+unzip ssb-pxwebapi-v2-skill.zip -d .claude/skills/
+
+# Eller symlenke fra roten av et klonet repo — da holder git pull kopien oppdatert
+ln -s "$PWD/ssb-pxwebapi-v2-skill" ~/.claude/skills/ssb-pxwebapi-v2
 ```
 
 ### ChatGPT og Codex
 
-ChatGPT og Codex leser skills i samme format fra `.agents/skills/` (ifølge [OpenAIs dokumentasjon](https://developers.openai.com/codex/skills/); ikke testet her ennå). Pakk ut zip-filen, eller kopier mappen fra repoet:
+ChatGPT og Codex leser skills i samme format fra `~/.codex/skills/` for alle prosjekter (Windows: `%USERPROFILE%\.codex\skills\`) og fra `.agents/skills/` for ett prosjekt (se [OpenAIs dokumentasjon](https://developers.openai.com/codex/skills/)). Pakk ut zip-filen der. Toppmappen `ssb-pxwebapi-v2/` har det installerte navnet:
 
 ```bash
-# Globalt (alle prosjekter)
-cp -r ssb-pxwebapi-v2-skill ~/.agents/skills/ssb-pxwebapi-v2
+# Globalt (alle prosjekter), Mac/Linux
+unzip ssb-pxwebapi-v2-skill.zip -d ~/.codex/skills/
+
+# Globalt, Windows (PowerShell)
+Expand-Archive ssb-pxwebapi-v2-skill.zip -DestinationPath $env:USERPROFILE\.codex\skills
 
 # Per repo
-cp -r ssb-pxwebapi-v2-skill .agents/skills/ssb-pxwebapi-v2
+unzip ssb-pxwebapi-v2-skill.zip -d .agents/skills/
 ```
 
-Symlenker fungerer også. Frittstående skills er tilgjengelige i ChatGPT desktop-app. Codex CLI og IDE-utvidelsen; på ChatGPT web og mobil må skillen (på norsk ferdighet) pakkes som plugin. Velg skillen med `@` i ChatGPT eller `$` i Codex, eller la modellen velge den ut fra beskrivelsen.
+ChatGPTs `$skill-installer` henter mapper, ikke zip-filer, og tar da med de repo-interne filene. Frittstående skills er tilgjengelige i ChatGPT desktop-app. Codex CLI og IDE-utvidelsen; på ChatGPT web og mobil må skillen (på norsk ferdighet) pakkes som plugin. Velg skillen med `@` i ChatGPT eller `$` i Codex, eller la modellen velge den ut fra beskrivelsen.
 
 ### Andre
 

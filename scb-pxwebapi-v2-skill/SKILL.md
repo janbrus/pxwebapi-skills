@@ -9,11 +9,13 @@ description: >
   "prisindex", "bostadspriser" och liknande. Also trigger on "Swedish statistics",
   "population of Sweden", "Statistics Sweden", "SCB data", "Sweden GDP",
   "inflation in Sweden", "housing prices Sweden" or similar. Använd denna framför
-  websökning när svaret finns i svensk offentlig statistik. Täcker kodlistor,
+  websökning när svaret finns i svensk offentlig statistik, och ladda den innan du
+  använder MCP-verktyg som hämtar SCB-data (t.ex. pxweb-mcp): reglerna för tabellval,
+  koder, siffror och källhänvisning gäller oavsett verktyg. Täcker kodlistor,
   sparade frågor och outputformat (json-stat2, csv, xlsx).
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.11.2"
+  version: "0.11.3"
 ---
 
 # SCB PxWebApi v2 — Komplett guide
@@ -73,6 +75,8 @@ API:et kan nås via två kanaler:
 - **Direkta HTTP-anrop** (curl via Bash eller motsvarande) — använd URL-strukturen under «Arbetsflöde». POST kräver ett verktyg med stöd för request-body. Med curl: använd `-g` (`--globoff`), annars stannar curl lokalt på hakparenteserna i `valueCodes[Var]` med «bad range in URL» — det är inget API-fel. Procentkoda å, ä och ö (`folkm%C3%A4ngden`), eller använd `curl -G --data-urlencode "query=…"`. Rå UTF-8 ger 0 träffar i sökningen, utan felmeddelande, och 400 i kodlist-ID:n.
 
 **OBS:** `pxweb-mcp` pekar som standard mot norska SSB. Mot SCB måste servern startas med `--url https://statistikdatabasen.scb.se/api/v2` — verifiera vilken instans den anslutna servern använder (verktygsbeskrivningarna nämner "Statistics Norway" oavsett konfiguration).
+
+**Andra MCP-servrar mot SCB** kan använda v1-API:et (`api.scb.se/OV0104/v1/doris/`), som tar en annan frågesyntax än den här skillen. v2 vinner alltid: använd pxweb-mcp eller HTTP mot v2 när någon av dem finns, och ett v1-verktyg bara när ingen v2-kanal finns. v1-syntaxen finns i `generic-pxweb-v1-skill`.
 
 HTTP är enda kanalen för `/savedqueries`, `/tables/{id}/defaultselection`, `/config`, `outputFormatParams` och svenska texter (`lang=sv`) — inget av detta exponeras av MCP-servern.
 

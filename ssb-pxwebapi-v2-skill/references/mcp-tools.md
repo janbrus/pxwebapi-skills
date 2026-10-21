@@ -31,3 +31,5 @@ Serveren startes med `--url` og kan peke mot enhver PxWebApi v2-instans; default
 ## Andre MCP-tjenester
 
 TRY tilbyr en hostet SSB-MCP-tjeneste (https://tools.try.no/ssb-mcp). Den krever e-postregistrering for et personlig endepunkt og er av TRY selv merket som eksperimentell og ikke kvalitetssikret — ikke verifisert av denne skillen.
+
+`ssb-mcp-server` og `synjan/mcp-ssb` henter fra v0-API-et, og `@pipeworx/mcp-ssb-no` tar v1-spørringer (README-ene, 2026-10-18). v2 vinner alltid — se «Verktøyvalg» i `SKILL.md`.

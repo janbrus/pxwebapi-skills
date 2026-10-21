@@ -99,33 +99,39 @@ model: an `llms.txt` template for agencies, and a skill map of the workflow. It 
 
 ## Installation
 
-### Claude.ai
+### Claude.ai and Claude desktop
 
-1. Build the ZIP with `scripts/build_zip.sh` — do not zip the folder by hand, or
-   repo-internal files end up in the package
-2. Go to **Settings > Skills**
-3. Upload the ZIP file
+1. Download `generic-pxweb-v1-skill.zip` (*Download raw file* on GitHub), or build it with
+   `scripts/build_zip.sh` — do not zip the folder by hand, or repo-internal files end up in the package
+2. Go to **Settings > Skills** → **+ Add** → **Upload skill**
+3. Pick the ZIP file
+
+Under **Settings > Capabilities**, *Cloud code execution and file creation* must be on. For the skill to fetch data itself, without an MCP server, also turn on *Allow network egress* and add the installation's domain (e.g. `*.stat.fi`) under *Additional allowed domains*. To update, download the new ZIP, open the skill under **Settings > Skills** and choose **⋮** → **Replace**. [Screenshots](https://github.com/janbrus/pxwebapi-skills#claudeai-and-claude-desktop).
 
 ### Claude Code
 
-The installed name is `generic-pxweb-v1-skill` (the frontmatter `name`); the repository folder is `pxwebapi-v1-generic-skill`. From the repository root:
+Unpack the ZIP file into the skills directory. Its top folder carries the installed name `generic-pxweb-v1-skill` (the frontmatter `name`); the repository folder is `pxwebapi-v1-generic-skill`:
 
 ```bash
-cp -r pxwebapi-v1-generic-skill ~/.claude/skills/generic-pxweb-v1-skill
+unzip generic-pxweb-v1-skill.zip -d ~/.claude/skills/
 
-# or symlink a cloned repository, so that git pull keeps the copy current
+# or symlink from the root of a cloned repository, so that git pull keeps the copy current
 ln -s "$PWD/pxwebapi-v1-generic-skill" ~/.claude/skills/generic-pxweb-v1-skill
 ```
 
 ### ChatGPT and Codex
 
-ChatGPT and Codex read skills in the same format from `.agents/skills/` (per [OpenAI's documentation](https://developers.openai.com/codex/skills/); untested here). Unpack the ZIP file, or copy the folder from the repository:
+ChatGPT and Codex read skills in the same format from `~/.codex/skills/` for all projects (Windows: `%USERPROFILE%\.codex\skills\`) and from `.agents/skills/` for one project (see [OpenAI's documentation](https://developers.openai.com/codex/skills/)). Unpack the ZIP file there; its top folder `generic-pxweb-v1-skill/` carries the installed name:
 
 ```bash
-cp -r pxwebapi-v1-generic-skill ~/.agents/skills/generic-pxweb-v1-skill
+# Mac/Linux
+unzip generic-pxweb-v1-skill.zip -d ~/.codex/skills/
+
+# Windows (PowerShell)
+Expand-Archive generic-pxweb-v1-skill.zip -DestinationPath $env:USERPROFILE\.codex\skills
 ```
 
-Standalone skills are available in the ChatGPT desktop app, Codex CLI and the IDE extension; on web and mobile the skill has to be packaged as a plugin.
+ChatGPT's `$skill-installer` fetches folders, not ZIP files, and brings the repo-internal files along. Standalone skills are available in the ChatGPT desktop app, Codex CLI and the IDE extension; on web and mobile the skill has to be packaged as a plugin.
 
 ## Related skills
 

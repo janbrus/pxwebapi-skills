@@ -2,6 +2,51 @@
 
 Vedlikeholderens logg: hva som er endret, hva som er verifisert mot live API, hvor og når, og utfallet av hver søskensjekk. Den er repo-intern og følger ikke med i zip-en. Brukerne leser den korte [`CHANGELOG.md`](CHANGELOG.md); hver versjon står i begge filene. Fram til 2026-10-05 *var* denne fila `CHANGELOG.md`, så eldre oppføringer sier «denne loggen» eller «changelog» der de mener denne fila.
 
+## 1.6.4 — 2026-10-21
+
+Påbegynt 2026-10-18/19, etter at 1.6.3 var committet, og avsluttet 2026-10-21. Fire deler: MCP-setningen i description (A), regelen om at v2 vinner (B), trigger-testen (C) og installeringsteksten i alle README-ene (D). Testene kjørte skill-creators `run_eval.py` (Claude Code 2.1.302) og stoppet hver økt ved første verktøykall, så ingen data ble hentet fra API-et.
+
+### A. MCP-setningen i description
+
+* **Funn 2026-10-18:** 20 spørsmål × 3 kjøringer (`evals/trigger-eval.json`, terskel 0,5), med `pxweb-ssb` tilkoblet slik vedlikeholderen har den:
+  - Opus 5.5: 20/20 bestått, skillen lastet først i 30 av 30 skal-trigge-kjøringer
+  - Sonnet 5.5: 11/20, 5/30. Alle 25 bom gikk rett til `pxweb-ssb`-verktøyene via ToolSearch
+  - Haiku 5.5: 17/20, 19/30. Alle 11 bom gikk til `pxweb-ssb`
+  - Uten `pxweb-ssb` (`--disallowedTools mcp__pxweb-ssb`): Sonnet 20/20, 30/30; Haiku 18/20, 24/30 (fem websøk og ett `curl` rett mot `data.ssb.no`, uten skillen)
+  - Ingen falske treff i 150 bom-kjøringer. Med Opus gikk nesten-treffene til `norges-bank-api`, `ssb-histstat`, `scb-pxwebapi-v2`, `ssb-chart` og v1-skillen; Sonnet og Haiku gikk oftere til websøk eller `curl`
+* Med pxweb-mcp tilkoblet, slik `brukerveiledning.md` viser, hoppet Sonnet altså som regel over Dataintegritet, rutingen og begrensningene i `mcp-tools.md`. «Verktøyvalg» knytter MCP til skillen, men leses først når skillen er lastet
+* **Endring:** websøk-setningen i description er utvidet: «…, og last den før du bruker MCP-verktøy som henter SSB-data (f.eks. pxweb-mcp): reglene for tabellvalg, koder, tall og kildehenvisning gjelder uansett verktøy.» 777 → 935 tegn. Setningen sier «SSB-data», ikke verktøynavn: verktøynavnene varierer mellom serverne (se B), og servernavnet velger brukeren selv. Den lover heller ikke hjelp med verktøyene, siden `mcp-tools.md` bare dekker pxweb-mcp. Ordlyden ble godkjent av vedlikeholderen 2026-10-18
+* **Ny test 2026-10-19,** samme oppsett med `pxweb-ssb`: Sonnet 20/20, 29/30; Haiku 20/20, 29/30; ingen falske treff. Bommene som gjenstår, gikk fortsatt rett til MCP (Sonnet T02, Haiku T05, én gang hver). Opus og oppsettet uten MCP er ikke kjørt på nytt
+* **Servernavnet `pxweb`, 2026-10-19.** Utløst av et sideagent-varsel: alle testene brukte servernavn med byrået i, og HTTP-eksempelet i `brukerveiledning.md` kalte serveren bare `pxweb`. Før modellen laster verktøyene, er servernavnet ofte det eneste som viser hvilket byrå de henter fra. Test med Sonnet og en server som bare heter `pxweb` (`@jarib/pxweb-mcp`, standardmål SSB, satt opp bare for testøktene med `--mcp-config`, `pxweb-ssb` skjult): 20/20, 30/30, ingen falske treff. Navnet er ikke helt nøytralt, fordi «pxweb» også står i eksempelet i description; et navn uten «pxweb» eller «ssb» er ikke testet. HTTP-eksempelet heter nå `pxweb-ssb`, som de andre eksemplene i veiledningen
+
+### B. Andre MCP-servere: v2 vinner
+
+* **Kartlagt 2026-10-18** (npm-registeret og README-ene på GitHub). `@jarib/pxweb-mcp` bruker v2. `ssb-mcp-server` (langtind; verktøyene `ssb_search`, `ssb_table_metadata`, `ssb_get_data`, `ssb_get_url`) bruker v0 ifølge README. `@pipeworx/mcp-ssb-no` (`subjects`, `table_meta`, `query_table`) bruker v1-navigasjon og PxWeb-spørreobjekt, altså trolig v0. `synjan/mcp-ssb` (`search`, `table`, `data`, `latest`) har lokal indeks og henter tall fra v0. TRY står allerede i `mcp-tools.md`. `haakonjacobsen/ssb-mcp` er et tomt repo (vedlikeholder: støy) og er ikke omtalt
+* **Vedlikeholder 2026-10-19:** «v2 servere skal alltid vinne dersom den er tilgjengelig». «Verktøyvalg» har fått et avsnitt: flere andre SSB-servere bruker v0 og tar v1-spørringer; bruk pxweb-mcp eller HTTP mot v2 når en av dem er tilgjengelig, et v0-verktøy bare når ingen v2-kanal finnes, og v1-syntaksen står i `generic-pxweb-v1-skill`. «v2-server» er tolket som enhver v2-kanal, også HTTP
+* 2026-10-21: `docs/instruks-kort.md` har fått regelen i én linje øverst, fordi kortet brukes på plattformer uten skills, men gjerne med MCP-connectors. «Andre MCP-tjenester» i `references/mcp-tools.md` nevner de tre v0/v1-serverne og peker til «Verktøyvalg»
+
+### C. Trigger-testen
+
+* **Ny fil `evals/trigger-eval.json`:** 10 spørsmål som skal trigge og 10 nesten-treff, i `run_eval.py`-format med `id` og forventet `route`. `CLAUDE.md` beskriver fila og fallgruvene, og har utgangspunktet fra 2026-10-18
+* **Uendret `run_eval.py` teller for lavt her.** Skriptet teller bare kall til sin midlertidige kopi, men den installerte skillen (symlenke til repoet, samme tekst) tar kallene. Kjøringene brukte en tilpasset kopi i scratchpad, som ikke ligger i repoet: `--installed-name ssb-pxwebapi-v2`, `--run-cwd /home/jan` (scratchpad-stien inneholder «pxwebapi-skills» og påvirker modellen), `--claude-args` og en logg over første handling per kjøring. Sesjonsloggene fra 2026-10-18 er slettet
+* Bifunn: Spørsmålet om KPI-omregning (N10) ble riktig nok besvart uten skillen, men svaret sa at «SSB bruker nå 2015=100»; skillen sier 2025=100
+
+### D. Installering: skjermbilder og ChatGPT
+
+* **Skjermbilder 2026-10-19** (vedlikeholder, engelsk grensesnitt i Claude desktop): `claude-install-skill.png`, `claude-allow-domain.png` og `claude-replace-skill.png` i `docs/img/` i repo-roten, felles for alle seks skills. Rot-README har fått «Claude.ai og Claude desktop» på norsk og engelsk: installering, code execution og domenet under Settings > Capabilities, og oppdatering med ⋮ → Replace. Ingen README sa før hvordan man oppdaterer på claude.ai, eller at domenet må tillates. Menystien er «Settings > Skills» overalt (vedlikeholder: lik i desktop og på claude.ai); `Settings › Features › Skills` i rot-README (engelsk) og `ssb-histstat` er rettet
+* Skill-README-ene har fått oppdatering og code execution, de fire API-skillene også domenet (`*.ssb.no`, `*.scb.se`, installasjonens domene). De lenker til rot-README med full GitHub-URL, fordi bildene ikke er med i zip-ene. `brukerveiledning.md` lenker til bildene under Forutsetninger og Nettverkstilgang
+* **ChatGPT desktop, test 2026-10-19** (vedlikeholder): `$skill-installer` med blob-URL-en til `ssb-pxwebapi-v2-skill.zip` installerte hele kildemappen i `%USERPROFILE%\.codex\skills\ssb-pxwebapi-v2-skill\`, med `CLAUDE.md`, `DEVLOG.md`, `evals/`, `scripts/` og zip-en, under mappenavnet og ikke skillnavnet `ssb-pxwebapi-v2`. Installerens egen `SKILL.md` forklarer det: den installerer mapper fra GitHub, ikke zip-filer, gir dem mappens navn når `--name` mangler, og avbryter hvis mappen finnes fra før
+* README-ene sier nå: pakk ut zip-en i `~/.codex/skills/` (på tvers av prosjekter) eller `.agents/skills/` (ett prosjekt) (vedlikeholder). «Eller kopier mappen fra repoet» og «Symlenker fungerer også» er strøket i ChatGPT-delen. `ssb-chart-skill/README.md` kopierte til `~/.agents/skills/ssb-chart-skill`, mens skillen heter `ssb-chart`; zip-ens toppmappe gir riktig navn. En ren installasjon (zip pakket ut, skillen brukt i en ny samtale) er ikke testet
+* Claude Code: `cp -r` av mappen er byttet med utpakking av zip-en til `~/.claude/skills/` eller `.claude/skills/` i rot-README og alle seks skill-README-ene (vedlikeholder, 2026-10-19). Symlenken fra et klonet repo står. Det installerte navnet til `ssb-chart` er rettet fra `ssb-chart-skill` til frontmatter-navnet `ssb-chart` i rot-README (begge tabellene og rutinglista) og i symlenkelinjen i `ssb-chart-skill/README.md`, slik at det stemmer med zip-ens toppmappe. Etterpå «overalt» (vedlikeholder): `SKILL.md` (rutingen, kildehenvisningen og Steg 5), `json-stat2.md` regel 7, skillkartet, `generic-pxweb-v2-skill` sin `SKILL.md`, og README og `CLAUDE.md` i `ssb-chart-skill`. Mappenavnet `ssb-chart-skill` i stier, URL-er og CI står
+* Vedlikeholder 2026-10-21: bildene står nå også i SSB-README-en, med fulle `raw.githubusercontent.com`-URL-er, så de vises også når README-en leses fra zip-en (der finnes ingen `../docs/img/`). Rot-README-en har fått «Verktøy for å kalle API-et - MCP» og engelsk «MCP and tools» som egne deler
+* Bare README-er og `docs/` er endret, ikke svarene, så det står ikke i CHANGELOG. Zip-ene til alle seks skills er bygget på nytt, fordi README ligger i dem
+
+### Søskensjekk
+
+* `scb-pxwebapi-v2`, `generic-pxweb-v2-skill` og `generic-pxweb-v1-skill` har fått samme type setning (vedlikeholder, 2026-10-19), og SCB også v2-regelen i «Verktygsval». Test 2026-10-19 med Sonnet og en pxweb-mcp-server satt opp bare for testøktene (`--mcp-config`, `pxweb-ssb` skjult), 6 + 4 spørsmål × 3: SCB med `pxweb-scb` 15/18 → 18/18, generisk v2 med `pxweb-lv` 6/18 → 15/18, ingen falske treff. v1 er ikke testet. Detaljer i deres DEVLOG
+* Funn i andre skills, ikke rettet: `ssb-histstat` — Sonnet svarte på 1865-spørsmålet fra hukommelsen i 5 av 9 kjøringer (alle 3 i testen med servernavnet `pxweb`), med bestemte tall merket som ikke slått opp. `generic-pxweb-v1-skill` — for v1-bodyer lastet Sonnet skillen 0 av 12 ganger (6 mot SSBs `/api/v0/`, 6 mot Statistics Finland), Haiku 1 av 6 og Opus 3 av 3; resten gikk rett til `curl`
+* `ssb-chart-skill`: ikke berørt
+
 ## 1.6.3 — 2026-10-13
 
 Sju deler, besluttet av vedlikeholder 2026-10-13 og gjennomført 2026-10-13/14: KPI-avrundingsstøy ut (A), xlsx til Excel (B), AKU med 3MGG (C), `llms.txt` (D), Forbruksundersøkelsen og søk (F), slanking av `SKILL.md` (G) og prosentkoding (H). I tillegg står datoen i kildehenvisningen. Del E porterte json-stat2-forbedringene til søsknene, som har egne versjoner (se søskensjekk). Alle kall er GET eller POST mot `/tables/{id}/data` — ingen `POST /savedqueries`.

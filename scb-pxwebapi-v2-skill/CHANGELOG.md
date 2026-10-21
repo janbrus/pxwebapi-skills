@@ -4,6 +4,11 @@ Vad som är annorlunda för den som använder skillen, nyast först. Gällande v
 
 Vad som verifierats, var och när, står i underhållarens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/scb-pxwebapi-v2-skill/DEVLOG.md). Den finns i repot, inte i zip:en.
 
+## 0.11.3 — 2026-10-21 (beta)
+
+- Nytt: är en MCP-server mot SCB ansluten, till exempel pxweb-mcp, laddar Claude skillen innan verktygen används. Då gäller reglerna för tabellval, koder, siffror och källhänvisning även där. Det är mätt med servernamnet `pxweb-scb`, så ge servern ett namn som nämner SCB.
+- Nytt: v2 vinner. Andra MCP-servrar mot SCB kan använda v1-API:et. Skillen använder pxweb-mcp eller HTTP mot v2 när någon av dem finns, och ett v1-verktyg bara när ingen v2-kanal finns.
+
 ## 0.11.2 — 2026-10-14 (beta)
 
 - **Rättat: obligatoriska noter finns på tre nivåer.** Utöver tabellnoterna kan en variabel (`Alder` i TAB6471) och ett enskilt värde (`categoryNoteMandatory`) ha obligatoriska noter. Svaret ska visa alla tre.

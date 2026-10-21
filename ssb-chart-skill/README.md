@@ -39,43 +39,49 @@ ssb-chart-skill/
 
 ## Installasjon
 
-### Claude.ai
+### Claude.ai og Claude desktop
 
-1. Last ned [ssb-chart-skill.zip](ssb-chart-skill.zip), eller bygg den fra repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger `CLAUDE.md` og `scripts/` med). Pakken har toppmappe `ssb-chart/` og inneholder kun `SKILL.md`, `README.md`, `CHANGELOG.md`, `references/` og `LICENSE`
-2. Gå til **Settings > Skills** i Claude.ai
-3. Last opp ZIP-filen
+1. Last ned [ssb-chart-skill.zip](ssb-chart-skill.zip) (*Download raw file* på GitHub), eller bygg den fra repoet med `scripts/build_zip.sh` (ikke zip mappen selv — da følger `CLAUDE.md` og `scripts/` med). Pakken har toppmappe `ssb-chart/` og inneholder kun `SKILL.md`, `README.md`, `CHANGELOG.md`, `references/` og `LICENSE`
+2. Gå til **Settings > Skills** → **+ Add** → **Upload skill**
+3. Velg ZIP-filen
+
+Under **Settings > Capabilities** må *Cloud code execution and file creation* være på. For å oppdatere laster du ned den nye ZIP-filen, åpner skillen under **Settings > Skills** og velger **⋮** → **Replace**. [Skjermbilder](https://github.com/janbrus/pxwebapi-skills#claudeai-og-claude-desktop).
 
 ### Claude Code
 
-Kopier mappen til din globale eller prosjektspesifikke skills-katalog. Fra repo-roten:
+Pakk ut zip-filen i din globale eller prosjektspesifikke skills-katalog. Toppmappen heter `ssb-chart`:
 
 ```bash
-# Kopi, globalt (tilgjengelig i alle prosjekter)
-cp -r ssb-chart-skill ~/.claude/skills/ssb-chart-skill
-
-# Eller symlenke fra et klonet repo — da holder git pull kopien oppdatert
-ln -s "$PWD/ssb-chart-skill" ~/.claude/skills/ssb-chart-skill
+# Globalt (tilgjengelig i alle prosjekter)
+unzip ssb-chart-skill.zip -d ~/.claude/skills/
 
 # Per prosjekt
-cp -r ssb-chart-skill .claude/skills/ssb-chart-skill
+unzip ssb-chart-skill.zip -d .claude/skills/
+
+# Eller symlenke fra roten av et klonet repo — da holder git pull kopien oppdatert
+ln -s "$PWD/ssb-chart-skill" ~/.claude/skills/ssb-chart
 ```
 
 ### ChatGPT og Codex
 
-ChatGPT og Codex leser skills i samme format fra `.agents/skills/` (ifølge [OpenAIs dokumentasjon](https://developers.openai.com/codex/skills/); ikke testet her). Pakk ut zip-filen, eller kopier mappen fra repoet:
+ChatGPT og Codex leser skills i samme format fra `~/.codex/skills/` for alle prosjekter (Windows: `%USERPROFILE%\.codex\skills\`) og fra `.agents/skills/` for ett prosjekt (se [OpenAIs dokumentasjon](https://developers.openai.com/codex/skills/)). Pakk ut zip-filen der. Toppmappen `ssb-chart/` har det installerte navnet:
 
 ```bash
-cp -r ssb-chart-skill ~/.agents/skills/ssb-chart-skill
+# Mac/Linux
+unzip ssb-chart-skill.zip -d ~/.codex/skills/
+
+# Windows (PowerShell)
+Expand-Archive ssb-chart-skill.zip -DestinationPath $env:USERPROFILE\.codex\skills
 ```
 
-Frittstående skills er tilgjengelige i ChatGPT desktop-app, Codex CLI og IDE-utvidelsen; på web og mobil må skillen pakkes som plugin.
+ChatGPTs `$skill-installer` henter mapper, ikke zip-filer, og tar da med de repo-interne filene. Frittstående skills er tilgjengelige i ChatGPT desktop-app, Codex CLI og IDE-utvidelsen; på web og mobil må skillen pakkes som plugin.
 
 ## Bruk sammen med datakilde-skillen
 
 Denne skillen inneholder **ingen datahenting** — den forutsetter at du allerede har en JSON-stat2-respons fra SSBs PxWebApi v2. Last derfor opp begge skillene sammen for komplett arbeidsflyt:
 
 - **`ssb-pxwebapi-v2`** — søker, utforsker og henter SSB-data. Eier dataformat-spesifikasjonen (`references/json-stat2.md`) som denne skillen peker til i stedet for å gjenta.
-- **`ssb-chart-skill`** (denne) — styrer presentasjonen av de hentede dataene.
+- **`ssb-chart`** (denne) — styrer presentasjonen av de hentede dataene.
 
 For svenske data finnes en parallell `scb-pxwebapi-v2`-skill; for vilkårlige PxWebApi v2-installasjoner finnes `generic-pxweb-v2-skill`. Chart-skillen er bevisst SSB-spesifikk (SSBs palett og kildelinje) og er ikke ment for andre datakilder.
 

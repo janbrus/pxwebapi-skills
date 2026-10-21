@@ -32,7 +32,7 @@ scb-pxwebapi-v2/
 
 ## Installation
 
-### Claude.ai
+### Claude.ai och Claude desktop
 
 1. Ladda ner `scb-pxwebapi-v2-skill.zip`, eller bygg den själv från repot:
 
@@ -42,29 +42,35 @@ scb-pxwebapi-v2/
 
    Paketet innehåller endast de användarvända filerna (`SKILL.md`, `README.md`, `CHANGELOG.md`, `references/`) plus `LICENSE` under toppmappen `scb-pxwebapi-v2/`.
 
-2. Gå till **Settings > Skills**
-3. Ladda upp ZIP-filen
+2. Gå till **Settings > Skills** → **+ Add** → **Upload skill**
+3. Välj ZIP-filen
+
+Under **Settings > Capabilities** måste *Cloud code execution and file creation* vara på. Ska skillen hämta data själv, utan MCP-server, slår du också på *Allow network egress* och lägger till `*.scb.se` under *Additional allowed domains*. För att uppdatera laddar du ner den nya ZIP-filen, öppnar skillen under **Settings > Skills** och väljer **⋮** → **Replace**. [Skärmbilder](https://github.com/janbrus/pxwebapi-skills#claudeai-og-claude-desktop).
 
 ### Claude Code
 
-Installerat namn är `scb-pxwebapi-v2`; mappen i repot heter `scb-pxwebapi-v2-skill`. Från repots rot:
+Packa upp ZIP-filen i skills-katalogen. Toppmappen har det installerade namnet `scb-pxwebapi-v2`; mappen i repot heter `scb-pxwebapi-v2-skill`:
 
 ```bash
-cp -r scb-pxwebapi-v2-skill ~/.claude/skills/scb-pxwebapi-v2
+unzip scb-pxwebapi-v2-skill.zip -d ~/.claude/skills/
 
-# eller symlänka ett klonat repo, så håller git pull kopian aktuell
+# eller symlänka från roten av ett klonat repo, så håller git pull kopian aktuell
 ln -s "$PWD/scb-pxwebapi-v2-skill" ~/.claude/skills/scb-pxwebapi-v2
 ```
 
 ### ChatGPT och Codex
 
-ChatGPT och Codex läser skills i samma format från `.agents/skills/` (enligt [OpenAI:s dokumentation](https://developers.openai.com/codex/skills/); inte testat här). Packa upp ZIP-filen, eller kopiera mappen från repot:
+ChatGPT och Codex läser skills i samma format från `~/.codex/skills/` för alla projekt (Windows: `%USERPROFILE%\.codex\skills\`) och från `.agents/skills/` för ett projekt (se [OpenAI:s dokumentation](https://developers.openai.com/codex/skills/)). Packa upp ZIP-filen där. Toppmappen `scb-pxwebapi-v2/` har det installerade namnet:
 
 ```bash
-cp -r scb-pxwebapi-v2-skill ~/.agents/skills/scb-pxwebapi-v2
+# Mac/Linux
+unzip scb-pxwebapi-v2-skill.zip -d ~/.codex/skills/
+
+# Windows (PowerShell)
+Expand-Archive scb-pxwebapi-v2-skill.zip -DestinationPath $env:USERPROFILE\.codex\skills
 ```
 
-Fristående skills finns i ChatGPT:s skrivbordsapp, Codex CLI och IDE-tillägget; på webb och mobil måste skillen paketeras som plugin.
+ChatGPT:s `$skill-installer` hämtar mappar, inte ZIP-filer, och tar då med de repointerna filerna. Fristående skills finns i ChatGPT:s skrivbordsapp, Codex CLI och IDE-tillägget; på webb och mobil måste skillen paketeras som plugin.
 
 ## MCP-servrar
 
