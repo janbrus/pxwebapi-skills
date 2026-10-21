@@ -7,12 +7,12 @@ Skillen er uoffisiell, hverken SSB eller SCB står bak. En språkmodell tolker s
 ## Hva skillen gjør
 
 - Guider AI-assistenten gjennom riktig arbeidsflyt: Søk → Metadata → Spørring → Presenter
-- Støtter norsk og engelsk. 
+- Støtter norsk og engelsk.
 - Dekker alle endepunkter i PxWebApi v2 (tabeller, metadata, kodelister, lagrede spørringer, config)
 - Håndterer kodelister og aggregeringer (fylker, kommunesammenslåinger, aldersgrupper)
 - Inkluderer vedlikeholdt liste på rundt 90 mye brukte tabeller
 - Refererer til SSBs Klass- og VarDok-systemer via lenker i metadata.
-- se også docs/skillkart 
+- se også docs/skillkart.
 
 ## Filstruktur
 
@@ -55,13 +55,11 @@ ssb-pxwebapi-v2/
 
 ![Installere en skill: Download raw file på GitHub, deretter Settings > Skills > Add > Upload skill i Claude](../docs/img/claude-install-skill.png)
 
-For å oppdatere laster du ned den nye ZIP-filen, åpner skillen under **Settings > Skills** og velger **⋮** → **Replace**. 
+For å oppdatere laster du ned den nye ZIP-filen, åpner skillen under **Settings > Skills** og velger **⋮** → **Replace**.
 
 ![Oppdatere en skill: ⋮ > Replace på skillsiden](../docs/img/claude-replace-skill.png)
 
-
-Under **Settings > Capabilities** må *Cloud code execution and file creation* være på. Skal skillen hente data selv, uten MCP-server, slår du også på *Allow network egress* og legger `*.ssb.no` inn under *Additional allowed domains*. 
-
+Under **Settings > Capabilities** må *Cloud code execution and file creation* være på. Skal skillen hente data selv, uten MCP-server, slår du også på *Allow network egress* og legger `*.ssb.no` inn under *Additional allowed domains*.
 
 ![Settings > Capabilities: code execution, network egress og *.ssb.no under Additional allowed domains](../docs/img/claude-allow-domain.png)
 

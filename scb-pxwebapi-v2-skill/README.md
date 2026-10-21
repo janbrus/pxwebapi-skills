@@ -45,7 +45,13 @@ scb-pxwebapi-v2/
 2. Gå till **Settings > Skills** → **+ Add** → **Upload skill**
 3. Välj ZIP-filen
 
-Under **Settings > Capabilities** måste *Cloud code execution and file creation* vara på. Ska skillen hämta data själv, utan MCP-server, slår du också på *Allow network egress* och lägger till `*.scb.se` under *Additional allowed domains*. För att uppdatera laddar du ner den nya ZIP-filen, öppnar skillen under **Settings > Skills** och väljer **⋮** → **Replace**. [Skärmbilder](https://github.com/janbrus/pxwebapi-skills#claudeai-og-claude-desktop).
+![Installere en skill: Download raw file på GitHub, deretter Settings > Skills > Add > Upload skill i Claude](../docs/img/claude-install-skill.png)
+
+Under **Settings > Capabilities** måste *Cloud code execution and file creation* vara på. Ska skillen hämta data själv, utan MCP-server, slår du också på *Allow network egress* och lägger till `*.scb.se` under *Additional allowed domains*. 
+
+För att uppdatera laddar du ner den nya ZIP-filen, öppnar skillen under **Settings > Skills** och väljer **⋮** → **Replace**. 
+
+![Uppdatera en skill: ⋮ > Replace på skillsiden](../docs/img/claude-replace-skill.png)
 
 ### Claude Code
 

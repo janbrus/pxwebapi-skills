@@ -50,9 +50,7 @@ Alle seks deler samme grunnregel, skrevet øverst i hver `SKILL.md`: **oppgi ald
 
 ![Installere en skill: Download raw file på GitHub, deretter Settings > Skills > Add > Upload skill i Claude](docs/img/claude-install-skill.png)
 
-**2. Slå på code execution og gi tilgang til API-et.** Under **Settings > Capabilities** må *Cloud code execution and file creation* være på, ellers virker ikke skills. Skal skillen hente data selv, slår du også på *Allow network egress* og legger byråets domene inn under *Additional allowed domains*: `*.ssb.no`, `*.scb.se` eller installasjonens domene. En lokal MCP-server i Claude Desktop kaller API-et fra din egen maskin og trenger ikke dette.
-
-![Settings > Capabilities: code execution, network egress og *.ssb.no under Additional allowed domains](docs/img/claude-allow-domain.png)
+**2. Slå på code execution og gi tilgang til API-et.** Under **Settings > Capabilities** må *Cloud code execution and file creation* være på, ellers virker ikke skills. Skal skillen hente data selv, slår du også på *Allow network egress* og legger byråets domene inn under *Additional allowed domains*: `*.ssb.no`, `*.scb.se` eller installasjonens domene. En lokal MCP-server i Claude Desktop kaller API-et fra din egen maskin. Den trenger ikke dette.
 
 **Oppdatere.** Last ned den nye zip-filen, åpne skillen under **Settings > Skills**, klikk **⋮** → **Replace** og velg zip-filen.
 

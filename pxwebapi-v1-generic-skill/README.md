@@ -106,7 +106,15 @@ model: an `llms.txt` template for agencies, and a skill map of the workflow. It 
 2. Go to **Settings > Skills** → **+ Add** → **Upload skill**
 3. Pick the ZIP file
 
-Under **Settings > Capabilities**, *Cloud code execution and file creation* must be on. For the skill to fetch data itself, without an MCP server, also turn on *Allow network egress* and add the installation's domain (e.g. `*.stat.fi`) under *Additional allowed domains*. To update, download the new ZIP, open the skill under **Settings > Skills** and choose **⋮** → **Replace**. [Screenshots](https://github.com/janbrus/pxwebapi-skills#claudeai-and-claude-desktop).
+![Download raw file på GitHub, then Settings > Skills > Add > Upload skill i Claude](../docs/img/claude-install-skill.png)
+
+To update, download the new ZIP, open the skill under **Settings > Skills** and choose **⋮** → **Replace**.
+
+![To update: Select Replace on the skill page](../docs/img/claude-replace-skill.png)
+
+Under **Settings > Capabilities**, *Cloud code execution and file creation* must be on. For the skill to fetch data itself, without an MCP server, also turn on *Allow network egress* and add the installation's domain (e.g. `*.stat.fi`) under *Additional allowed domains*.  
+
+![Settings > Capabilities: code execution, network egress og *.ssb.no under Additional allowed domains](../docs/img/claude-allow-domain.png)
 
 ### Claude Code
 
