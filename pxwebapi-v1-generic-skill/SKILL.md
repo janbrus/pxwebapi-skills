@@ -16,7 +16,7 @@ description: >
   `ssb-pxwebapi-v2` or `scb-pxwebapi-v2` instead.
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.12.3"
+  version: "0.12.4"
 ---
 
 # PxWebApi v1 — Generic Skill
@@ -127,7 +127,7 @@ The field *names* are the point; the values are not. Real figures for the instal
 
 Every v1 installation probed so far answers it, so treat it as universal rather than as a feature some agencies happen to offer. Estonia is the one quirk: it needs the URL without a trailing slash (`.../et?config`).
 
-Three things to know about what comes back:
+Four things to know about what comes back:
 
 - **`maxCells` is sometimes missing.** Absence is not "no cell limit" — the 403 still fires; you just have to find the ceiling by bisection.
 - **Check your query against the ceilings before sending it.** Cells are the *product* of the selected value counts, values their *sum*. From a metadata response that is `prod(len(v["values"]))` and `sum(len(v["values"]))` over the variables you did not restrict — cheaper than discovering the limit as a 403.
@@ -242,7 +242,7 @@ The PX-JSON case is the dangerous one, because it *is* JSON — a check like "di
 
 Verified live against SSB and SCB: `agg:` takes only explicit codes (never `*`), `?` single-character masking does not exist in any filter, and several wildcards in one `all` list do work on current builds despite the spec saying otherwise. Aggregation and valueset names are filenames, so a name valid on one table is often invalid on another. Details and verification: `references/query-syntax.md`.
 
-Two things worth knowing before you reach for `agg:`:
+Three things worth knowing before you reach for `agg:`:
 
 - `top` is the tool for **rolling queries** — a stored `top` query keeps returning the newest periods as data is published, whereas an `item` list of future dates errors out.
 - **`extension.px.aggregallowed` is a hint, not a prediction.** Read it from any small query's response, but do not plan around it: it is **absent entirely** at Iceland, the Faroes and Estonia, and where it is `false` the installations disagree about what that means — SSB rejects `agg:` with 400, SCB serves the data anyway (verified across all seven, 2026-09-03/04). Send the query and handle the answer. See `references/px-files-and-classifications.md`.

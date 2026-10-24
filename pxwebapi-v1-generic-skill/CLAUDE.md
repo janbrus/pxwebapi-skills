@@ -14,8 +14,7 @@ scenarios in `evals/`.
 The defining constraint of v1, and the thing every page here has to keep in view: **data is
 POST-only**, metadata is thin, and there is no codelist endpoint and no saved-query API. Limits
 *are* discoverable, but through `?config` as a **query parameter** on the language level — the
-`/config` path returns 400, and an early draft of this skill wrongly concluded from that that v1
-had no config endpoint at all.
+`/config` path returns 400.
 
 v1 is not "v2 with fewer features" — the request shape is genuinely different, and the gaps in
 discovery drive most of the guidance.
@@ -95,8 +94,8 @@ rather than presenting it as universal.
 
 Every content change:
 
-1. Bump `metadata.version` in `SKILL.md` frontmatter (semver; stay below 1.0.0 while the skill has
-   no published distribution). A version that isn't bumped lies about copies being current.
+1. Bump `metadata.version` in `SKILL.md` frontmatter (semver; stay below 1.0.0 while the root
+   `README.md` marks the skill beta). A version that isn't bumped lies about copies being current.
 2. Add a `DEVLOG.md` entry — what changed, what was verified live, and on what date. Then add the
    user entry in `CHANGELOG.md`, derived from it: what is different in the answers, in a few
    bullets, with corrections marked **Corrected:**. Same version and date in both files.
@@ -113,9 +112,9 @@ made in three places: `SKILL.md`, `README.md` and `references/installations.md`.
 ## Editing guidance
 
 - The **Data integrity — the base rule** section near the top of `SKILL.md` outranks everything else in the skill: never state a number not fetched from the API in that conversation, never blend other sources, never interpolate. Don't weaken, shorten or relocate it. It mirrors the same section in `generic-pxweb-v2-skill`, `ssb-pxwebapi-v2` (Norwegian) and `scb-pxwebapi-v2` (Swedish); a change to the rule belongs in all four. The v1 version deliberately differs on two points: the `status` bullet notes that symbols are per-PX-file (`DATASYMBOL1`–`6`), and the API-failure bullet notes that several v1 installations return a bare `Bad Request`, which makes a failed call easy to mistake for an empty result. There is no `discontinued` bullet — v1 has no such flag. Since 0.12.2 the mandatory-notes bullet is mirrored here; it adds that v1's metadata has no notes, so they arrive only with the data.
-- **Versioning:** `metadata.version` in `SKILL.md` frontmatter plus a `DEVLOG.md` and a `CHANGELOG.md` entry on every content change (semver; stay below 1.0.0 while the skill has no published distribution). A version that isn't bumped lies about copies being current.
-- **Verify against a live installation before changing a factual claim.** Everything currently in
-  these files was reproduced with `curl` against SSB and/or SCB on 2026-08-28. Where a claim
+- **Versioning:** `metadata.version` in `SKILL.md` frontmatter plus a `DEVLOG.md` and a `CHANGELOG.md` entry on every content change (semver; stay below 1.0.0 while the root `README.md` marks the skill beta). A version that isn't bumped lies about copies being current.
+- **Verify against a live installation before changing a factual claim.** Each claim in these
+  files was reproduced with `curl` against the installations it names, on the date it gives. Where a claim
   contradicts published documentation, the file says so and states which one is right — keep that
   habit, and keep the verification date accurate when you re-check.
 - Known contradictions between the official PxWeb 1.0 spec and live behaviour, already documented

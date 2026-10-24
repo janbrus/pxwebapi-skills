@@ -5,6 +5,28 @@ and the outcome of every sibling check. It is repo-internal and not in the ZIP. 
 short [`CHANGELOG.md`](CHANGELOG.md); every version appears in both files. Until 2026-10-03 this
 file *was* `CHANGELOG.md`, so older entries say "this changelog" where they mean this log.
 
+## 0.12.4 — 2026-10-23
+
+From the prompt audit of 2026-10-21 (`/claude-api prompt-audit`), carried out point by point on
+2026-10-23.
+
+- **Corrected (H5): two counts in `SKILL.md`.** "Three things to know about what comes back"
+  introduced four bullets, and "Two things worth knowing before you reach for `agg:`" introduced
+  three. Now "Four" and "Three". No instruction changed
+- `CLAUDE.md` (H4): "Everything currently in these files was reproduced … on 2026-08-28" is now
+  "Each claim … against the installations it names, on the date it gives". Later releases
+  verified claims on other dates and at installations other than SSB and SCB
+- `CLAUDE.md` (M8): the intro no longer tells how an early draft concluded that v1 had no config
+  endpoint. The lesson stays under "Probe the query-parameter form before declaring an endpoint
+  absent"
+- F1: the `CHANGELOG.md` intro said versions below 1.0.0 mark "a skill with no published
+  distribution yet", although the ZIP has long been published. It now uses the root README's
+  definition of beta: fewer verified examples and evals than the SSB skill, not an unstable one.
+  `CLAUDE.md` (two places) says to stay below 1.0.0 "while the root `README.md` marks the skill
+  beta", in line with `scb-pxwebapi-v2`
+- Sibling check: no other `SKILL.md` in the repo announces a count before a list (grep
+  2026-10-23), so H5 does not apply elsewhere
+
 ## 0.12.3 — 2026-10-21
 
 Started 2026-10-19 as a sibling of `ssb-pxwebapi-v2` 1.6.4 (see its DEVLOG for the finding), and

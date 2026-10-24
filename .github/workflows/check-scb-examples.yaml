@@ -9,6 +9,8 @@ on:
   push:
     paths:
       - 'scb-pxwebapi-v2-skill/SKILL.md'
+      - 'scb-pxwebapi-v2-skill/README.md'
+      - 'scb-pxwebapi-v2-skill/CHANGELOG.md'
       - 'scb-pxwebapi-v2-skill/references/**'
       - 'scb-pxwebapi-v2-skill/scripts/**'
       - 'scb-pxwebapi-v2-skill/scb-pxwebapi-v2-skill.zip'
@@ -17,6 +19,8 @@ on:
   pull_request:
     paths:
       - 'scb-pxwebapi-v2-skill/SKILL.md'
+      - 'scb-pxwebapi-v2-skill/README.md'
+      - 'scb-pxwebapi-v2-skill/CHANGELOG.md'
       - 'scb-pxwebapi-v2-skill/references/**'
       - 'scb-pxwebapi-v2-skill/scripts/**'
       - 'scb-pxwebapi-v2-skill/scb-pxwebapi-v2-skill.zip'

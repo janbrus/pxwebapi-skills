@@ -22,11 +22,12 @@ I søkefasen (Steg 2) har du bare `/tables`-treffet, ikke metadata — og dermed
 - **Samme tredje node i alle stiene:** det er kortnavnet. Gjelder 7 291 av 7 795 tabeller, avsluttede medregnet (sveip 2026-10-03); 80 av 80 i et kontrollutvalg stemte med `metaid`.
 - **Ulike tredje noder:** tabellen er krysslistet under flere statistikker, og `paths` sier ikke hvilken som eier den. `paths[0]` bommet på 76 av 450 aktive tabeller — 10484 har `kolltrans` først, men tilhører `jernbane`; 14662 har `valgdeltakelse` først, men tilhører `sametingsvalg`. Verken første sti, flest stier eller `subjectCode` avgjør det sikkert. Kortnavnet står i `extension.metaid` i metadata (se under), som du uansett henter i Steg 3 — vent med statistikklenken til da.
 
-Kortnavnet gir tre ting uten flere API-kall:
+Kortnavnet gir fire ting uten flere API-kall:
 
 - Statistikksiden: `https://www.ssb.no/<kortnavn>`
 - «Om statistikken» med definisjoner og forklaringer: `https://www.ssb.no/<kortnavn>#om-statistikken` (engelsk: `https://www.ssb.no/en/<kortnavn>#om-statistikken`) — f.eks. `https://www.ssb.no/arblonn#om-statistikken`
 - RSS-feeden for statistikken: `https://www.ssb.no/rss/statbank/<kortnavn>` (se `api-details.md`)
+- Neste publisering: `https://www.ssb.no/rss/statkal`, poster med samme `<ssbrss:shortname>` (se `api-details.md`)
 
 Har du først hentet metadata, trengs ikke utledningen: `<root>.link.related` gir de to første lenkene ferdig, og `extension.metaid` (`KORTNAVN:<kortnavn>`) gir kortnavnet direkte — se under.
 
@@ -92,42 +93,56 @@ I `describedby` er `extension`-nøkkelen enten variabelnavnet (URN-er som gjelde
 
 URN-er på formen `"urn:ssb:classification:klass:131"` peker til SSBs system for klassifikasjoner og kodelister. Tallet til slutt er klassifikasjons-ID. Omskrives til Klass API for maskinlesbart oppslag:
 
-- `https://data.ssb.no/api/klass/v1/classifications/131.json`
+- `https://data.ssb.no/api/klass/v1/classifications/131`
 
-Eksempel: `"urn:ssb:classification:klass:691"` → `https://data.ssb.no/api/klass/v1/classifications/691.json`
+Eksempel: `"urn:ssb:classification:klass:691"` → `https://data.ssb.no/api/klass/v1/classifications/691`
+
+Klass velger format etter `Accept`-headeren: uten header, med `*/*` eller med `application/json` kommer JSON, med en nettlesers header XML, og `Accept: text/html` alene gir 500. Ikke legg `.json` på stien — det virker ennå, men SSB har varslet at det fjernes. `language=en` gir engelske navn der Klass har dem.
 
 (Menneskelesbar side: `https://www.ssb.no/klass/klassifikasjoner/131` — samme URL som `link.related` gir ferdig.)
 
 Klass er nyttig for:
 
 - Fullstendige kodeverk med historikk
-- Korrespondansetabeller (gammel→ny kommunestruktur)
+- Korrespondansetabeller: gammel → ny kommuneinndeling (`changeTable: true`, f.eks. «Kommuneinndeling 2024 - Kommuneinndeling 2023»), og kobling fra kommune til andre inndelinger som politidistrikt, sentralitet og økonomiske regioner. Lista står under `correspondenceTables` i en versjon, f.eks. `https://data.ssb.no/api/klass/v1/versions/1710` (Kommuneinndeling 2024, 33 tabeller; verifisert 2026-10-24)
 - Gyldighetsperioder for koder
 
 Komplett kommuneklassifikasjon ligger på ID 131.
 
+Hvilke eldre koder dagens kommuner er satt sammen av, står i `valueMap` til `agg_KommSummer` (se «Fylker og kommuner over tid» i `codelists-and-filters.md`). Klass svarer i tillegg på når noe skjedde, og hva som gjaldt på en dato:
+
+- `https://data.ssb.no/api/klass/v1/classifications/131/changes?from=2019-12-31&to=2020-01-02` — kodeendringene 1. januar 2020, én rad per `oldCode` → `newCode` med `changeOccurred` (0213 Ski og 0217 Oppegård → 3020 Nordre Follo). Endringsdatoen må ligge mellom `from` og `to`, ikke på en av dem. `from` er med og `to` er ikke med, men en endring trenger også dagen før i perioden. Derfor gir både `from=2020-01-01` og `to=2020-01-01` 0 rader, uten feilmelding. Eksempelet i SSBs API-guide (`from=2020-01-01&to=2021-01-01`) er et slikt tomt svar. Over flere år står hvert ledd som egen rad. Lik kode på begge sider betyr nytt navn eller endret område: 1103 Stavanger beholdt koden da Finnøy og Rennesøy ble slått inn i 2020. Endringer som ikke har trådt i kraft, krever `includeFuture=true`
+- `https://data.ssb.no/api/klass/v1/classifications/131/codesAt?date=2019-01-01` — kodene som gjaldt på datoen. `9999` Uoppgitt er med, så antall kommuner er antall koder minus én
+- `https://data.ssb.no/api/klass/v1/classifications/131/correspondsAt?targetClassificationId=112&date=2026-01-01` — kobling til en annen klassifikasjon på datoen, her KOSTRA-gruppe per kommune (se under)
+
+Stiene virker for alle klassifikasjoner. Kildehenvisning: «Kilde: SSB, Klass, klassifikasjon 131.»
+
 KOSTRA-kommunegruppene (`EKG01`–`EKG17`, brukt som regionkoder i KOSTRA-tabellene) er klassifikasjon 112 «Kodeliste for KOSTRA - kommunegruppering», versjon 1450 = 2020-grupperingen (eldre: 423 for 2004-06–2019, 1288 for 2019). Hvilken gruppe en kommune tilhører leses fra korrespondansetabellen gruppering → kommuneinndeling for riktig år — gjeldende er 2840 (2026; Bergen 4601 → `EKG12`, Oslo 0301 → `EKG13`), eldre 1358 (2024), 1483 (2023), 1482 (2022), 978 (2020). Fylkeskommunegruppene (`EAFK01`–`EAFK06`) er klassifikasjon 152, korrespondanse 1310. Verifisert 2026-09-20:
 
-- `https://data.ssb.no/api/klass/v1/classifications/112.json`
-- `https://data.ssb.no/api/klass/v1/correspondencetables/2840.json`
-- `https://data.ssb.no/api/klass/v1/classifications/152.json`
+- `https://data.ssb.no/api/klass/v1/classifications/112`
+- `https://data.ssb.no/api/klass/v1/correspondencetables/2840`
+- `https://data.ssb.no/api/klass/v1/classifications/152`
+
+Uten tabell-ID: `correspondsAt` fra 131 til 112 gir tilordningen som gjaldt på datoen, den samme som tabellene over for sine år (sjekket mot alle fem 2026-10-24).
 
 Hva gruppene er og hvordan de brukes i spørringer: se `kostra.md`.
 
 Delområder og grunnkretser ligger på ID 1, «Standard for delområde- og grunnkretsinndeling», med årlige versjoner (2026-utgaven er versjon 3306: 1 906 delområder på nivå 1 med koder `KKKKDD00`, 14 487 grunnkretser på nivå 2 med `parentCode` til delområdet). Grunnkretstabellene i PxWeb peker hit via `link.related` (`https://www.ssb.no/klass/klassifikasjoner/1`), men har bare grunnkretsnivået — delområdekodene fra Klass finnes ikke som verdier der. Verifisert 2026-09-20:
 
-- `https://data.ssb.no/api/klass/v1/classifications/1.json`
-- `https://data.ssb.no/api/klass/v1/versions/3306.json`
+- `https://data.ssb.no/api/klass/v1/classifications/1`
+- `https://data.ssb.no/api/klass/v1/versions/3306`
 
 Hva det betyr i praksis (wildcard på delområdeprefiks, hvilke tabeller som har delområder): se «Regionale nivåer under kommune» i `codelists-and-filters.md`.
 
 Standard for næringsgruppering (SN) ligger på ID 6, med SN2007 som versjon 30 (gyldig 2009-01-01 til 2025-01-01) og SN2025 som versjon 3218 (gyldig fra 2025-01-01, 1 785 koder på fem nivåer). Korrespondansetabellen SN2025 → SN2007 er ID 2919 — 1 034 rader, kun på 5-siffernivå (f.eks. `62.100` → `62.010`), så bokstav- og tosiffernivå må kobles via labelene. Alle tre verifisert 2026-09-20:
 
-- `https://data.ssb.no/api/klass/v1/classifications/6.json`
-- `https://data.ssb.no/api/klass/v1/versions/3218.json`
-- `https://data.ssb.no/api/klass/v1/correspondencetables/2919.json`
+- `https://data.ssb.no/api/klass/v1/classifications/6`
+- `https://data.ssb.no/api/klass/v1/versions/3218`
+- `https://data.ssb.no/api/klass/v1/correspondencetables/2919`
 
-Hva overgangen betyr i PxWebApi (variabel-ID `NACE2025`, forskjøvne bokstavkoder, parallelle tabeller): se «Næringskoder: SN2007 → SN2025» i `codelists-and-filters.md`.
+2919 mangler de 220 kodene som er uendret 1:1 (samme kode og innhold, f.eks. `01.120` Dyrking av ris). En femsifret kode som ikke står i 2919, er altså den samme i begge standardene — ikke uten motstykke. Resten samsvarer med SSBs Excel-utgave av korrespondansen datert 29.04.2026 (sjekket 2026-10-24).
+
+Hva overgangen betyr i PxWebApi (variabel-ID `NACE2025`, forskjøvne og gjenbrukte koder, avsluttede SN2007-tabeller): se «Næringskoder: SN2007 → SN2025» i `codelists-and-filters.md`.
 
 ## Variabeldefinisjoner (VarDok)
 

@@ -7,7 +7,7 @@ Draft proposal, not published by SSB. Condensed from the `ssb-pxwebapi-v2` agent
 Rules for agents using this API:
 
 - Never state a figure you have not fetched from the API in the current session. Do not fill gaps from memory, other sources, interpolation or extrapolation. If the API fails or the table is not found, say so.
-- Workflow: search (`GET /tables?query=`) → inspect metadata (`GET /tables/{id}/metadata`) → fetch data (`GET` or `POST /tables/{id}/data`). Do not skip the metadata step: variable codes and value codes must be read from metadata, never guessed. Table IDs are permanent; codes and codelists are not.
+- Workflow: search (`GET /tables?query=`) → inspect metadata (`GET /tables/{id}/metadata`) → fetch data (`GET` or `POST /tables/{id}/data`). Do not skip the metadata step: variable codes and value codes must be read from metadata, never guessed. Codes and codelists change, and a replaced table can be removed entirely (404); the changes page below gives the new ID.
 - Search with SSB's subject terms in the language of `lang`: `konsumprisindeks` with `lang=no`, `consumer price index` with `lang=en`. Everyday words miss: `inflasjon` gives 0 hits, and `boligpriser` finds only a macroeconomic forecast table. The search engine is Lucene, so `title:`, wildcards and `AND`/`OR` work. Percent-encode æ, ø and å in URLs (`l%C3%B8nn`); raw UTF-8 returns 400.
 - Check `discontinued` and `lastPeriod` on `GET /tables/{id}`. `discontinued` is present only when the table is discontinued (`true`), and it is not set in metadata or data responses. Series often continue in a new table (CPI: 14700 replaces 03013, and 14701 replaces 03014).
 - A variable may be left out of a query only if its metadata says `elimination: true`. `Tid` (time) and `ContentsCode` (the measure) can never be left out.
@@ -39,7 +39,8 @@ Rules for agents using this API:
 
 ## Metadata and classifications
 
-- [Klass API](https://data.ssb.no/api/klass/v1/classifications/131.json): SSB's classification system (this example: municipalities); URNs in `link.describedby` in table metadata point here
+- [Klass API](https://data.ssb.no/api/klass/v1/classifications/131): SSB's classification system (this example: municipalities); URNs in `link.describedby` in table metadata point here
+- [Klass API guide](https://data.ssb.no/api/klass/v1/api-guide.html): endpoints and parameters; send Accept: application/json
 - [Standard symbols in tables](https://www.ssb.no/en/diverse/standardtegn-i-tabeller): the meaning of `.`, `..`, `:` and older symbols
 - [Changes to StatBank tables](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller): structural changes and discontinued tables
 - [KOSTRA documentation](https://www.ssb.no/offentlig-sektor/kostra/statistikk/kostra-kommune-stat-rapportering/om-kostra/dokumentasjon-av-kostra): municipal reporting, group codes and revision schedule

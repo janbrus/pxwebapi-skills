@@ -62,7 +62,7 @@ Ressursen finnes ikke.
 **Vanlige årsaker:**
 
 - Feil tabell-ID (skal være et tall som streng, f.eks. `"07459"`)
-- Tabellen er fjernet og erstattet av en ny — søk etter temaet
+- Tabellen er erstattet og fjernet helt (`Non-existent table`). SSB lar ikke alltid en erstattet tabell stå som `discontinued`, så en tabell-ID du husker eller har fått oppgitt, kan være borte. Slå opp ID-en på [Endringer i statistikkbanktabeller](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller), der arkivet for 2016–2025 er lenket nederst og ny tabell-ID står oppgitt. Søk etter temaet bare hvis den ikke står der. Eksempel: 11038 gir 404, og siden oppgir 14890 (verifisert 2026-10-23)
 - Feil saved query-ID
 - **URL-en er lengre enn ca. 2 100 tegn** — API-et svarer 404, ikke 400. Grensen er målt 2026-09-09 på 07459: 400 distinkte kommunekoder (2 092 tegn) gir 200, 410 koder (2 142 tegn) gir 404. Bytt lange verdilister mot `*`, `?`, `from()`/`to()`/`[range()]` eller en kodeliste, eller bruk POST, som ikke har lengdegrensen
 
@@ -116,9 +116,13 @@ Tjenesten er nede eller under oppdatering. Metadata oppdateres kl. 05.00 og 11.3
 - Bruk `pastDays=30` for å finne nylig oppdaterte tabeller
 - Paginering: sjekk `page.totalPages` — det kan finnes flere resultatsider
 
+### Avsluttet tabell (`discontinued`)
+
+Tabeller avsluttes, og serien fortsetter ofte i en ny tabell. Bruker du en avsluttet tabell, si det og oppgi siste periode. Finn etterfølgeren når den finnes: tabellnoten nevner den av og til (03013 → 14700), ellers slår du opp ID-en på [Endringer i statistikkbanktabeller](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller), som også lister tabeller som er fjernet helt (se 404 over).
+
 ### Manglende kommuner
 
-Kommunesammenslåinger i 2020 endret mange kommunekoder. For eksempel ble gamle Oppegård (0217) og Ski (0213) til nye Nordre Follo (3020).
+Kommunesammenslåingene i 2020 og fylkesdelingen i 2024 endret mange kommunekoder. For eksempel ble gamle Oppegård (0217) og Ski (0213) til nye Nordre Follo (3020). Hvilke koder som endret seg når, viser Klass (`changes`, se `klass-vardok.md`).
 
 **Løsning:**
 
@@ -155,8 +159,8 @@ Se https://www.ssb.no/diverse/standardtegn-i-tabeller (engelsk: https://www.ssb.
 
 ### Data ser "feil ut" over tid
 
-- Kommunesammenslåinger i 2020 bryter tidsserier på kommunenivå
-- Næringsklassifisering: SSB er i overgang fra SN2007 til SN2025 (fra 2026, statistikk for statistikk, begge varianter oppdateres parallelt). Samme bokstavkode er ulik næring i de to standardene — se «Næringskoder: SN2007 → SN2025» i `codelists-and-filters.md`
+- Kommunesammenslåingene i 2020 og kodeskiftet i 2024 bryter tidsserier på kommunenivå
+- Næringsklassifisering: SSB er i overgang fra SN2007 til SN2025 (2026–2029, statistikk for statistikk; de fleste SN2007-tabeller avsluttes, konkursene går parallelt). Samme kode, bokstav eller femsifret, kan være ulik næring i de to standardene — se «Næringskoder: SN2007 → SN2025» i `codelists-and-filters.md`
 - KOSTRA: KOSTRA-gruppene (`EKGnn`) ble revidert fra 2020 (brudd 2019/2020, ofte obligatorisk note); tabellene ble omstrukturert i 2015 (eldre serier ligger i avsluttede tabeller); variabler og tabeller byttes ut når rapporteringskravene endres (sosialtjenesten 2015–2021 → nye tabeller fra 2022) — tomme år for en variabel betyr ofte at den ikke fantes; mars-tall er ureviderte til juni uten `status`-flagg; Landet og Landet uten Oslo er estimerte og veide tall — se `kostra.md`
 - KPI-basisår endres periodisk (nå 2025=100)
 - Nasjonalregnskapet revideres (foreløpige → endelige tall)

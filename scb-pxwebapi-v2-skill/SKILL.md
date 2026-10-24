@@ -15,7 +15,7 @@ description: >
   sparade frågor och outputformat (json-stat2, csv, xlsx).
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.11.3"
+  version: "0.11.4"
 ---
 
 # SCB PxWebApi v2 — Komplett guide
@@ -140,12 +140,7 @@ Responsstrukturen för varje träff inkluderar: `id`, `label`, `description`, `u
 
 **Hitta kommunkoder:**
 
-När användaren nämner en kommun du inte kan koden till — wildcards i valueCodes matchar bara *koder*, inte kommunnamn. Strategi:
-
-1. Sök efter kommunnamnet i API:et — sökningen letar i variabelvärden och bekräftar att kommunen finns
-2. Hämta metadata för en aktuell tabell med Region-dimension (t.ex. TAB6471) — scanna `category.label` i Region-dimensionen för kommunnamnet och hitta koden
-3. Alternativt: använd wildcard på länskoden (t.ex. `01*` för Stockholms län) och identifiera kommunen i resultaten
-4. SCB:s standardkoder för kommuner/län följer SKR:s 4-siffriga kommunkoder (de två första = länskod)
+Wildcards i valueCodes matchar bara *koder*, inte kommunnamn. Kommunnamnet står i `category.label` i Region-dimensionen i metadata för en aktuell tabell (t.ex. TAB6471); sökningen letar i variabelvärden och bekräftar att kommunen finns. Koderna följer SKR:s 4-siffriga kommunkoder, där de två första är länskoden (`01*` = alla kommuner i Stockholms län).
 
 ### Steg 3: Utforska metadata
 
@@ -162,7 +157,7 @@ Metadata returneras i json-stat2-format (Dataset-schema) — se `references/json
 **Viktiga regler om metadata:**
 
 - Läs `elimination` **enbart från metadata** — i ett data-svar betyder fältet något annat och vilseleder dig. Utelämnar du en eliminerbar variabel försvinner den helt ur svaret (ur `id` och `dimension`, inte som en totalrad); notera det själv. Metadata skiljer inte tabeller med egen totalkod (`Region` = `00`, «Riket») från dem som summeras i farten (`Kon` i TAB638; i TAB6471 har `Kon` totalkoden `TotSa`) — leta efter «Riket»/«Totalt» i `category.label`. `eliminationValueCode` finns bara i data-svar som innehåller totalen (TAB6471 Region=`00` → `"00"`), aldrig i metadata. Detaljer: `references/json-stat2.md`
-- Variabler med `elimination: false` MÅSTE inkluderas i query. Tid och ContentsCode är alltid icke-elimineringsbara (felet du annars får står i Steg 4)
+- Variabler med `elimination: false` måste inkluderas i query — annars svarar API:et 400 (se Steg 4). Tid och ContentsCode är alltid icke-elimineringsbara
 
 **Kodlistor och filtrering:**
 
@@ -232,7 +227,6 @@ Viktigaste mönster: `top(N)` = senaste N värdena, `bottom(N)` = äldsta N, `fr
 - En GET-URL över ca 2 100 tecken ger **404**, inte 400 (gränsen mätt hos SSB 2026-09-09: 2 092 tecken svarar, 2 142 gör det inte). Ersätt långa värdelistor med `*`, `?`, `from()`/`to()`/`[range()]` eller en kodlista, eller använd POST — korta URL:en innan du drar slutsatsen att tabellen saknas.
 - **Upprepad värdekod ger 500 med tom body**, inte 400: `valueCodes[Tid]=2023,2023` räcker, i både GET och POST (verifierat mot TAB1267 2026-09-09; samma hos SSB och Lettland). Överlapp mellan ett uttryck och en enskild kod är däremot okej — `2026,top(1)` svarar. Deduplicera listan om du bygger selektionen programmatiskt.
 - 503 betyder att tjänsten är nere eller laddar om. Vänta och försök igen; kommer den inte tillbaka gäller Fallback — säg att data inte kunde hämtas.
-- Börja smalt — lättare att utvidga än att hantera för mycket data.
 
 ### Steg 5: Presentera resultaten
 

@@ -1,8 +1,12 @@
 # Changelog — generic-pxweb-v2-skill
 
-What is different for users of the skill, newest first. The current version is in `SKILL.md` frontmatter under `metadata.version`; if your copy has none, it predates 2026-08-30 — get a newer one. Versions below 1.0.0 mark a skill with no published distribution yet.
+What is different for users of the skill, newest first. The current version is in `SKILL.md` frontmatter under `metadata.version`; if your copy has none, it predates 2026-08-30 — get a newer one. Versions below 1.0.0 mark a beta skill: fewer verified examples and evals than the SSB skill, not an unstable one.
 
 What was verified, on which installations and when, is in the maintainer's log, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/pxwebapi-v2-generic-skill/DEVLOG.md). It is in the repository, not in the ZIP.
+
+## 0.11.4 — 2026-10-23
+
+- The advice "Start narrow" is gone from Step 4. The `maxDataCells` limit stays.
 
 ## 0.11.3 — 2026-10-21
 

@@ -2,6 +2,21 @@
 
 Underhållarens logg: vad som ändrats, vad som verifierats mot live API, var och när, och utfallet av varje syskonkontroll. Den är repo-intern och ingår inte i zip:en. Användare läser den korta [`CHANGELOG.md`](CHANGELOG.md); varje version står i båda filerna. Fram till 2026-10-05 *var* den här filen `CHANGELOG.md`, så äldre poster säger «denna logg» eller «CHANGELOG» när de menar den här filen.
 
+## 0.11.4 — 2026-10-23 (beta)
+
+Från prompt-auditen 2026-10-21 (`/claude-api prompt-audit`), genomförd punkt för punkt 2026-10-23 som syskon till `ssb-pxwebapi-v2` 1.6.5. Baseline-evals kördes samma dag före ändringarna: Sonnet 5.5, en agent per scenario med HEAD-zip:en (0.11.3) uppackad i egen mapp, `curl`, ingen MCP. Scenario 1 och 3 samt «Hur många bor i Gnesta?» klarade sig alla.
+
+- **M3:** «`elimination: false` MÅSTE inkluderas i query … (felet du annars får står i Steg 4)» är nu «måste inkluderas i query — annars svarar API:et 400 (se Steg 4)». Steg 4 har felet. Baseline scenario 1: `Alder=TotSA` med, ingen 400
+- **M5:** «Börja smalt — lättare att utvidga än att hantera för mycket data» är borttagen ur Steg 4
+- **M6:** «Hitta kommunkoder» var en strategi i fyra steg och är nu löptext med samma fakta: wildcards matchar bara koder, namnet står i `category.label` i Region-dimensionen i metadata för en aktuell tabell (t.ex. TAB6471), sökningen bekräftar att kommunen finns, och koderna är SKR:s fyrsiffriga med länskoden först (`01*`). Exemplen `TAB6471` och `01*` står kvar. Baseline «Hur många bor i Gnesta?»: koden 0461 hittades i `category.label` i TAB6471-metadata (dåvarande steg 2), utan sökning
+- `CLAUDE.md`: H3a — speglingsmeningen säger att API:ets decimaler ligger i «Märk dina egna beräkningar» och att bara SSB:s punkter om variabelkoder och preliminära siffror saknas. M2b — triggertestets resultat är flyttade ut ur `CLAUDE.md`; de står i 0.11.3 här. F6 — `README.md` och `CHANGELOG.md` under `paths:` i `check-scb-examples.yaml`, och i meningen i `CLAUDE.md` som räknar upp dem. F1 — versionsregeln säger «stay below 1.0.0 while the root `README.md` marks the skill beta» i stället för «while the skill is marked BETA», samma mening som i `generic-pxweb-v2-skill`, `generic-pxweb-v1-skill` och `ssb-histstat` (underhållaren 2026-10-23)
+- Syskonkontroll: se `ssb-pxwebapi-v2` 1.6.5
+- Syskonkontroll av SSB 1.6.5:s tillägg (verifierat live 2026-10-23), skillen oförändrad:
+  - **Tabell-ID:n som försvinner:** gäller inte i samma form. SCB:s skill påstår inte att tabell-ID:n är permanenta (grep). Ett okänt ID ger 404 `Non-existent table` som hos SSB, och avslutade tabeller flaggas med `discontinued` (33 av 251 träffar på `befolkning` med `includeDiscontinued=true`). Ingen motsvarighet till SSB:s sida «Endringer i statistikkbanktabeller» hittades på scb.se (API-sidan och Statistikdatabasen-sidan), och underhållaren tror inte att SCB har någon. Om SCB tar bort ersatta tabeller helt är inte undersökt
+  - **`pageSize=50`:** godtas (`befolkning`: 218 träffar, 50 returnerade); `pageSize=1001` ger 200 och alla 218, alltså ingen övre gräns. SCB:s skill har bara parametertabellen («default: 20») och rådet att lägga till ett ord ur tabelltiteln när träfflistan blir lång; inget ändrat förrän underhållaren säger till
+  - **Publiceringskalender via RSS:** inte undersökt. SSB:s recept bygger på `rss/statkal` och statistikens kortnamn; SCB:s publiceringskalender har inte granskats
+- **Efter-evals 2026-10-23** (Sonnet 5.5, zip från arbetsträdet, samma prompter som baseline): scenario 1, 3 och «Hur många bor i Gnesta?» klarade sig alla, utan regression från M3b, M5b eller M6. Se «Körningar» i `evals/eval-scenarios.md`. `check_examples.py`: 11 exempel och 2 tabell-ID:n, 0 fel (en första körning fick timeout på TAB6596/metadata medan tre agenter anropade SCB; URL:en svarade 200 direkt efteråt)
+
 ## 0.11.3 — 2026-10-21 (beta)
 
 Påbörjad 2026-10-19, som syskon till `ssb-pxwebapi-v2` 1.6.4 (se dess DEVLOG för upptäckten), och utgiven tillsammans med den 2026-10-21. Testet körde skill-creators `run_eval.py` och stoppade varje session vid första verktygsanropet, så inga data hämtades från API:et.

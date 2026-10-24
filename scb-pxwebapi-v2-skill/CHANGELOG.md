@@ -4,6 +4,12 @@ Vad som är annorlunda för den som använder skillen, nyast först. Gällande v
 
 Vad som verifierats, var och när, står i underhållarens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/scb-pxwebapi-v2-skill/DEVLOG.md). Den finns i repot, inte i zip:en.
 
+## 0.11.4 — 2026-10-23 (beta)
+
+- Rådet «Börja smalt» är borttaget ur Steg 4. Gränsen `maxDataCells` står kvar.
+- Regeln om obligatoriska variabler står med vanliga bokstäver och säger varför: saknas en av dem svarar API:et 400.
+- «Hitta kommunkoder» är skriven som löptext med samma fakta: namnet står i `category.label` i metadata, och de två första siffrorna i koden är länskoden.
+
 ## 0.11.3 — 2026-10-21 (beta)
 
 - Nytt: är en MCP-server mot SCB ansluten, till exempel pxweb-mcp, laddar Claude skillen innan verktygen används. Då gäller reglerna för tabellval, koder, siffror och källhänvisning även där. Det är mätt med servernamnet `pxweb-scb`, så ge servern ett namn som nämner SCB.

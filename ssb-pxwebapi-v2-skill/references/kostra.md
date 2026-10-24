@@ -120,7 +120,7 @@ Konsekvenser:
 
 - `https://data.ssb.no/api/pxwebapi/v2/tables/13526/data?lang=no&valueCodes[KOKkommuneregion0000]=EAK,EAKUO,EKG12,0301&valueCodes[ContentsCode]=KOSbygsokrestrik0000&valueCodes[Tid]=top(1)` — andel innvilgede byggesøknader i restriksjonsområder, siste år, i prosent med 1 desimal fra `category.unit`; Oslo har `status` `..` og skal vises som manglende, ikke droppes
 - `https://data.ssb.no/api/pxwebapi/v2/tables/12134/data?lang=no&valueCodes[KOKkommuneregion0000]=4601,EKG12,EAKUO&valueCodes[ContentsCode]=KOSAGD230000&valueCodes[Tid]=top(3)` — netto driftsresultat i prosent av brutto driftsinntekter, siste tre år, for Bergen, KOSTRA-gruppe 12 og landet uten Oslo. Responsen har `noteMandatory` på bruddnoten
-- `https://data.ssb.no/api/klass/v1/correspondencetables/2840.json` — gruppetilhørighet per kommune, 2026-inndelingen (357 rader)
+- `https://data.ssb.no/api/klass/v1/correspondencetables/2840` — gruppetilhørighet per kommune, 2026-inndelingen (357 rader)
 
 Utelates `valueCodes[KOKkommuneregion0000]` fra den første URL-en, svarer API-et 400 `Missing selection for mandantory variable`.
 

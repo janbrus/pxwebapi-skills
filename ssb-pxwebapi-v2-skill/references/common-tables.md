@@ -40,7 +40,7 @@ Kurert liste over mye etterspurte tabeller, basert på faktisk bruk. Bekreft med
 | 04317 | Grunnkretsenes befolkning (G)                                           | Årlig       | Folketall per grunnkrets (8-sifret kode); delområde = wildcard, f.eks. `030109*` for Majorstuen |
 | 04362 | Alders- og kjønnsfordeling for grunnkretsenes befolkning (G)            | Årlig       | Alder/kjønn per grunnkrets — 1- og 2-tall er endret til 0/3, summer avviker |
 | 06198 | Areal av land og ferskvatn, etter grunnkrets (km²) (G)                  | Årlig       | Areal per grunnkrets                                        |
-| 14746 | Framskrevet folkemengde kommuner, fylker og hele landet, 9 alternativer | Årlig       | Befolkningsprognoser til 2050                               |
+| 14746 | Framskrevet folkemengde kommuner, fylker og hele landet, 9 alternativer | Årlig       | Befolkningsframskrivinger til 2050                          |
 | 05375 | Forventet gjenstående levetid, etter kjønn og alder                     | Årlig       | Levealder, forventet gjenstående levetid                    |
 | 07995 | Døde, etter kjønn, alder og uke (foreløpige tall)                       | Ukentlig    | Overdødelighet, ukentlig dødsstatistikk                     |
 | 10467 | Fødte, etter jentenavn og guttenavn                                     | Årlig       | Navnestatistikk for nyfødte                                 |
@@ -48,6 +48,8 @@ Kurert liste over mye etterspurte tabeller, basert på faktisk bruk. Bekreft med
 | 12891 | Etternavn brukt av 200 personer eller flere                             | Årlig       | Etternavnstatistikk                                         |
 
 Tabell 07459 er den mest brukte befolkningstabellen. Den dekker alle kommuner, fylker og hele landet. Bruk kodeliste `agg_KommFylker` for fylkesaggregering, `agg_KommSummer` for konsistente tidsserier over kommunesammenslåinger.
+
+Tabell 14746 er en framskriving: SSB-tall, men ikke statistikk. Oppgi alternativet. `Personer` er hovedalternativet (MMMM), `Personer1`–`Personer8` de åtte andre.
 
 ---
 
@@ -99,6 +101,8 @@ AKU (13760): Bruk `Justering=3MGG` (sesongjustert, tremåneders glidende gjennom
 | 10701 | NIBOR og Norges Banks foliorente                         | Månedlig                       | Pengemarkedsrenter, styringsrente                                              |
 | 10748 | Renter på nye boliglån, etter utlånstype og bindingstid  | Månedlig                       | Boliglånsrenter, utvalg banker/kredittforetak                                  |
 | 07200 | Renter på utestående utlån, etter långiver og sektor     | Kvartalsvis                    | Utlånsrenter totaltelling, historisk fra 1979-                                 |
+
+Ferdige per innbygger-tall fra SSB, som i 09842, bruker du med mindre de mangler serier eller perioder du trenger, eller bygger på en eldre revisjon enn tallene de skal sammenlignes med. Regn da selv, og si hvorfor.
 
 Tabell 12880 har både regnskap og SSBs prognoser: 43 hovedstørrelser fra 1991 (vekst i prosent der ikke annet står; BNP og BNP Fastlands-Norge er lik 09189). De fire siste årene er alltid prognoser (`top(4)`), merket bare i noten, ikke i `status`. Siste regnskapsår er `[top(1,4)]`, de fem siste `[top(5,4)]`. Kall prognosene prognoser.
 

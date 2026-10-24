@@ -1,12 +1,17 @@
 # Changelog — generic-pxweb-v1-skill
 
 What is different for users of the skill, newest first. The current version is in `SKILL.md` frontmatter under
-`metadata.version`; if your copy has none, it predates 2026-08-30 — get a newer one. Versions below 1.0.0 mark a skill
-with no published distribution yet.
+`metadata.version`; if your copy has none, it predates 2026-08-30 — get a newer one. Versions below 1.0.0 mark a beta
+skill: fewer verified examples and evals than the SSB skill, not an unstable one.
 
 What was verified, on which installations and when, is in the maintainer's log,
 [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/pxwebapi-v1-generic-skill/DEVLOG.md). It is in the
 repository, not in the ZIP.
+
+## 0.12.4 — 2026-10-23
+
+- Corrected: two lists in `SKILL.md` announced fewer points than they have ("Three things" over four, "Two things"
+  over three). The instructions themselves are unchanged.
 
 ## 0.12.3 — 2026-10-21
 

@@ -2,6 +2,17 @@
 
 Vedlikeholderens logg: hva som er endret, hvorfor, hva som er verifisert og når, og om en søskenskill ble berørt. Den er repo-intern og følger ikke med i zip-en. Brukerne leser den korte [`CHANGELOG.md`](CHANGELOG.md); hver versjon står i begge filene. Fram til 2026-10-05 *var* denne fila `CHANGELOG.md`.
 
+## 1.4 — 2026-10-23
+
+Fra prompt-auditen 2026-10-21 (`/claude-api prompt-audit`), gjennomført punkt for punkt 2026-10-23.
+
+- **Rettet (H1): fortellerbuen sto i strid med datareglen.** «Konsekvens» foreslo «framskriving» og konteksten «vs. mål», mens «Avhengigheter til datakilden» forbyr å tegne tall som ikke er hentet fra API-et i samme samtale. Nå er en framskriving bare lov som SSBs egne tall (som befolkningsframskrivingene), merket som framskriving, og sammenligningstallene skal være hentet fra SSB i samme samtale. «vs. mål» er tatt ut, fordi et mål (som Norges Banks inflasjonsmål) ikke er SSB-data. Referanselinjene for gjennomsnitt og median i `chart-selection.md` og den stiplete prognoselinja står, fordi de bygger på SSB-tall
+- **Baseline-eval 2026-10-23** (Sonnet 5.5, ssb-pxwebapi-v2 1.6.4 + ssb-chart 1.3, «Lag en serie diagrammer som forteller historien om KPI de siste 10 årene»): fem diagrammer fra 14700, 14701 og 14704, ingen målstrek og ingen framskriving, og agenten sa selv at målet ikke er et SSB-tall. Testen skiller altså ikke før og etter; den kan bare fange en forverring
+- `CLAUDE.md` (H2): oppskriften for å bygge zip-en for hånd, og «mirror to the other home», er erstattet med `scripts/build_zip.sh`. Den installerte kopien er en symlenke hos vedlikeholderen; der den er en kopi, må den oppdateres fra kilden
+- **M4:** «ALLTID» og «IKKE» står med vanlige bokstaver på fire steder i brødteksten: y-aksen starter alltid på 0, de to rendringsmålene deler ikke stilregler, tittel og kilde skrives ikke inn i widgeten, og tabeller rendres ikke med SSB-stilen i en widget. `description` er uendret, for ikke å røre triggerflaten. Baseline-eval 2026-10-23 («Vis befolkningen i Oslo som graf» i chat-widget): tittel og kilde sto i chat-teksten, ikke i widgeten
+- Søskenskill: ingen — SCB og generisk har ingen chart-skill
+- **Etter-evals 2026-10-23** (ssb-pxwebapi-v2 1.6.5 + ssb-chart 1.4, samme prompter): KPI-historien ga seks diagrammer fra 14700, 14701 og 14704, ingen målstrek («Norges Banks tall», henviser til `norges-bank-api`) og ingen framskriving; eneste referanselinje er basisåret 100. Oslo-widgeten hadde tittel og kilde i chat-teksten, vertens tokens og SSB Grønn. Ingen regresjon fra H1 eller M4
+
 ## 1.3 — 2026-10-15
 
 Atferdsendring i farger, rutenett, diagramtyper og tekster. Utløst av innspill Jan har fått til skillen (lagret utenfor repoet), og av Jans håndredigeringer i `SKILL.md` 2026-10-07 (grønn `#00824D`, Open Sans-titler, kilde og direkte merking i `#274247`, rutenett `#D9DFE0`) som bare hadde nådd hurtigtabellene. Snuttene i `references/` blir kopiert ordrett, så de gamle verdiene vant i praksis fram til nå. Alle tall under er regnet med WCAG-kontrast og med OKLab-avstand ×100 etter Machado-simulering (2009, full styrke) av protanopi og deuteranopi; metoden gjenskaper innspillets 3,4 for grønn mot gull nøyaktig.

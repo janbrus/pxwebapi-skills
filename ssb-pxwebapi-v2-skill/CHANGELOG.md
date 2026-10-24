@@ -4,6 +4,20 @@ Hva som er annerledes for deg som bruker skillen, nyeste først. Gjeldende versj
 
 Hva som er verifisert, hvor og når, står i vedlikeholderens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/ssb-pxwebapi-v2-skill/DEVLOG.md). Den ligger i repoet, ikke i zip-en.
 
+## 1.6.5 — 2026-10-23
+
+- Rådet «Start smalt» er tatt ut av Steg 4. Grensen `maxDataCells` står.
+- Regelen om obligatoriske variabler står med vanlige bokstaver og sier hvorfor: mangler en av dem, svarer API-et 400.
+- **Rettet:** Skillen sa at tabell-ID-er er permanente. En erstattet tabell kan være fjernet helt (404). Claude slår da opp ny ID på SSBs side over endringer i statistikkbanktabeller.
+- Nytt: «Når kommer neste tall?» besvares via statistikkens kortnavn, fra SSBs publiseringskalender eller, lenger fram, fra statistikksiden.
+- Nytt: tabellsøket bruker `pageSize=50`, så brede søk ikke kutter bort riktig tabell.
+- Dataintegritet i `SKILL.md` er kortere. Punktene har regelen, og detaljene står i referansefilene: prognoser, framskrivinger og ferdige per innbygger-tall i `common-tables.md`, avsluttede og fjernede tabeller i `troubleshooting.md`.
+- Nytt: Claude kan slå opp i SSBs Klass hvilke kommunekoder som endret seg når (sammenslåinger, delinger, nye navn, grenseendringer), hvilke koder som gjaldt på en dato, og KOSTRA-gruppe på en dato.
+- Klass-oppslag bruker ikke lenger `.json` i URL-en, som SSB har varslet at fjernes.
+- **Rettet:** Skillen nevnte bare sammenslåingene i 2020 som grunn til at kommunekoder endrer seg. Fylkesdelingen i 2024 ga også nye koder.
+- **Rettet:** Skillen sa at SN2007-tabellene oppdateres parallelt med SN2025. De fleste avsluttes når SN2025-tabellen kommer; bare noen, som konkursene, går på begge.
+- Nytt: varsel om at også femsifrede næringskoder kan ha fått nytt innhold i SN2025. En kode som mangler i SSBs korrespondansetabell i Klass, er uendret.
+
 ## 1.6.4 — 2026-10-21
 
 - Nytt: Er en MCP-server mot SSB tilkoblet, for eksempel pxweb-mcp, laster Claude skillen før den bruker verktøyene. Da gjelder reglene for tabellvalg, koder, tall og kildehenvisning også der. Uten skillen gikk Claude ofte rett til verktøyene. Dette er målt med servernavn som nevner SSB eller pxweb, så gi serveren et slikt navn, for eksempel `pxweb-ssb`.

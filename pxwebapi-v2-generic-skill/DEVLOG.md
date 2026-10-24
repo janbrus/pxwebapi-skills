@@ -2,6 +2,20 @@
 
 The maintainer's record: what changed, what was verified live, on which installations and when, and the outcome of every sibling check. It is repo-internal and not in the ZIP. Users read the short [`CHANGELOG.md`](CHANGELOG.md); every version appears in both files. Until 2026-10-05 this file *was* `CHANGELOG.md`, so older entries say "this log" or "the CHANGELOG" where they mean this file.
 
+## 0.11.4 — 2026-10-23
+
+From the prompt audit of 2026-10-21 (`/claude-api prompt-audit`), carried out point by point on 2026-10-23 as a sibling of `ssb-pxwebapi-v2` 1.6.5. A baseline eval ran the same day before the changes: Sonnet 5.5, scenario 3 (Latvia) with the HEAD zip (0.11.3) unpacked in its own folder, `curl`, no MCP. It passed.
+
+- **M5c:** "Start narrow — it's easier to expand than to handle too much data" is gone from Step 4's limits; the `maxDataCells` line stays. Baseline scenario 3: `/config` read, `top(4)` where the latest month was asked for
+- `CLAUDE.md`: H3b — the mirroring sentence says the API's decimals sit inside "Mark your own calculations" and that only SSB's bullets on variable codes and provisional figures are not mirrored. M2c — the trigger results moved out of `CLAUDE.md`; they are in 0.11.3 here
+- F1: the `CHANGELOG.md` intro said versions below 1.0.0 mark "a skill with no published distribution yet", although the ZIP has long been published. It now uses the root README's definition of beta: fewer verified examples and evals than the SSB skill, not an unstable one. `CLAUDE.md` says to stay below 1.0.0 "while the root `README.md` marks the skill beta", in line with `scb-pxwebapi-v2`; the same change is in `generic-pxweb-v1-skill` 0.12.4 and `ssb-histstat` 0.9.1
+- Sibling check: see `ssb-pxwebapi-v2` 1.6.5
+- Sibling check of SSB 1.6.5's additions (verified live 2026-10-23), skill unchanged:
+  - **Table IDs that disappear:** this skill and `generic-pxweb-v1-skill` make no claim that table IDs are permanent (grep). Does not apply
+  - **`pageSize=50`:** accepted at SCB (`befolkning`: 218 hits, 50 returned) and Latvia (`population`, `lang=en`: 205 hits, 50 returned); `pageSize=1001` returns 200 and every hit at both, so no upper limit found. SSB measured the same. Step 2's "raise `pageSize` or page through" stays
+  - **Release calendar via RSS:** SSB-specific (`rss/statkal` keyed by the statistics shortname). Not checked for SCB or Latvia
+- **After-eval 2026-10-23** (Sonnet 5.5, ZIP built from the working tree, same prompt as the baseline): scenario 3 (Latvia) passed as before, with no change in behaviour from M5c. See "Runs" in `evals/eval-scenarios.md`
+
 ## 0.11.3 — 2026-10-21
 
 Started 2026-10-19 as a sibling of `ssb-pxwebapi-v2` 1.6.4 (see its DEVLOG for the finding), and released with it on 2026-10-21. The test ran skill-creator's `run_eval.py` and stopped each session at its first tool call, so no data was fetched from any API.

@@ -2,7 +2,7 @@
 
 Denne veiledningen forklarer hvordan du bruker Claude-skillen for SSBs Statistikkbank.
 
-Skillen vedlikeholdes på <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>; denne veiledningen ligger i `docs/` der. Denne veiledningen dekker **v1.6.3**. Sjekk repoet for nyere versjon og endringslogg.
+Skillen vedlikeholdes på <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>; denne veiledningen ligger i `docs/` der. Denne veiledningen dekker **v1.6.5**. Sjekk repoet for nyere versjon og endringslogg.
 
 ## Forutsetninger
 
@@ -226,7 +226,7 @@ Kjenner du tabellnummeret, oppgi det direkte.
 
 ### Claude bruker feil kommunekode
 
-Kommunekodene endret seg ved sammenslåingene i 2020. Be Claude søke etter kommunenavnet, eller bruke kodelista `agg_KommSummer` for en konsistent tidsserie over sammenslåingen. Wildcards matcher bare koder, ikke kommunenavn.
+Kommunekodene endret seg ved sammenslåingene i 2020 og fylkesdelingen i 2024. Be Claude søke etter kommunenavnet, eller bruke kodelista `agg_KommSummer` for en konsistent tidsserie over sammenslåingen. Wildcards matcher bare koder, ikke kommunenavn.
 
 ### Dataene ser rare ut
 
@@ -234,9 +234,9 @@ Be Claude sjekke enheten — tabellen kan ha flere målevariabler (antall, prose
 
 Tre vanlige årsaker til at en serie ser merkelig ut over tid:
 
-- kommunesammenslåingene i 2020 bryter tidsserier på kommunenivå
+- kommunesammenslåingene i 2020 og kodeskiftet i 2024 bryter tidsserier på kommunenivå
 - KPI-basisåret endres periodisk (nå 2025=100)
-- næringskodene: samme bokstav betyr ulik næring i SN2007 og SN2025
+- næringskodene: samme kode (bokstav eller tall) kan bety ulik næring i SN2007 og SN2025
 
 ### Skillen trigger ikke
 
@@ -270,7 +270,7 @@ De vanligste:
 - **40 spørringer per minutt.** Gjeldende grense står i `x-ratelimit-*`-responsheaderne. Feltene `maxCallsPerTimeWindow` og `timeWindow` i `/config` er nullstilt til 0 og ikke lenger i bruk
 - **Nye tall publiseres kl. 08.00.** Data under revisjon kan vise 0 eller prikk mellom kl. 05 og 08. Metadata oppdateres kl. 05.00 og 11.30, og tabellene er utilgjengelige imens
 - **Kommunekoder er ikke stabile over tid.** Bruk kodelister for konsistente tidsserier
-- **Tabell-ID-er er derimot permanente.** Bare `discontinued`-statusen endres når en tabell avsluttes
+- **Tabell-ID-er kan også forsvinne.** En avsluttet tabell står vanligvis igjen med `discontinued`, men en erstattet tabell kan bli fjernet helt. SSB lister begge på [Endringer i statistikkbanktabeller](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller)
 - **KOSTRA-strukturen endres** når rapporteringskravene endres. Variabler kommer til og faller bort, og tabeller erstattes av nye med nytt nummer
 
 Lisens på dataene: Creative Commons CC BY 4.0.

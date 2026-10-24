@@ -9,6 +9,7 @@ what catches the copies going stale.
 What is checked:
 
   - Full URLs matching https://data.ssb.no/api/pxwebapi/v2/...  -> GET, require 200
+  - Full Klass URLs (https://data.ssb.no/api/klass/v1/...)      -> GET, require 200
   - Relative GET examples at line start (`GET /tables...`)      -> prepend base, GET, require 200
   - POST examples (`POST /tables/{id}/data` + JSON body)        -> JSON-validate body, then POST, require 200
   - Table IDs referenced in example paths (/tables/NNNNN)       -> /tables/{id} must not be discontinued
@@ -20,7 +21,6 @@ Skipped on purpose:
   - POST /savedqueries — NEVER posted (creates persistent state at SSB);
     body is JSON-validated only
   - POST examples without a JSON body (illustrative parameter examples)
-  - Klass URLs (data.ssb.no/api/klass/...) — different API, out of scope
 
 JSON bodies are extracted by brace-counting and must not contain braces inside
 string values. Identical checks are deduplicated.
@@ -42,7 +42,7 @@ from collections.abc import Iterator
 from pathlib import Path
 
 BASE = "https://data.ssb.no/api/pxwebapi/v2"
-FULL_URL_RE = re.compile(r"https://data\.ssb\.no/api/pxwebapi/v2/\S+")
+FULL_URL_RE = re.compile(r"https://data\.ssb\.no/api/(?:pxwebapi/v2|klass/v1)/\S+")
 VERB_RE = re.compile(r"^\s*(?:\d+\.\s*)?(GET|POST)\s+(/\S+)\s*$")
 TABLE_ID_RE = re.compile(r"/tables/(\d{4,6})\b")
 

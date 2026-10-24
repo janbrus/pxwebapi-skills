@@ -12,7 +12,7 @@ description: >
   datakilder — da er en annen dataviz-skill riktig valg.
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "1.3"
+  version: "1.4"
   source: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-chart-skill
 ---
 
@@ -26,7 +26,7 @@ Denne skillen styrer visuell presentasjon av norsk offentlig statistikk fra SSB.
 
 1. **Én innsikt per diagram.** Hvert diagram formidler én tydelig observasjon. Flere historier → flere diagrammer.
 
-2. **Statistisk integritet.** SSB-data er offentlig statistikk — presisjon er avgjørende. Y-aksen på søyle- og arealdiagrammer starter ALLTID på 0. Linjediagram kan avkortes når endringen er budskapet og startverdien står synlig på aksen. Tidsserier skal ha jevne intervaller. Enheter og måleperiode må alltid synliggjøres.
+2. **Statistisk integritet.** SSB-data er offentlig statistikk — presisjon er avgjørende. Y-aksen på søyle- og arealdiagrammer starter alltid på 0. Linjediagram kan avkortes når endringen er budskapet og startverdien står synlig på aksen. Tidsserier skal ha jevne intervaller. Enheter og måleperiode må alltid synliggjøres.
 
 3. **SSBs visuelle identitet som standard.** SSBs farger, typografi og formspråk er standardvalget. Ber brukeren om egne farger, eller har rapporten en egen palett, bruk dem — men kontrastkravene i prinsipp 4, skillbarhet for fargeblinde og fast farge per kategori gjelder fortsatt. Se `references/color-system.md` for komplett fargespesifikasjon.
 
@@ -48,7 +48,7 @@ Selve oppskriften for å gå fra JSON-stat2-respons til et chart-config (labels,
 
 ## Rendringsmål: widget vs. frittstående leveranse
 
-Denne skillen brukes i to helt ulike rendringskontekster, og de deler IKKE samme stilregler. Avgjør rendringsmål før du velger farger, typografi eller layout — ikke etterpå.
+Denne skillen brukes i to helt ulike rendringskontekster, og de deler ikke samme stilregler. Avgjør rendringsmål før du velger farger, typografi eller layout — ikke etterpå.
 
 **A. Inline chat-widget** (f.eks. `visualize:show_widget` / tilsvarende verktøy som rendrer direkte i samtalen)
 
@@ -60,8 +60,8 @@ Alt annet følger vertens konvensjoner, ikke tabellene lenger ned i denne skille
 
 - **Akser, rutenett, bakgrunn, generell tekst** — bruk vertens fargetoken/design (f.eks. `getComputedStyle` mot `--text-muted`, `--border` osv. der verten støtter det), ikke de hardkodede SSB-hex-verdiene fra «Tekst og merking» → «Akser».
 - **Mørk modus** — obligatorisk. Vertens tokens løser dette automatisk; hardkodede lys-modus-farger som `#274247` eller `#D9DFE0` skal ikke skrives direkte inn i widget-DOM-en.
-- **Tittel og kilde** — skrives IKKE inn i widgeten. Verten krever ofte at forklarende tekst ligger i selve chat-svaret, ikke i widget-koden. Skriv deklarativ tittel og kildelinje (jf. «Tekst og merking» → «Kilde») i svarteksten rundt widget-kallet i stedet.
-- **Tabeller** — rendres IKKE med SSB-tabellstilen i en widget. Bruk vanlig markdown-tabell i chat-svaret. Seksjonen «Tabellformatering» lenger ned gjelder ikke her.
+- **Tittel og kilde** — skrives ikke inn i widgeten. Verten krever ofte at forklarende tekst ligger i selve chat-svaret, ikke i widget-koden. Skriv deklarativ tittel og kildelinje (jf. «Tekst og merking» → «Kilde») i svarteksten rundt widget-kallet i stedet.
+- **Tabeller** — rendres ikke med SSB-tabellstilen i en widget. Bruk vanlig markdown-tabell i chat-svaret. Seksjonen «Tabellformatering» lenger ned gjelder ikke her.
 
 **B. Frittstående leveranse** (nedlastbar HTML-fil, PDF-rapport, Excel-dashboard, eller annen artefakt brukeren laster ned/åpner utenfor selve samtalen)
 
@@ -255,9 +255,9 @@ Når du bygger en serie av visualiseringer, følg denne buen:
 1. **Kontekst** — Hva er situasjonen? (Scorecard med nøkkeltall)
 2. **Endring** — Hva har skjedd? (Trend + annotasjon)
 3. **Innsikt** — Hva forklarer det? (Sammenligning, nedbrytning)
-4. **Konsekvens** — Hva betyr det? (Oppsummering, framskriving)
+4. **Konsekvens** — Hva betyr det? (Oppsummering; en framskriving bare som SSBs egne tall, merket som framskriving)
 
-Bruk **utheving-paletten** for å styre oppmerksomhet: SSB Grønn på nøkkelserien, grå på resten. Gi alltid kontekst for tall (vs. forrige periode, vs. landsgjennomsnitt, vs. mål).
+Bruk **utheving-paletten** for å styre oppmerksomhet: SSB Grønn på nøkkelserien, grå på resten. Gi alltid kontekst for tall (vs. forrige periode, vs. landsgjennomsnitt), med sammenligningstallene hentet fra SSB i samme samtale.
 
 ---
 

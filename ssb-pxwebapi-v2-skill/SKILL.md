@@ -15,7 +15,7 @@ description: >
   lagrede spørringer og outputformater (json-stat2, csv, xlsx).
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "1.6.4"
+  version: "1.6.5"
   source: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 ---
 
@@ -29,7 +29,7 @@ https://data.ssb.no/api/pxwebapi/v2
 
 **Skillen vedlikeholdes her:** https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 
-Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.6.4.
+Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.6.5.
 
 ## Dataintegritet — grunnregelen
 
@@ -37,16 +37,16 @@ SSB er Norges offisielle statistikkprodusent. Tilliten til tallene er selve prod
 
 **Oppgi aldri et tall du ikke har hentet fra API-et i denne samtalen.**
 
-- **Ingen tall fra hukommelsen.** Har du ikke kjørt spørringen, har du ikke tallet. Dette gjelder også tall du er sikker på — folketall, KPI-nivåer, ledighetsrater endrer seg, og treningsdata har en skjæringsdato.
+- **Ingen tall fra hukommelsen.** Har du ikke kjørt spørringen, har du ikke tallet. Dette gjelder også tall du er sikker på — folketall, KPI-nivåer, ledighetsrater endrer seg.
 - **Ingen tall fra andre kilder i samme svar.** Ikke Norges Bank, Eurostat, OECD, websøk eller nyhetsartikler. Henvis videre i stedet.
 - **Feiler API-et, si det.** Ikke anslå, ikke rund av fra minnet, ikke «omtrent». Se «Fallback».
-- **Ingen interpolering eller egen framskriving.** Mangler en periode i uttrekket, mangler den i svaret. SSBs prognoser (12880) og framskrivinger (14746) er SSB-tall, men ikke statistikk: kall prognoser prognoser, og oppgi alternativet for en framskriving (14746: `Personer` er hovedalternativet MMMM).
-- **Merk egne beregninger.** Vekst i prosent, andeler, summer og indeksomregninger er dine, ikke SSBs. Vis hvilke hentede tall de bygger på. Per innbygger-tall du regner ut selv: del størrelser som måles over en periode (BNP, inntekt, konsum) på middelfolkemengden (03037), og størrelser som måles på et tidspunkt på folketallet samme dato (07459). Si hvilken nevner du brukte — SSBs tabeller oppgir den ikke alltid. Finnes tallet ferdig per innbygger hos SSB, bruk det, med mindre det mangler serier eller perioder du trenger, eller bygger på en eldre revisjon enn tallene det skal sammenlignes med. Regn da selv, og si hvorfor.
+- **Ingen interpolering eller egen framskriving.** Mangler en periode i uttrekket, mangler den i svaret.
+- **Merk egne beregninger.** Vekst i prosent, andeler, summer og indeksomregninger er dine, ikke SSBs. Vis hvilke hentede tall de bygger på. Per innbygger-tall du regner ut selv: del størrelser som måles over en periode (BNP, inntekt, konsum) på middelfolkemengden (03037), og størrelser som måles på et tidspunkt på folketallet samme dato (07459). Si hvilken nevner du brukte — SSBs tabeller oppgir den ikke alltid. Finnes tallet ferdig per innbygger hos SSB, bruk det.
 - **Behold API-ets presisjon.** Bruk desimalene fra `category.unit.decimals`. Ikke legg til presisjon som ikke finnes, og ikke rund bort presisjon som betyr noe.
-- **Verifiser variabelkoder mot metadata.** Tabell-ID-er er permanente og endres aldri, men variabelkoder (`ContentsCode`, verdikoder) skal bekreftes med metadata før bruk — ikke gjettes fra hukommelsen.
-- **Sjekk `discontinued` og `lastPeriod`** på søketreffet eller `GET /tables/{id}`. `discontinued` står bare der, og bare når tabellen er avsluttet (`true`) — mangler feltet, er tabellen aktiv. I metadata og data-responsen sier feltet ingenting. Tabeller avsluttes, og serien fortsetter ofte i en ny tabell. Bruker du en avsluttet tabell, si det og oppgi siste periode. Finn etterfølgeren når den finnes.
+- **Verifiser variabelkoder mot metadata.** Variabelkoder (`ContentsCode`, verdikoder) skal bekreftes med metadata før bruk — ikke gjettes fra hukommelsen.
+- **Sjekk `discontinued` og `lastPeriod`** på søketreffet eller `GET /tables/{id}`. `discontinued` står bare der, og bare når tabellen er avsluttet (`true`) — mangler feltet, er tabellen aktiv. Avsluttede og fjernede tabeller (404): se `references/troubleshooting.md`.
 - **Vis `status`.** Manglende, foreløpige og konfidensielle verdier skal fram i tabellen, ikke skjules. Se `references/troubleshooting.md`.
-- **Vis obligatoriske noter.** Er `extension.noteMandatory` satt, har SSB bestemt at noten skal følge tallet. Å utelate den er å presentere tallet uten forbeholdet SSB selv knyttet til det. Noten følger med i data-responsen, så den koster ingen ekstra kall.
+- **Vis obligatoriske noter.** Er `extension.noteMandatory` satt, har SSB bestemt at noten skal følge tallet.
 - **Flagg foreløpige tall.** Nasjonalregnskap, KOSTRA (ureviderte tall fra 15. mars, reviderte fra 15. juni, uten `status`-flagg — se `references/kostra.md`) og flere andre serier revideres. Si fra når tallene kan endre seg.
 
 Finner du ikke tallet i Statistikkbanken, er riktig svar at det ikke ble funnet — med forslag til søkeord eller alternativ kilde. Et ærlig «vet ikke» er langt bedre enn et plausibelt tall som ikke stemmer. Feil tall med SSB-kildehenvisning skader tilliten til SSB, ikke bare til svaret.
@@ -144,10 +144,11 @@ Bruk `GET /tables` med `query`-parameter.
 **Tips for gode søk:**
 
 - Søk med SSBs fagtermer, ikke hverdagsord: `konsumprisindeks`, ikke `inflasjon` (0 treff), og `brukte boliger`, ikke `boligpriser`. Indeksen følger `lang`: med `lang=en` søker du `consumer price index`
-- Søket er case-insensitivt og leter i tabelltitler, variabler og variabelverdier, ikke i emnenavnene i `paths` (`forbruksundersøkelse*` gir 0 treff). Sjekk `page.totalElements` før du konkluderer at tabellen ikke finnes
+- Søket er case-insensitivt og leter i tabelltitler, variabler og variabelverdier, ikke i emnenavnene i `paths` (`forbruksundersøkelse*` gir 0 treff)
+- Bruk `pageSize=50`: de fleste søk har færre treff, så hele lista kommer i ett kall, mens standard 20 kutter brede søk. Sjekk `page.totalElements` før du konkluderer at tabellen ikke finnes. Har søket hundrevis av treff, snevre det inn i stedet for å bla
 - Trunkering med `*` (f.eks. `anlegg*`) og feltbegrensning med `title:` er ofte nok
 - Suffiks i tittelen viser laveste regionale nivå: (F) fylke, (K) kommune, (B) bydel, (G) grunnkrets. Søk på ordet (`grunnkrets`, `bydel`) — `title:"(G)"` treffer også G = grunnbeløp
-- Næringstabeller finnes i to parallelle varianter under overgangen SN2007 → SN2025 (fra 2026); tittelen sier hvilken. Søk på `SN2025` eller `SN2007` for å skille dem — se `references/codelists-and-filters.md`
+- Næringstabeller er på SN2007 eller SN2025 under overgangen (2026–2029); de fleste SN2007-tabeller avsluttes når SN2025-tabellen kommer. Tittelen sier hvilken. Søk på `SN2025` eller `SN2007` for å skille dem — se `references/codelists-and-filters.md`
 - KOSTRA-tabeller kjennes igjen på stien `os > os01 > kostrahoved` i `paths`, ikke på søkeord (`kostrahoved` gir 0 treff, og «kostra» finner ikke bydelstabellene). Søk `kostra` pluss fagterm — se `references/kostra.md`
 - For fuzzy søk, nærhetssøk, boolske operatorer og dato-syntaks: se `references/search-syntax.md`
 
@@ -175,7 +176,7 @@ Metadata returneres i json-stat2-format (Dataset-schema). Full formatreferanse, 
 **Viktige regler om metadata:**
 
 - Les `elimination` **kun fra metadata** — i en data-respons betyr feltet noe annet og villeder deg. Utelater du en eliminerbar variabel, forsvinner den helt fra responsen (ut av `id` og `dimension`, ikke som en «total»-rad); noter det selv. Detaljer og verifisering: `references/json-stat2.md`
-- Variabler med `elimination: false` MÅ inkluderes i query. Tid og ContentsCode er alltid ikke-eliminerbare.
+- Variabler med `elimination: false` må være med i query — ellers svarer API-et 400 (se Steg 4). Tid og ContentsCode er alltid ikke-eliminerbare.
 
 **Kodelister og filtrering:**
 
@@ -239,7 +240,6 @@ Viktigste mønstre: `top(N)` = siste N verdier, `from(verdi)` = fra og med, `ran
 **Viktige begrensninger:**
 
 - API-et har en øvre grense for antall celler per spørring. Sjekk `/config` for `maxDataCells` (typisk 800 000, men kan endre seg).
-- Start smalt — det er lettere å utvide enn å håndtere for mye data.
 
 ### Steg 5: Presenter resultatene
 
@@ -267,9 +267,9 @@ Ber brukeren om en lagret spørring, eller kommer med en gammel sq-lenke: se `re
 Integritetsreglene øverst gjelder alltid — i tillegg:
 
 - Hent data uten filtre og anta at du får hele tabellen — API-et returnerer defaultselection-uttrekket, og du kontrollerer ikke hva det inneholder; angi alltid eksplisitt seleksjon
-- Anta at kommunekoder er stabile over tid (kommunesammenslåinger i 2020!)
+- Anta at kommunekoder er stabile over tid (sammenslåinger i 2020, nye koder ved fylkesdelingen i 2024!)
 - Bland koder fra forskjellige kodelister
-- Bland næringskoder fra SN2007 og SN2025 — samme bokstav (K, L, …) er ulik næring i de to standardene; les variabel-ID-en (`NACE2007`/`NACE2025`) fra metadata
+- Bland næringskoder fra SN2007 og SN2025 — samme kode er ikke samme næring: bokstavene er forskjøvet (K, L, …), og femsifrede koder kan være gjenbrukt; les variabel-ID-en (`NACE2007`/`NACE2025`) fra metadata
 - Anta at regionvariabelen heter `Region` eller at landet er `0` — i KOSTRA-tabellene heter den `KOKkommuneregion0000`/`KOKfylkesregion0000`/`KOKbydelsregion0000`, landet er `EAK`, alle dimensjoner er obligatoriske, og nøkkeltall summeres aldri (`aggregallowed: false`)
 
 ---

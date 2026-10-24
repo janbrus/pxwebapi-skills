@@ -76,3 +76,9 @@ The scenario CLAUDE.md requires: proof that `Region`/`ContentsCode`/`Tid` are no
 | # | Outcome | Notes |
 |---|---|---|
 | 2 | Passed | `/config` first; `folkmäng* AND region` sent with `curl -G --data-urlencode`; TAB6471, not the frozen TAB638; `Region` found without `role.geo`; `Alder=TotSA` with no 400; all five mandatory notes, including the variable-level note on `Alder`. Gave both the municipality (0180) and the county (01), and shortened the long disclosure-control note — the skill does not say whether a mandatory note may be abridged |
+
+**2026-10-23, against v0.11.3 (before) and v0.11.4 (after).** Prompt-audit baseline and after-run: Sonnet 5.5, one agent each with the ZIP unpacked in its own folder, `curl`, no MCP, no `CLAUDE.md` in context. Same prompt both times. Logs: `~/test/logs/2026-10-23-prompt-audit/`.
+
+| # | Before (0.11.3) | After (0.11.4) | Notes |
+|---|---|---|---|
+| 3 | Passed | Passed | `/config` first, `TIME`, json-stat2 on every call, `top(4)`, said that `lastPeriod` (2026M08) differs from the data (2026M09), notes shown; 4 calls both times. Tests M5c (removal of "Start narrow"): no change in behaviour |

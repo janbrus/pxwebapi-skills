@@ -54,16 +54,19 @@ Sjekk `x-ratelimit-remaining` før batch-uttrekk med mange kall. Ved `429 Too Ma
 
 Komplement til `/tables?pastDays=…` når du vil overvåke publiseringer uten å polle API-et:
 
-| Feed                                                | Innhold                                                          |
-| --------------------------------------------------- | ---------------------------------------------------------------- |
-| `https://www.ssb.no/rss/statbank`                   | Siste 5 dagers oppdaterte tabeller i Statistikkbanken            |
-| `https://www.ssb.no/rss/statbank/{kortnavn}`        | Siste 90 dagers oppdaterte tabeller for ett statistikk-kortnavn  |
-| `https://www.ssb.no/rss/statkal`                    | Kommende statistikkpubliseringer (publiseringskalender)          |
+| Feed                                         | Innhold                                                                                                                                                                                                                   |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `https://www.ssb.no/rss/statkal`             | Planlagte publiseringer, ca. fire uker fram (publiseringskalender). Tittel: «dd.mm.åååå: Statistikk, Tall for <periode>»                                                                                                   |
+| `https://www.ssb.no/rss/`                    | Publiserte statistikker og artikler fra de siste dagene. Artiklene har tomt kortnavn                                                                                                                                      |
+| `https://www.ssb.no/rss/statbank`            | Oppdaterte tabeller fra de siste ca. 5 dagene, med `<ssbrss:tableid>`                                                                                                                                                     |
+| `https://www.ssb.no/rss/statbank/{kortnavn}` | Siste oppdatering per tabell i én statistikk, siste 90 dager. Månedstabeller viser bare siste måned, og tabeller som ikke er oppdatert på 90 dager, mangler — ingen fullstendig tabelliste. Ukjent kortnavn gir 200 og tom feed, ikke 404 |
 
-`{kortnavn}` er statistikkens kortnavn — samme som `extension.metaid` i metadata og som regel 3. nivå i `paths` fra `/tables`-respons (krysslistede tabeller: se `klass-vardok.md`), siste ledd i `ssb.no/<kortnavn>`-URL-er, og verdien av `<ssbrss:shortname>`-elementet i RSS-itemene (f.eks. `arblonn`, `kpi`).
+Feedene er vinduer, ikke arkiver: det som faller ut, er borte. Alle tar `?lang=en`.
+
+`{kortnavn}` er statistikkens kortnavn — står som `KORTNAVN:<kortnavn>` i `link.related[].extension.metaid` i metadata og er som regel 3. nivå i `paths` fra `/tables`-respons (krysslistede tabeller: se `klass-vardok.md`), siste ledd i `ssb.no/<kortnavn>`-URL-er, og verdien av `<ssbrss:shortname>`-elementet i RSS-itemene (f.eks. `arblonn`, `kpi`).
 
 Bruksområder:
 
-- `statkal`-feeden: når brukeren spør "når kommer neste tall for X?"
+- **«Når kommer neste tall for X?»** API-et har ingen publiseringskalender. Finn kortnavnet (tredje node i `paths`, eller `link.related[0].extension.metaid`), hent `rss/statkal` og velg postene med samme `<ssbrss:shortname>`. Datoen står i `<ssbrss:date>`, og perioden etter siste komma i tittelen («Tall for oktober 2026»). Mangler kortnavnet, er det ingen publisering innen vinduet: hent `https://www.ssb.no/<kortnavn>` og les datoen etter «Neste oppdatering:» (siden er server-rendret og rekker lenger fram). Ikke si at det ikke kommer flere tall.
 - `statbank/{kortnavn}`-feeden: overvåk en spesifikk statistikk uten å bygge polling-logikk
-- Rot-feeden: vis hva som er publisert nylig på tvers av temaer
+- Rot-feeden: vis hva som er publisert nylig på tvers av temaer. Artikler har tomt kortnavn: ligger lenken under en statistikkside (`…/statistikk/<side>/artikler/…`), hører artikkelen til den statistikken; ellers hører den til et emne (`…/<emne>/artikler/…`)

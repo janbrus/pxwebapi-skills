@@ -78,3 +78,11 @@ Miljön laddade skillens `CLAUDE.md` i agentens kontext, så körningen var inte
 | # | Utfall | Kommentar |
 |---|---|---|
 | 1 | Passerade | TAB6471, `Alder=TotSA`, `Kon` angiven som utelämnad, alla fem obligatoriska noterna inklusive variabelnoten på `Alder`. Fann att `Kon` summeras i farten i TAB638 men har totalkoden `TotSa` i TAB6471 (rättat i v0.11.2), och att sökexemplet med rå å/ä ger 0 träffar med `curl -g` (inte ändrat) |
+
+**2026-10-23, mot v0.11.3 (före) och v0.11.4 (efter).** Prompt-auditens baseline och efter-körning: Sonnet 5.5, en agent per scenario med zip:en uppackad i egen mapp, `curl`, ingen MCP, ingen `CLAUDE.md` i kontexten. Samma prompt före och efter. Loggar: `~/test/logs/2026-10-23-prompt-audit/`.
+
+| # | Före (0.11.3) | Efter (0.11.4) | Kommentar |
+|---|---|---|---|
+| 1 | Passerade | Passerade | TAB6471, `Alder=TotSA`, ingen 400, alla fem obligatoriska noter. Testar M3b («MÅSTE» → «måste … annars 400») |
+| 3 | Passerade | Passerade | TAB638 + `agg_RegionKommungrupp2023-`, egen summa märkt, säger att 2025-tabellerna saknar kodlistan. Efter: 14 anrop mot 8, fler sökningar innan TAB638 |
+| «Hur många bor i Gnesta?» | Passerade | Passerade | 0461 ur `category.label` i TAB6471-metadata, ingen kod från minnet. Testar M6 (kommunkodsstrategin som löptext) |

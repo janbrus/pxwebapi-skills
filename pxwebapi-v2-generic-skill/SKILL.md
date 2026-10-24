@@ -12,7 +12,7 @@ description: >
   Covers table search, metadata, data queries, codelists, and saved queries.
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.11.3"
+  version: "0.11.4"
 ---
 
 # PxWebApi v2 — Generic Skill
@@ -206,7 +206,6 @@ Default `json-stat2`; also `csv`, `xlsx`, `html`, `px`, `json-px`, and at some i
 - `maxDataCells` from `/config` — 10 000 to 800 000 across the known installations; exceeding it is `400 — "Too many cells selected"`
 - Rate limiting: check **both** `/config` and the response headers — SSB announces only in `x-ratelimit-*` headers, SCB and Latvia in `/config` *and* `X-Rate-Limit-*` headers (a different spelling; match both). See `references/api-details.md`
 - GET URLs cannot exceed ~2,100 characters — use POST for complex queries
-- Start narrow — it's easier to expand than to handle too much data
 
 ### Step 5: Present results
 

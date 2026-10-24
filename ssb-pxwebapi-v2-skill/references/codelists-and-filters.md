@@ -118,7 +118,7 @@ Et kommunenavn må oversettes til kode:
 1. Søk på navnet med `/tables?query=…` — søket leter også i variabelverdier og bekrefter at kommunen finnes
 2. Hent metadata for en kommunetabell (f.eks. 07459) og let etter navnet i `category.label` på `Region`
 3. Eller bruk wildcard på fylkeskoden (`34*` for Innlandet, `345?` for å snevre inn) og les labelene i svaret
-4. Klass har hele kommuneinndelingen med historikk: `https://data.ssb.no/api/klass/v1/classifications/131.json` (se `klass-vardok.md`)
+4. Klass har hele kommuneinndelingen med historikk: `https://data.ssb.no/api/klass/v1/classifications/131`, og hvilke koder som gjaldt eller endret seg på en dato (`codesAt`, `changes` — se `klass-vardok.md`)
 
 ### Fylker og kommuner over tid
 
@@ -180,7 +180,7 @@ Vil brukeren ha delområdetall SSB selv har publisert, er 06944-typen riktig; vi
 
 ## Næringskoder: SN2007 → SN2025
 
-SSB er i overgang til **SN2025** (Standard for næringsgruppering 2025, norsk utgave av NACE Rev. 2.1). Per 2026-09-20 er 14 tabeller på SN2025 og 331 på SN2007. Overgangen skjer statistikk for statistikk, og **SN2007-tabellene lever videre parallelt** — de er ikke merket `discontinued` og oppdateres fortsatt (10790 og 14729 har begge 2026K2). Tittelen sier hvilken standard tabellen bruker; søk på `SN2025` eller `SN2007` i `/tables?query=` for å skille variantene.
+SSB er i overgang til **SN2025** (Standard for næringsgruppering 2025, norsk utgave av NACE Rev. 2.1). SN2025 gjelder fra statistikkåret 2025, og SSB innfører den statistikk for statistikk i 2026–2029. Per 2026-10-24 er 42 tabeller på SN2025. **De fleste statistikker bytter:** SN2007-tabellen blir «avslutta serie» (`discontinued`), og SN2025-tabellen tar over, ofte med ett overlappsår (varehandel 07312 → 14828, overlapp 2025). Konkursene publiseres foreløpig på begge (10790 og 14729 har begge 2026K3). En avsluttet SN2007-tabell har sjelden en note om etterfølgeren: søk på tittelordene og `SN2025`. Tittelen sier hvilken standard tabellen bruker; søk på `SN2025` eller `SN2007` i `/tables?query=` for å skille variantene.
 
 |                     | SN2007-tabeller          | SN2025-tabeller |
 | ------------------- | ------------------------ | --------------- |
@@ -191,6 +191,8 @@ SSB er i overgang til **SN2025** (Standard for næringsgruppering 2025, norsk ut
 | 5-sifret kode       | `62.010`                 | `62.100`        |
 
 **Bokstavkodene betyr ikke det samme i de to standardene.** SN2007 J «Informasjon og kommunikasjon» er delt i SN2025 J (utgivelse, kringkasting, innholdsproduksjon) og K (telekommunikasjon, dataprogrammering, IT-tjenester), og alle bokstaver etter J er forskjøvet ett hakk: SN2007 K (finans) = SN2025 L, L (eiendom) = M, M (faglig/teknisk) = N, … U (internasjonale organisasjoner) = V. `valueCodes[NACE2007]=K` gir finans; `valueCodes[NACE2025]=K` gir IT. Les variabel-ID-en fra metadata, og slå alltid opp labelen før du sammenligner bokstavkoder på tvers av tabeller.
+
+**Femsifrede koder kan også ha fått nytt innhold.** Av 494 koder som finnes i begge standardene, er 301 uendret, 33 er gjenbrukt til en annen næring (35.140 er handel med elektrisitet i SN2007 og distribusjon i SN2025), og 160 er utvidet eller innsnevret. Sammenlign aldri en femsifret kode på tvers av standardene uten korrespondansetabellen. Hovedforskjellene ifølge SSB: fornybar og ikke-fornybar energi er skilt, næring 45 er fordelt på 46, 47 og 95, skillet mellom fysisk handel og netthandel er borte, og barnehager er flyttet fra helse- og sosialtjenester til undervisning.
 
 Kodelistene på `NACE2025` varierer per tabell: `agg_NACE2025nivaa1` (14729) og `agg_NACE2025niv1` (14721, 14730, 14731) gir begge næringshovedområdene A–V inkl. `_T` (24 koder), `vs_NACE2025niva1og5nn` (14729) gir hovedområder pluss 5-siffer næring (762 koder), og 14758 har ingen. Femsifrede koder inneholder punktum og brukes direkte i GET. Verifisert 2026-09-20:
 

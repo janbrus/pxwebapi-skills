@@ -2,7 +2,12 @@
 
 Gjeldende versjon står i `SKILL.md`-frontmatter under `metadata.version`.
 Har din kopi ingen `metadata.version`, er den fra før 2026-08-30 — last ned ny.
-Versjoner under 1.0.0 markerer at skillen ikke har noen publisert distribusjon ennå.
+Versjoner under 1.0.0 markerer at skillen er beta: den har færre verifiserte eksempler og evals enn SSB-skillen, men er ikke ustabil i bruk.
+
+## 0.9.1 — 2026-10-23
+
+- Innledningen over sier nå hva versjoner under 1.0.0 betyr, slik rot-README definerer beta. Før sto det «ingen publisert distribusjon», men zip-en har vært ute siden 2026-09-09. `SKILL.md` er uendret bortsett fra versjonen
+- `CLAUDE.md`, fra prompt-auditen 2026-10-21: versjonsregelen viser til beta-merket i rot-README, og historikksetningen om den gamle WebFetch-veiledningen for emnesidene er fjernet. Regelen om `/publikasjoner/`-stien står
 
 ## 0.9.0 — 2026-08-30
 

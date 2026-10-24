@@ -122,3 +122,31 @@ før du antar at skillen er problemet.
 - **Forventet tabell:** 14100 (Forbruksundersøkelsen, fra `common-tables.md`), valgt med begrunnelse — ikke en KPI-tabell
 - **Nøkkelvalg:** `VareTjenesteGruppe` med koder lest fra metadata for «mat» og «transport» (f.eks. `01` eller `01.1`, og `07`), `ContentsCode` = `Utgift` og/eller `AndForbrUtg` **og** `Standardfeil`, `Tid=2022`
 - **Suksess:** svaret sier hvilke koder «mat» og «transport» ble til, viser standardfeilen før det kaller forskjellen reell, merker forholdstallet som egen beregning, og oppgir at siste periode er 2022 (utvalgsundersøkelse, minst hvert femte år). Ingen tall i fasiten
+
+## 20. «Hent tallene fra tabell 11084»
+
+- **Forventet tabell:** 14891 (Eierstatus. Husholdninger), etterfølgeren til 11084 — funnet på SSBs side [Endringer i statistikkbanktabeller](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller), ikke ved søk
+- **Nøkkelvalg:** `GET /tables/11084` → 404 `Non-existent table` → oppslag på endringssiden → 14891 → metadata for 14891. Et søk alene er ikke nok: `query=11084&includeDiscontinued=true` gir 0 treff, også med `lang=en`
+- **Suksess:** svaret sier at 11084 er erstattet og fjernet (ikke tastefeil eller for lang URL), oppgir 14891 som etterfølger med kilde (endringssiden, 14.09.2026) og nevner revisjonen (nåværende regionkoder for hele serien). Ingen tall fra en gjettet tabell. Verifisert 2026-10-23; ved årsskiftet kan oppføringen flyttes til arkivsiden (lenket nederst)
+- **Merk:** tabellen må ikke stå i skillfilene. 11038 → 14890 fra samme oppføring er eksempelet i `troubleshooting.md`, og en agent som søkte på ID-en i skillmappa, fant fasiten der (2026-10-23)
+
+## 21. «Når kommer neste nasjonalregnskapstall?»
+
+- **Forventet tabell:** ingen data; kortnavnet `knr` fra `paths` til 09190 (eller 09189/11721, alle `knr`) eller fra `link.related[0].extension.metaid`
+- **Nøkkelvalg:** kortnavn → `https://www.ssb.no/rss/statkal` → poster med `<ssbrss:shortname>knr</ssbrss:shortname>`. Målt 2026-10-23: statkal dekker 27.10–20.11 og har **ingen** `knr`-post; `https://www.ssb.no/knr` sier «Neste oppdatering: 26. november 2026». Søket `nasjonalregnskap` gir bare 2 treff (`fnr`, fylkesfordelt) — ikke riktig statistikk
+- **Suksess:** svaret sier at publiseringskalenderen ikke har noen nasjonalregnskapspublisering de neste ca. fire ukene, viser til `https://www.ssb.no/knr` (og gjerne datoen derfra, 26.11.2026, med siden som kilde), og oppgir siste publiserte periode (09190: `lastPeriod`, `updated`). Feil: en gjettet dato, «det kommer ingen flere tall», eller en dato fra `fnr`/en annen statistikk. Datoene flytter seg — kjør kjeden på nytt før du vurderer svaret
+
+## 22. «Hvilke kommuner fikk nytt kommunenummer 1. januar 2024?»
+
+- **Forventet kilde:** Klass, `https://data.ssb.no/api/klass/v1/classifications/131/changes` med endringsdatoen mellom grensene (f.eks. `from=2023-12-31&to=2024-01-02`). Holdt utenfor: ingen av kommunene under står i skillfilene
+- **Fasit (målt 2026-10-24):** 118 rader, 117 gamle koder. 113 rene omnummereringer etter fylkesdelingen (Viken, Vestfold og Telemark, Troms og Finnmark), 1507 Ålesund delt i 1508 Ålesund og 1580 Haram, og 3 rader som bare er nytt navn med samme nummer (1833 Rana, 1845 Sørfold, 5037 Levanger)
+- **Suksess:** svaret bygger på et `changes`-kall i samtalen, skiller omnummerering, deling og navneendring, og regner ikke 118 rader som 118 kommuner. «114 kommuner, og Haram fikk 1580» og «115» (Haram regnet med) godtas begge. Kilde: SSB, Klass, klassifikasjon 131
+- **Feil:** «ingen endringer» fordi en grense står på endringsdagen (`from=2024-01-01` eller `to=2024-01-01` gir 0 rader uten feilmelding), et svar fra hukommelsen uten oppslag, eller navneendringene telt som nye numre
+
+## 23. «Blir det endringer i kommuneinndelingen 1. januar 2027?»
+
+- **Datobundet:** gjelder til 2027-01-01. Deretter må spørsmålet flyttes et år fram og fasiten måles på nytt
+- **Forventet kilde:** Klass `changes` med `includeFuture=true` og endringsdatoen mellom grensene (f.eks. `from=2026-12-31&to=2027-01-02&includeFuture=true`)
+- **Fasit (målt 2026-10-24):** 6 rader, to grensejusteringer der alle kodene består: 1525 Stranda avgir areal til 1578 Fjord, og 5060 Nærøysund avgir areal til 1811 Bindal (over fylkesgrensen). Ingen sammenslåinger eller nye numre
+- **Suksess:** nevner begge justeringene, sier at kodene ikke endres, og at det er grensejusteringer, ikke sammenslåinger
+- **Feil:** «ingen endringer», enten fordi `includeFuture` mangler eller fordi en grense står på 2027-01-01

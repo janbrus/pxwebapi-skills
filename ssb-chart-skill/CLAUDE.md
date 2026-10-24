@@ -60,16 +60,7 @@ This skill has two homes plus a distribution artifact, and all three drift indep
 
 **Every behaviour change needs an entry in both logs** — same rule the sibling skill's CLAUDE.md enforces. In `DEVLOG.md`, record what changed, why, and whether a sibling skill was affected (for this skill that is normally "none — no SCB/generic chart equivalent exists"). Then add the user entry in `CHANGELOG.md`, derived from it: what is different for someone holding an older copy, in a few bullets, with corrections marked **Rettet:**. Pure wording fixes don't need an entry; a changed rule always does. Bump `metadata.version` in the same edit.
 
-After editing, mirror to the other home, then **rebuild the ZIP from scratch** rather than updating entries in place — the wrapper folder makes `zip ssb-chart-skill.zip SKILL.md` actively harmful, because it adds a second root-level `SKILL.md` beside `ssb-chart/SKILL.md` and the package silently becomes wrong. Rebuild in a temp dir:
-
-```bash
-rm -rf /tmp/pack && mkdir -p /tmp/pack/ssb-chart/references
-cp SKILL.md README.md CHANGELOG.md /tmp/pack/ssb-chart/
-cp references/*.md /tmp/pack/ssb-chart/references/
-(cd /tmp/pack && zip -r ssb-chart-skill.zip ssb-chart)
-```
-
-Verify with `diff -r` between the two homes, and check every ZIP entry against its working file (`unzip -p <zip> ssb-chart/<path> | diff - <path>`) rather than trusting `unzip -l` sizes. A stale or duplicated ZIP entry is invisible until someone reinstalls from it, and it has actually happened here. Bump `metadata.version` in `SKILL.md` frontmatter when the change alters behaviour rather than wording.
+After editing, rebuild the ZIP with `scripts/build_zip.sh` rather than updating entries in place — the wrapper folder makes `zip ssb-chart-skill.zip SKILL.md` actively harmful, because it adds a second root-level `SKILL.md` beside `ssb-chart/SKILL.md` and the package silently becomes wrong. Where the deployed copy is a copy rather than a symlink, refresh it from the source as well.
 
 ## Related sibling skills
 

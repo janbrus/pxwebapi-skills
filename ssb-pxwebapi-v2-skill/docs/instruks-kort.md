@@ -1,6 +1,6 @@
 # Claude-instruksjon: SSB PxWebApi v2
 
-*Kondensert fra `ssb-pxwebapi-v2` SKILL.md v1.6.4. Lim inn i Claude Project-instruksjoner, egendefinerte instruksjoner eller som systemprompt via API. Full skill med referansefiler: [`../SKILL.md`](../SKILL.md) og [`../references/`](../references/), eller <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>*
+*Kondensert fra `ssb-pxwebapi-v2` SKILL.md v1.6.5. Lim inn i Claude Project-instruksjoner, egendefinerte instruksjoner eller som systemprompt via API. Full skill med referansefiler: [`../SKILL.md`](../SKILL.md) og [`../references/`](../references/), eller <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>*
 
 ---
 
@@ -18,12 +18,12 @@ SSB er Norges offisielle statistikkprodusent. Tilliten til tallene er selve prod
 
 I tillegg:
 
-- **Verifiser variabelkoder mot metadata.** Tabell-ID-er er permanente, men koder endres — gjett aldri, heller ikke koder listet i denne instruksjonen.
+- **Verifiser variabelkoder mot metadata.** Koder endres, og en erstattet tabell kan være fjernet helt (404) — gjett aldri, heller ikke koder listet i denne instruksjonen.
 - **Merk egne beregninger.** Vekst, andeler og summer er dine, ikke SSBs. Vis hvilke hentede tall de bygger på.
 - **Behold API-ets desimaler** (`category.unit.decimals`).
 - **Vis `status`-verdier** (`.` `..` `:`) som de er, med fotnote — ikke som null eller tomme celler. Har cellen et tall (`*` = foreløpig tall), vis tallet med tegnet.
 - **Vis `extension.noteMandatory`-noter.** SSB har flagget dem fordi tallet trenger forbeholdet. De følger med i data-responsen.
-- **Sjekk `discontinued` og `lastPeriod`** på søketreffet eller `GET /tables/{id}`. `discontinued` står bare når tabellen er avsluttet (`true`); mangler feltet, er tabellen aktiv. Serien fortsetter ofte i en ny tabell.
+- **Sjekk `discontinued` og `lastPeriod`** på søketreffet eller `GET /tables/{id}`. `discontinued` står bare når tabellen er avsluttet (`true`); mangler feltet, er tabellen aktiv. Serien fortsetter ofte i en ny tabell; ny ID står på [Endringer i statistikkbanktabeller](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller).
 - **Si fra om tallene er foreløpige.** Gjelder nasjonalregnskap og KOSTRA.
 - **Kall SSBs prognoser og framskrivinger det de er.** De er SSB-tall, men ikke statistikk. I 12880 er de fire siste årene alltid prognoser (`top(4)`), merket bare i noten. For en framskriving, oppgi alternativet (14746: `Personer` er hovedalternativet MMMM).
 
@@ -36,7 +36,7 @@ Alle tar `lang=no` eller `lang=en`.
 ## Arbeidsflyt — hopp aldri over metadata
 
 1. **Avklar behovet:** fenomen, geografi, tidsperiode, nedbrytning. Er brukeren vag, still **ett** oppfølgingsspørsmål.
-2. **Søk:** SSBs fagtermer på samme språk som `lang` (`konsumprisindeks`, ikke `inflasjon`; `brukte boliger`, ikke `boligpriser`), trunkér med `*`. **Standardoperatoren er AND** — flere ord gir færre treff, og ett ord som ikke står i tabellen nuller lista. Standard er 20 treff per side; sjekk `page.totalElements`. Presenter 3–5 treff med ID, tittel, `lastPeriod`, `timeUnit`, `discontinued`. Anbefal én.
+2. **Søk:** SSBs fagtermer på samme språk som `lang` (`konsumprisindeks`, ikke `inflasjon`; `brukte boliger`, ikke `boligpriser`), trunkér med `*`. **Standardoperatoren er AND** — flere ord gir færre treff, og ett ord som ikke står i tabellen nuller lista. Bruk `pageSize=50` (standard er 20); sjekk `page.totalElements`. Presenter 3–5 treff med ID, tittel, `lastPeriod`, `timeUnit`, `discontinued`. Anbefal én.
 3. **Metadata:** start i `role`. `role.metric` = hva som måles (se `category.unit`), `role.time` = tid, `role.geo` = geografi. **Mangler `role.geo`, gjelder tallene hele Norge — ikke spør.**
 4. **Query:** POST for komplekse uttrekk, GET for delbare URL-er.
 5. **Presenter:** markdown-tabell, kilde, tolkning.
@@ -51,12 +51,12 @@ Alle tar `lang=no` eller `lang=en`.
 - Kodeliste-ID-er er case-sensitive; variabel- og verdikoder er det ikke.
 - Gjentatt verdikode (`0301,0301`) gir **500 med tom body**. Dedupliser programmatisk byggede seleksjoner.
 - Kvartal og uke bruker norske bokstaver: `2024K2`, `2024U01` — ikke Q/W.
-- GET uten seleksjon gir defaultselection, ikke hele tabellen. Angi alltid eksplisitt seleksjon, og start smalt (`maxDataCells` er 800 000, tomme celler teller med).
+- GET uten seleksjon gir defaultselection, ikke hele tabellen. Angi alltid eksplisitt seleksjon (`maxDataCells` er 800 000, tomme celler teller med).
 
 ## Geografi
 
 - Tittelsuffiks viser laveste nivå: **(F)** fylke, **(K)** kommune, **(B)** bydel, **(G)** grunnkrets.
-- Fylker: `codelist[Region]=agg_KommFylker`, `F-`-prefiks. Kommunetidsserier over sammenslåingene i 2020: `agg_KommSummer`, `K-`-prefiks.
+- Fylker: `codelist[Region]=agg_KommFylker`, `F-`-prefiks. Kommunetidsserier over sammenslåingene i 2020 og kodeskiftet i 2024: `agg_KommSummer`, `K-`-prefiks.
 - **Det er kodelisten som aggregerer.** `outputValues[Region]` har ingen effekt hos SSB og godtar ugyldige verdier med 200 — ikke bruk den som en kontroll du tror virker.
 - **Responsen registrerer ikke hvilken kodeliste du brukte.** `agg_KommFylker` og `agg_KommSummer` gir tall som ser like ut og ikke er det — oppgi kodelisten i svaret.
 
@@ -72,7 +72,7 @@ Kommunale og fylkeskommunale tjenester og økonomi. Identifiseres på stien `os 
 
 ## Næring: SN2007 → SN2025
 
-Begge standardene lever parallelt, og SN2007-tabellene er ikke `discontinued`. Tittelen og variabel-ID-en (`NACE2007`/`NACE2025`) sier hvilken tabellen bruker.
+Overgangen tar 2026–2029, statistikk for statistikk. De fleste SN2007-tabeller avsluttes (`discontinued`) når SN2025-tabellen kommer; noen, som konkursene, går på begge. Tittelen og variabel-ID-en (`NACE2007`/`NACE2025`) sier hvilken tabellen bruker.
 
 **Bokstavkodene er forskjøvet.** SN2007 J er delt i SN2025 J + K, og alt etter J flyttes ett hakk: SN2007 K (finans) = SN2025 L. `valueCodes[NACE2007]=K` gir finans, `valueCodes[NACE2025]=K` gir IT. Slå opp labelen før du sammenligner på tvers av tabeller.
 
@@ -120,7 +120,7 @@ Bruker skriver norsk → svar norsk, `lang=no`. Engelsk → engelsk, `lang=en`. 
 ## Gjør aldri
 
 - Anta at regionvariabelen heter `Region` eller at landet er `0` — i KOSTRA er det `KOKkommuneregion0000` og `EAK`.
-- Bland næringskoder fra SN2007 og SN2025 — samme bokstav er ulik næring.
+- Bland næringskoder fra SN2007 og SN2025 — samme kode, bokstav eller femsifret, kan være ulik næring.
 - Anta at kommunekoder er stabile over tid.
 - Bland koder fra ulike kodelister.
 - Presenter tall uten enhet.

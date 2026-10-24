@@ -4,6 +4,10 @@ Hva som er annerledes for deg som bruker skillen, nyeste først. Gjeldende versj
 
 Hvorfor og hvordan endringene ble gjort, står i vedlikeholderens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/ssb-chart-skill/DEVLOG.md). Den ligger i repoet, ikke i zip-en.
 
+## 1.4 — 2026-10-23
+
+- **Rettet: fortellerbuen åpnet for tall som ikke kommer fra SSB.** Siste ledd foreslo en framskriving, og konteksten «vs. mål» inviterte til tall som et inflasjonsmål. Nå er en framskriving bare lov når den er SSBs egen og merket som framskriving, og sammenligningstallene skal være hentet fra SSB i samme samtale.
+
 ## 1.3 — 2026-10-15
 
 - **Nytt: SSB-paletten er standardvalget, ikke et krav.** Du kan bruke egne farger; kontrast og skillbarhet for fargeblinde gjelder fortsatt, også mot mørk bakgrunn.
