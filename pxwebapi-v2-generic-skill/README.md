@@ -6,13 +6,14 @@ This skill is a reduced, vendor-neutral version derived from the Statistics Norw
 
 ## What is PxWebApi v2?
 
-PxWebApi v2 is a REST API for statistical databases, developed by Statistics Sweden (SCB) and Statstics Norway (SSB). It is used by national statistical institutes across the Nordics and beyond. It provides a standardized way to search, explore, and retrieve official statistics.
+PxWebApi v2 is a REST API for statistical databases, developed by Statistics Sweden (SCB) and Statistics Norway (SSB). It is used by national statistical institutes across the Nordics and beyond. It provides a standardized way to search, explore, and retrieve official statistics.
 
-Known v2 installations (all verified live 2026-09-08):
+Known v2 installations (SSB, SCB and Latvia verified live 2026-09-08, the Faroe beta 2026-11-02):
 
 - **Statistics Norway (SSB):** `https://data.ssb.no/api/pxwebapi/v2`
 - **Statistics Sweden (SCB):** `https://statistikdatabasen.scb.se/api/v2`
 - **Official Statistics Portal of Latvia (CSP):** `https://api.stat.gov.lv/api/v2`
+- **Statistics Faroe Islands (beta):** `https://betaapi.statbank.fo/api/v2` — listed, but Faroe queries still go to v1
 
 They share the API shape but differ in cell limit (10 000 to 800 000), default data format (Latvia returns PX unless asked for json-stat2), variable names (`Tid` vs `TIME`, `Region` vs `AREA`) and period-code letters. The skill treats every such difference as "read it from `/config` and metadata", and `references/api-details.md` carries the verified comparison table.
 

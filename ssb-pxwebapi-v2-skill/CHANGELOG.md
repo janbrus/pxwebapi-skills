@@ -4,6 +4,13 @@ Hva som er annerledes for deg som bruker skillen, nyeste først. Gjeldende versj
 
 Hva som er verifisert, hvor og når, står i vedlikeholderens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/ssb-pxwebapi-v2-skill/DEVLOG.md). Den ligger i repoet, ikke i zip-en.
 
+## 1.6.6 — 2026-11-02
+
+- Etterfølgeren til en avsluttet tabell slås opp på SSBs endringsside og i arkivet for 2016–2025, også for KOSTRA-tabeller.
+- Feilkodene i Fallback omfatter også 500 og 503.
+- Feiloppslag: `detail` står på flere titler, men gjentar bare `title`. `Non-existent table` fra `/data` er HTTP 400, ikke 404. Ugyldige parameterverdier gir en egen feilform, der `errors` navngir parameteren. En for lang GET-URL gir en HTML-side med 404, ikke JSON, og skilles slik fra en tabell som mangler.
+- **Rettet:** hos SCB gir en gjentatt verdikode 500 bare i `Tid` og `ContentsCode`. I andre variabler fjernes duplikatet uten feil.
+
 ## 1.6.5 — 2026-10-23
 
 - Rådet «Start smalt» er tatt ut av Steg 4. Grensen `maxDataCells` står.

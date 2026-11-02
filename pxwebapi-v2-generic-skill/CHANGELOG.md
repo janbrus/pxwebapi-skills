@@ -4,6 +4,13 @@ What is different for users of the skill, newest first. The current version is i
 
 What was verified, on which installations and when, is in the maintainer's log, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/pxwebapi-v2-generic-skill/DEVLOG.md). It is in the repository, not in the ZIP.
 
+## 0.11.5 — 2026-11-02
+
+- Statistics Faroe Islands' v2 beta (`betaapi.statbank.fo/api/v2`) is listed, with its own column in the comparison table. Faroe queries still go to v1 until the beta is in production.
+- Error lookup: `detail` appears on more titles, but only repeats `title`. `Non-existent table` from `/data` is HTTP 400, not 404. An invalid parameter value gets its own error shape, with `errors` naming the parameter. A too-long GET URL gives a 404 HTML page instead of JSON, which tells it apart from a missing table.
+- **Corrected:** Latvia serves `parquet`, although its `dataFormats` leaves it out.
+- **Corrected:** at SCB a repeated value code gives 500 only in `Tid` and `ContentsCode`. In other variables the duplicate is silently dropped.
+
 ## 0.11.4 — 2026-10-23
 
 - The advice "Start narrow" is gone from Step 4. The `maxDataCells` limit stays.

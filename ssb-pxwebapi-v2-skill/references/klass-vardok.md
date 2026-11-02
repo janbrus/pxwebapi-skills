@@ -7,6 +7,16 @@ Metadata-responsen fra `/tables/{id}/metadata` kobler tabellen og variablene til
 
 `link` finnes på både rot-nivå (om statistikken) og variabel-nivå (om den enkelte dimensjonen). Data-responser (`/tables/{id}/data`) inneholder kun `describedby` — `related` finnes bare i metadata-responsen.
 
+**Innhold**
+
+1. Kortnavn før du har metadata: `paths`, krysslistede tabeller, lenkene kortnavnet gir
+2. Rot-nivå: statistikkside og «Om statistikken», `extension.metaid`
+3. Variabel-nivå: definisjoner per variabel, `describedby` og `related`
+4. Klassifikasjoner (Klass): URN → Klass API, `changes`/`codesAt`/`correspondsAt`, KOSTRA-grupper (112), delområder og grunnkretser (1), SN2007/SN2025 (6)
+5. Variabeldefinisjoner (VarDok): URN → definisjonsside
+
+---
+
 ## Kortnavn før du har metadata
 
 I søkefasen (Steg 2) har du bare `/tables`-treffet, ikke metadata — og dermed ingen `link.related`. Kortnavnet kan som regel leses ut av `paths`.

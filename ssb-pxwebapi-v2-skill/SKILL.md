@@ -15,7 +15,7 @@ description: >
   lagrede spørringer og outputformater (json-stat2, csv, xlsx).
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "1.6.5"
+  version: "1.6.6"
   source: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 ---
 
@@ -29,7 +29,7 @@ https://data.ssb.no/api/pxwebapi/v2
 
 **Skillen vedlikeholdes her:** https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 
-Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.6.5.
+Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.6.6.
 
 ## Dataintegritet — grunnregelen
 
@@ -332,7 +332,7 @@ https://data.ssb.no/api/pxwebapi/v2/tables/07459/data?valueCodes[Region]=K-0301&
 
 ## Fallback
 
-Feilkoder og vanlige problemer (400/403/404/429, cellegrense, tomme søkeresultater, NULL-verdier): se `references/troubleshooting.md`.
+Feilkoder og vanlige problemer (400/403/404/429/500/503, cellegrense, tomme søkeresultater, NULL-verdier): se `references/troubleshooting.md`.
 
 Hvis API-et ikke er tilgjengelig:
 

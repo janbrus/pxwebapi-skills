@@ -15,7 +15,7 @@ description: >
   sparade frågor och outputformat (json-stat2, csv, xlsx).
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.11.4"
+  version: "0.12.0"
 ---
 
 # SCB PxWebApi v2 — Komplett guide
@@ -173,7 +173,7 @@ Det farliga är vad som försvinner. Verifierat 2026-09-07 på `TAB6471`: anrope
 
 ### Steg 4: Bygg och kör query
 
-PxWebApi v2 stödjer **både GET och POST** för datahämtning. Du kan också använda Statistikdatabasen (https://www.statistikdatabasen.scb.se) som grafisk frågebyggare — välj tabell och värden och exportera som API-fråga för att få färdig GET-URL eller POST-body. Användbart för att verifiera koder och filter.
+PxWebApi v2 stödjer **både GET och POST** för datahämtning. Du kan också använda Statistikdatabasen (https://www.statistikdatabasen.scb.se) som grafisk frågebyggare — välj tabell och värden och exportera med «Gör denna tabell tillgänglig i din applikation» för att få en färdig GET-URL (bara GET; en POST-body bygger du själv). Användbart för att verifiera koder och filter.
 
 #### POST (rekommenderat för komplexa frågor)
 
@@ -208,24 +208,23 @@ Variabler med `elimination: true` kan uteslutas från `selection`-arrayen.
 GET /tables/{id}/data?valueCodes[Region]=0180&valueCodes[ContentsCode]=000007SF&valueCodes[Tid]=top(5)&outputFormat=json-stat2
 ```
 
-OBS: Variabler med `elimination: false` (typiskt `Tid` och `ContentsCode`) måste alltid inkluderas — annars returnerar API:et HTTP 400. Felmeddelandet innehåller ett stavfel i API:et och lyder ordagrant `"Missing selection for mandantory variable"` (sic, `mandantory`) — samma stavfel som hos SSB. Citera det som det är, annars matchar inte en sökning i loggar.
+OBS: Variabler med `elimination: false` (typiskt `Tid` och `ContentsCode`) måste alltid inkluderas — annars svarar API:et HTTP 400 `"Missing selection for mandantory variable"` (sic, `mandantory` — citera det ordagrant, annars matchar inte en sökning i loggar).
 
 #### Outputformat
 
-Standard är `json-stat2`. Övriga: `csv`, `xlsx`, `html`, `px`, `json-px` — `dataFormats` i `GET /config` är facit (SCB serverar **inte** `parquet`). `outputFormatParams` gäller bara csv/html/xlsx — skickade tillsammans med json-stat2 ger de 400. De kan kombineras, antingen som upprepad parameter eller kommaseparerade i en (`outputFormatParams=SeparatorSemicolon,UseCodesAndTexts`): `UseCodes` (standard) / `UseTexts` / `UseCodesAndTexts`, `IncludeTitle`, `SeparatorTab` / `SeparatorSpace` / `SeparatorSemicolon` (standard: komma). CSV levereras som `text/csv; charset=iso-8859-1`, inte UTF-8 — `encoding="latin-1"` i pandas (verifierat 2026-09-09). Styr pivoteringen med `heading` (kolumner) och `stub` (rader) — listor av variabelnamn; alla variabler i `stub` ger en rad per observation, det format pivottabeller och pandas vill ha.
+Standard är `json-stat2`. Övriga: `csv`, `xlsx`, `html`, `px`, `json-px` — `dataFormats` i `GET /config` är facit (SCB serverar **inte** `parquet`). Data till Excel («Till Excel»), csv:ns teckenkodning (Latin-1), `outputFormatParams` (bara csv/html/xlsx) och `heading`/`stub`: se `references/output-formats.md`.
 
 #### Filteruttryck i valueCodes
 
-Viktigaste mönster: `top(N)` = senaste N värdena, `bottom(N)` = äldsta N, `from(värde)` = från och med, `to(värde)` = till och med, `*` = alla värden. Wildcards `*` och `?` för mönstermatchning (t.ex. `01*` = alla kommuner i Stockholms län), explicita listor (`2024M01,2024M02` i GET), och `range(från,till)` = slutet intervall. **I en GET-URL måste uttryck med komma stå inom hakparenteser** — `valueCodes[Tid]=[range(2024M01,2024M03)]`, `[top(3,2)]` — eftersom komma annars är listavgränsare; utan hakparenteser svarar API:et `400 "Illegal selection expression"`. I en POST-body skrivs uttrycket utan hakparenteser (`"range(2024M01,2024M03)"`). Uttryck och enskilda koder kan blandas i samma `valueCodes` — `2015,top(2)` ger 2015 plus de två senaste åren (TAB1267). Variabel- och värdekoder är inte skiftlägeskänsliga (`tid`, `contentscode` accepteras); kodlist-ID:n är det hos SSB (inte testat hos SCB). Allt verifierat 2026-09-09.
+Viktigaste mönster: `top(N)` = senaste N värdena, `bottom(N)` = äldsta N, `from(värde)` = från och med, `to(värde)` = till och med, `*` = alla värden. Wildcards `*` och `?` för mönstermatchning (t.ex. `01*` = alla kommuner i Stockholms län), explicita listor (`2024M01,2024M02` i GET), och `range(från,till)` = slutet intervall. **I en GET-URL måste uttryck med komma stå inom hakparenteser** — `valueCodes[Tid]=[range(2024M01,2024M03)]`, `[top(3,2)]` — eftersom komma annars är listavgränsare; utan hakparenteser svarar API:et `400 "Illegal selection expression"`. I en POST-body skrivs uttrycket utan hakparenteser (`"range(2024M01,2024M03)"`). Uttryck och enskilda koder kan blandas i samma `valueCodes` — `2015,top(2)` ger 2015 plus de två senaste åren (TAB1267). Allt verifierat 2026-09-09.
 
 **För tidsdimensionen: föredra `top(N)`/`from(värde)` framför explicita perioder.** Relativa filter fångar upp nya perioder automatiskt, så delbara URL:er och sparade frågor fortsätter ge aktuella siffror i stället för att frysa på de perioder som råkade vara senast när frågan skrevs. Detta gäller särskilt `/savedqueries`, vars hela syfte är att köras om senare.
 
 **Viktiga begränsningar:**
 
-- API:et har en övre gräns för antal celler per query. Kontrollera `/config` för `maxDataCells`.
-- Rate limiting: `/config` visar `maxCallsPerTimeWindow` och `timeWindow` (30 anrop per 10 sekunder i skrivande stund — läs `/config`, inte denna text). Varje svar bär dessutom `X-Rate-Limit-Remaining` och `X-Rate-Limit-Reset` — läs dem före en serie anrop. Vid 429: kör stora frågor sekventiellt, vänta på svaret innan nästa skickas.
-- En GET-URL över ca 2 100 tecken ger **404**, inte 400 (gränsen mätt hos SSB 2026-09-09: 2 092 tecken svarar, 2 142 gör det inte). Ersätt långa värdelistor med `*`, `?`, `from()`/`to()`/`[range()]` eller en kodlista, eller använd POST — korta URL:en innan du drar slutsatsen att tabellen saknas.
-- **Upprepad värdekod ger 500 med tom body**, inte 400: `valueCodes[Tid]=2023,2023` räcker, i både GET och POST (verifierat mot TAB1267 2026-09-09; samma hos SSB och Lettland). Överlapp mellan ett uttryck och en enskild kod är däremot okej — `2026,top(1)` svarar. Deduplicera listan om du bygger selektionen programmatiskt.
+- API:et har en övre gräns för antal celler per query. Kontrollera `/config` för `maxDataCells`; för stora uttag, se «För många celler» i `references/troubleshooting.md`.
+- Rate limiting: 30 anrop per 10 sekunder i skrivande stund — läs `/config` och `X-Rate-Limit-*`-headrarna, inte denna text. Kör stora frågor sekventiellt, vänta på svaret innan nästa skickas. Vid 429: se `references/troubleshooting.md`.
+- Två fel förklarar sig inte själva: en GET-URL över ca 2 100 tecken ger **404** med en HTML-sida (använd POST), och en upprepad värdekod kan ge **500** med tom body (deduplicera listan). Se `references/troubleshooting.md`.
 - 503 betyder att tjänsten är nere eller laddar om. Vänta och försök igen; kommer den inte tillbaka gäller Fallback — säg att data inte kunde hämtas.
 
 ### Steg 5: Presentera resultaten
@@ -238,7 +237,7 @@ Viktigaste mönster: `top(N)` = senaste N värdena, `bottom(N)` = äldsta N, `fr
 - **Noten kan begränsa din egen aritmetik.** Från referensår 2025 lägger SCB in en kontrollerad slumpmässig osäkerhet i befolkningsstatistiken (Cell Key Method) — **redovisade totaler är därför inte alltid lika med summan av delarna, och osäkerheten adderas när du summerar själv.** Det står i en obligatorisk not. Summerar du hämtade värden till en ny total: säg att den är din egen och att den bär mer osäkerhet än ett enskilt publicerat tal
 - **Gör uttaget reproducerbart.** Ange vilka dimensioner du utelämnade och vilken kodlista du använde — svaret registrerar ingetdera. Visa GET-URL:en eller POST-bodyn, eller erbjud en sparad fråga (Steg 6)
 - Erbjud att visualisera data
-- Erbjud nedladdning i annat format (csv, xlsx)
+- Erbjud nedladdning i annat format. Ska data till Excel: se «Till Excel» i `references/output-formats.md`
 
 ### Steg 6: Sparade frågor (valfritt)
 
@@ -349,9 +348,11 @@ Region `00` är «Riket». Behöver du en lång årsserie i stället, är TAB436
 
 ## Fallback
 
+Felkoder och vanliga problem (400/404/429/500/503, cellgränsen): se `references/troubleshooting.md`.
+
 Om API:et inte är tillgängligt:
 
 1. **Säg tydligt att data inte kunde hämtas.** Fyll aldrig tomrummet med siffror ur minnet — utan API-åtkomst levererar du vägledning, inte statistik
-2. Hänvisa till SCB:s Statistikdatabas: https://www.statistikdatabasen.scb.se, och för API:ets syntax till SCB:s handbok för PxWebApi v2 (PxTools-guiden, på engelska): https://www.pxtools.net/PxWebApi/documentation/user-guide/
+2. Hänvisa till SCB:s Statistikdatabas: https://www.statistikdatabasen.scb.se, och för API:ets syntax till SCB:s handbok för PxWebApi v2 (PxTools-guiden, på engelska): https://www.pxtools.net/PxWebApi/documentation/user-guide/. Frågor om API:et: px@scb.se
 3. Föreslå relevanta sökord baserat på frågan
 4. Ge vägledning för manuell uppslagning (tabellnamn, variabler att leta efter)

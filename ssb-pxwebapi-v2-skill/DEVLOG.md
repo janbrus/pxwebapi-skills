@@ -2,6 +2,27 @@
 
 Vedlikeholderens logg: hva som er endret, hva som er verifisert mot live API, hvor og når, og utfallet av hver søskensjekk. Den er repo-intern og følger ikke med i zip-en. Brukerne leser den korte [`CHANGELOG.md`](CHANGELOG.md); hver versjon står i begge filene. Fram til 2026-10-05 *var* denne fila `CHANGELOG.md`, så eldre oppføringer sier «denne loggen» eller «changelog» der de mener denne fila.
 
+## 1.6.6 — 2026-11-02
+
+Fra gjennomgangen av referansefilene 2026-10-27 (punkt 1–9, gjennomført og godkjent samme dag), pluss tre feilfunn fra arbeidet med `scb-pxwebapi-v2` 0.12.0 (E1–E3, målt hos SSB og SCB 2026-10-27/28). Releasen ventet til 2026-11-02 («flere kommer, vent»). Alle kall var lesende: GET, pluss POST mot `/data`, aldri `POST /savedqueries`.
+
+* **A1/B1, innholdsfortegnelser:** `api-details.md`, `klass-vardok.md`, `kostra.md`, `output-formats.md` og `troubleshooting.md` åpner med **Innhold**. `kostra.md` begynner med «Sjekkliste før du svarer» (regler før beskrivelse, som i `json-stat2.md`), og fem overskrifter har fått nytt navn. Ordsjekken fant ingen tapt tekst, tabellene i `kostra.md` er byte-identiske, og fire punkter ble avsnitt
+* **A2, parquet sist:** rekkefølgen i `output-formats.md` er formatene → xlsx → CSV → `outputFormatParams` → `heading`/`stub` → Power Query → parquet, fordi formatet er beta (vedlikeholderen, 2026-10-27). Fem parquet-kutt, også i `troubleshooting.md`: parquet-avsnittet beholder det som endrer agentens oppførsel, og den lukkede feilen #511 med verifiseringen står i 1.6.1 her
+* **B2, arkivet, målt 2026-10-27:** arkivet `…/endringer-i-statistikkbanktabeller-arkiv` lister etterfølgerne til sosialhjelptabellene (15.06.2023: 12210, 13138, 12203, 12213, 12266, 12204 og 12201 blir 14019, 13995, 13992, 13994, 13991, 13993 og 13990). Hovedsiden lister dem ikke. Arkivsetningen står under «Avsluttet tabell» i `troubleshooting.md`, og `kostra.md` peker dit i stedet for å gjenta oppslaget, som i 1.6.5 sto i gammel rekkefølge der
+* **C2:** siste linje i `saved-queries.md` (feilkodene) er strøket. `api-details.md` sier «Ved 429: se `troubleshooting.md`.», og pekeren i `SKILL.md` Fallback har fått «500/503»
+* **E, `CLAUDE.md`:** Innhold-regelen og unntakene, rekkefølgen i `kostra.md` og `output-formats.md`, at `troubleshooting.md` er oppslaget fra feil til årsak mens regelen bor i temafila, og de låste overskriftene «NULL-verdier i data», «Data ser "feil ut" over tid» og «Avsluttet tabell»
+* **E1–E3, feilsvar** (`troubleshooting.md`, målt 2026-10-27/28):
+  * `detail` settes også i `Unsupported output format` og `Saved query not found` (404), og gjentar bare `title`. Fila sa at «Too many cells» var eneste tilfelle. Nye rader i 400-tabellen: `outputFormatParams` med json-stat2, ukjent tabell fra `/data` og ugyldig parameterverdi. SSB og SCB
+  * `Non-existent table` fra `/data` er HTTP 400 med `"status":404` i body, men 404 fra `/tables/{id}` og `/metadata`. SSB, SCB og Latvia
+  * Ugyldige parameterverdier (`outputFormat=nonsense`, `pageSize=abc`) gir `application/problem+json` med `type` som RFC 9110-URI, `title` «One or more validation errors occurred.» og `errors`, som navngir parameteren. SSB og SCB
+  * For lang URL: 404-svaret er webserverens HTML-side «404 - File or directory not found», ikke JSON. SSB med 2 340 tegn, SCB TAB6471 med 2 163 tegn. Grensen 2 092/2 142 fra 2026-09-09 står
+  * Gjentatt verdikode: SCB gir 500 bare i `Tid` og `ContentsCode` og fjerner duplikater i `Region`, `Alder` og `Kon` uten feil (TAB6471, 2026-10-28). Fila sa «samme oppførsel hos SCB». Hos SSB gir `Region` fortsatt 500
+  * `CLAUDE.md`: `detail`-setningen er rettet
+* `docs/brukerveiledning.md` sier nå «dekker v1.6.6». `docs/instruks-kort.md` er uendret: punktet om gjentatt verdikode (500 med tom body) stemmer for SSB, og ingen annen regel den gjengir er endret
+* **Verifisering:** innholdsfortegnelsene stemmer i alle fem filene, `output-formats.md` har ingen H3, og arkiv-URL-en svarte 200. Kjørt på nytt 2026-11-02: `check_examples.py` 60 eksempler, 11 tabell-ID-er, 0 feil, og `check_common_tables.py` 92 tabeller, 0 feil, 0 advarsler
+* **Søskensjekk 2026-10-27:** SCB hadde ingen av filene i A og B. To av dem ble laget i SCB 0.12.0, med SCBs egne fakta og uten parquet og Power Query. I generic-v2 peker 429 i `troubleshooting.md` til `api-details.md`, uten ring, så den endres ikke. Generic-v1 har egen 429-tabell, så den gjelder ikke. E1–E3 er gjort også i `scb-pxwebapi-v2` 0.12.0 og i `generic-pxweb-v2-skill` 0.11.5 (E4)
+* Ingen eval for denne versjonen
+
 ## 1.6.5 — 2026-10-23
 
 Fra prompt-auditen 2026-10-21 (`/claude-api prompt-audit`), gjennomført punkt for punkt 2026-10-23. Baseline-evals ble kjørt samme dag før endringene: Sonnet 5.5, én agent per scenario med HEAD-zipen (1.6.4) pakket ut i egen mappe, `curl`, ingen MCP. Scenario 3, 12 og 16 besto alle.

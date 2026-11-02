@@ -8,7 +8,9 @@ Common errors and solutions.
 
 ### 400 Bad Request
 
-Invalid request. **Diagnose from `title`, not from `detail`** — `detail` is usually absent. The payload is a small JSON object with `type`, `title` and `status`; `type` is a plain string, not a URI, so treat it as a category label rather than as an RFC 7807 problem type.
+Invalid request. **Diagnose from `title`, not from `detail`** — `detail` is usually absent and, where present, only repeats `title`. The payload is a small JSON object with `type`, `title` and `status`; `type` is a plain string, not a URI, so treat it as a category label rather than as an RFC 7807 problem type.
+
+The exception is an invalid parameter value (`outputFormat=nonsense`, `pageSize=abc`): it comes as `application/problem+json` with `type` as an RFC 9110 URI, `title` «One or more validation errors occurred.» and an `errors` object that names the parameter — `{"errors":{"pageSize":["The value 'abc' is not valid."]}}`. Same on SSB, SCB and Latvia (2026-10-28).
 
 The observed `title` values and what each one means:
 
@@ -17,8 +19,10 @@ The observed `title` values and what each one means:
 | `Non-existent variable` | A `variableCode` / `valueCodes[…]` key is not in the table | Re-fetch metadata and compare the name. Variable and value codes are **not** case-sensitive (`tid`, `contentscode`, `TOP(1)` all accepted on SSB, SCB and Latvia, 2026-09-09), so this error means the name is wrong, not its case. Codelist IDs *are* case-sensitive — see `codelists-and-filters.md` |
 | `Non-existent value` | The variable exists, the value code does not | Check `dimension.{var}.category.index`; watch for codelist prefixes |
 | `Missing selection for mandantory variable` | A variable with `elimination: false` was omitted | Add it. Note the API's spelling, `mandantory` (sic) — quote it as-is or a log search won't match |
-| `Too many cells selected` | Result exceeds `maxDataCells` from `/config` | Narrow the selection — see "Too many cells" below. **This is the one case that also sets `detail`** |
+| `Too many cells selected` | Result exceeds `maxDataCells` from `/config` | Narrow the selection — see "Too many cells" below. Also sets `detail`, which repeats the title |
 | `Illegal selection expression` | A function with a comma — `range(a,b)`, `top(N,offset)`, `bottom(N,offset)` — written bare in a **GET** URL | Wrap it in square brackets: `valueCodes[Tid]=[range(2024M01,2024M03)]`. The comma is the GET list separator. In a POST body use the bare string instead — see `codelists-and-filters.md` |
+| `Unsupported output format` | `outputFormatParams` sent with json-stat2, or a format the installation does not serve | See "Other causes" below. Also sets `detail`. SSB, SCB and Latvia, 2026-10-28 |
+| `Non-existent table` | Unknown table ID. **HTTP 400 from `/data`**, 404 from `/tables/{id}` and `/metadata`; the body says `"status":404` in all three | Search with `/tables?query=` — see 404 below. SSB, SCB and Latvia, 2026-10-28 |
 
 Useful positive finding: this payload shape is **identical across installations** — all five titles verified on SSB, SCB and Latvia (2026-09-08), including the `mandantory` spelling. Unlike PxWebApi v1 — where several installations return a bare `Bad Request` with no diagnostic and you have to bisect the selection to find the offending part — a v2 400 tells you what went wrong. Read the `title` before changing anything.
 
@@ -48,7 +52,7 @@ Request understood but denied. The table may not be available via API. **Note:**
 
 ### 404 Not Found
 
-Resource does not exist. Wrong table ID, codelist ID, or saved query ID — **or a GET URL longer than roughly 2 100 characters**, which returns 404 rather than 400 (verified 2026-09-09; the threshold was bisected at SSB, where 400 distinct municipality codes — 2 092 characters — answer and 410 codes — 2 142 characters — do not). Replace long value lists with `*`, `?`, `from()`/`to()`/`[range()]` or a codelist, or switch to POST. The v1 `navigation` endpoint also answers 404 on every v2 installation — the subject hierarchy is in `paths` on each `/tables` hit instead.
+Resource does not exist. Wrong table ID, codelist ID, or saved query ID (`Saved query not found`, with `detail`) — **or a GET URL longer than roughly 2 100 characters**, which returns 404 rather than 400 (verified 2026-09-09; the threshold was bisected at SSB, where 400 distinct municipality codes — 2 092 characters — answer and 410 codes — 2 142 characters — do not). The body tells the two apart: a too-long URL gets the web server's HTML page «404 - File or directory not found», not the API's JSON, so JSON with `Non-existent table` means the table is missing and HTML means the URL is too long (SSB, SCB and Latvia, 2026-10-28). Replace long value lists with `*`, `?`, `from()`/`to()`/`[range()]` or a codelist, or switch to POST. The v1 `navigation` endpoint also answers 404 on every v2 installation — the subject hierarchy is in `paths` on each `/tables` hit instead.
 
 **Solution:** Use `GET /tables?query=...` to find the correct ID; if the URL is long, shorten it before concluding the resource is missing.
 
@@ -58,7 +62,7 @@ Rate-limited. The limit is announced in `/config` *or* in `x-ratelimit-*` header
 
 ### 500 Internal Server Error
 
-**A repeated value code.** Listing the same code twice for one variable — `valueCodes[Region]=0301,0301`, or `["0301", "0301"]` in a POST body — returns 500 with an **empty body**, not a 400 with a diagnostic. Two identical codes are enough. Verified on all three installations 2026-09-09 (SSB `0301,0301`, SCB `2023,2023`, Latvia `2020M01,2020M01`), in both GET and POST.
+**A repeated value code.** Listing the same code twice for one variable — `valueCodes[Region]=0301,0301`, or `["0301", "0301"]` in a POST body — returns 500 with an **empty body**, not a 400 with a diagnostic. Two identical codes are enough. Verified on all three installations 2026-09-09 (SSB `0301,0301`, SCB `2023,2023`, Latvia `2020M01,2020M01`), in both GET and POST. Which variables fail varies: at SCB only `Tid` and `ContentsCode` give 500, while duplicates in `Region`, `Alder` and `Kon` are silently dropped (TAB6471, 2026-10-28) — so a list that answers 200 may still hold duplicates.
 
 Overlap between an expression and a plain code is fine: `valueCodes[Tid]=2026,top(1)` answers 200 even when `top(1)` resolves to 2026 — only literal duplicates fail. Deduplicate before sending if you build the selection programmatically, e.g. by unioning code lists from several sources.
 

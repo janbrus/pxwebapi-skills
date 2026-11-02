@@ -2,6 +2,52 @@
 
 Underhållarens logg: vad som ändrats, vad som verifierats mot live API, var och när, och utfallet av varje syskonkontroll. Den är repo-intern och ingår inte i zip:en. Användare läser den korta [`CHANGELOG.md`](CHANGELOG.md); varje version står i båda filerna. Fram till 2026-10-05 *var* den här filen `CHANGELOG.md`, så äldre poster säger «denna logg» eller «CHANGELOG» när de menar den här filen.
 
+## 0.12.0 — 2026-11-02 (beta)
+
+Underhållaren frågade 2026-10-27 om något i `ssb-pxwebapi-v2`:s `output-formats.md`, `api-details.md` och `troubleshooting.md` hör hemma här. Planen genomfördes punkt för punkt 2026-10-27/28 och gavs ut 2026-11-02. Varje SSB-fakta mättes mot SCB innan det fördes över. Alla anrop var läsande: GET, plus POST mot `/data`, aldrig `POST /savedqueries`.
+
+**Mätt 2026-10-27/28** (SCB; SSB och Lettland där de nämns):
+
+- 400-titlarna är identiska med SSB:s: `Non-existent variable`, `Non-existent value`, `Non-existent codelist`, `Missing selection for mandantory variable`, `Too many cells selected` (med `detail`) och `Illegal selection expression`
+- `outputFormatParams` med json-stat2, och `outputFormat=parquet`: 400 `Unsupported output format` med `detail`. Samma hos SSB och Lettland
+- `outputFormat=nonsense`, `json_stat2` och `pageSize=abc`: 400 `application/problem+json`, `title` «One or more validation errors occurred.», `type` som RFC 9110-URI och `errors`, som namnger parametern. Samma hos SSB
+- Okänd tabell: `/tables/TAB99999` och `/metadata` ger 404, `/data` ger **HTTP 400** med `"status":404` i body, alla tre med `Non-existent table`. Samma hos SSB och Lettland (`/data`)
+- v1-namn: `/tables/BefolkningNy` ger 404 `Non-existent table`. Hela listningen har 4 286 tabeller, alla med `TAB`-ID
+- `/savedqueries/99999999` och dess `/data`: 404 `Saved query not found` med `detail`. Samma hos SSB
+- Lång URL: TAB6471 med 2 163 tecken ger 404 med `text/html` (en XHTML-sida), 1 878 tecken ger 200, och POST med samma urval ger 200. SSB med 2 340 tecken ger också 404 med HTML. SSB:s gräns 2 092/2 142, som Steg 4 citerade, står i 0.11.0
+- Kodlist-ID: skiftlägeskänsligt i datafrågan (`agg_regionkommungrupp2023-` ger 400 `Non-existent codelist`). `GET /codelists/{id}` skiljer inte på skiftläge hos SCB (200), men gör det hos SSB (500). Ett okänt ID där ger 500 med tom body
+- `Alder=100+` ger 400 `Non-existent value`, `100%2B` ger 200. `Tid=2024` i en månadstabell ger `Non-existent value`. Rå `vs_CKM02Län` ger 400 `Non-existent codelist` som JSON (hos SSB ger rå UTF-8 en HTML-sida), procentkodat ger 200
+- csv och html: Latin-1 (`iso-8859-1`), och decimalpunkt med både `sv` och `en`. Upprepad och kommaseparerad form av `outputFormatParams` fungerar, oavsett skiftläge. `UseCodesAndTexts` ger «0180 - 0180 Stockholm»
+- Pivotering: alla variabler i `stub` ger en rad per observation, `placement` i POST fungerar, och standard är `extension.px.heading`/`stub`
+- xlsx: 14 av 16 tabeller svarar 200, och i alla är datacellerna text (`t="s"`, med punkt, även med `lang=sv`). TAB6596 och TAB5737 ger 500 med tom body. SSB 13760 och Lettland IRS010m har numeriska celler (`t="n"`). En GitHub-sökning i PxTools/PxWebApi på «xlsx» och «excel» hittar inget issue om textceller
+- Rate limit: `/config` 30 anrop per 10 s. Headrarna `X-Rate-Limit-Limit: 10s`, `-Remaining` och `-Reset` (ISO-tid). SCB:s API-sida säger att gränsen gäller per IP-adress
+- Cellgränsen i TAB6471 (312 × 134 × 3 × 1 × 20): en månad med alla regioner, åldrar och kön (125 424 celler) ger 200, två månader ger 400, och två månader med `vs_CKM035årN` ger 200
+- Upprepad värdekod (2026-10-28): 500 bara i `Tid` och `ContentsCode`. Dubbletter i `Region`, `Alder` och `Kon` tas bort utan fel (TAB6471)
+- Underhållarens test 2026-10-28: Statistikdatabasens «Gör denna tabell tillgänglig i din applikation» visar nu bara v2-GET-URL:en, och v1-POST-URL:en är borta. `outputFormat=xlsx` gav 500 för vissa tabeller och tal som text för andra. Underhållaren mejlade SCB och bad att skillen inte säger något om xlsx så länge
+
+**Ändringar:**
+
+- Ny `references/output-formats.md`: «Till Excel» (csv med `SeparatorSemicolon,UseTexts`, och Latin-1 och punkt som decimaltecken vid importen), CSV:s teckenkodning och decimaler, `outputFormatParams` och `heading`/`stub` med en POST med `placement`. **xlsx beskrivs medvetet inte** (underhållaren 2026-10-28). Kontrollkommandot står i `CLAUDE.md`
+- Ny `references/troubleshooting.md`: en `title`-tabell med HTTP-kolumn, sedan felen utan `title` (404 med HTML-sida, curl «bad range», 429 per IP-adress, 500 med tom body, 503) och «För många celler» med TAB6471-räkningen och ordningen för att minska urvalet. Ingen `/config`-sektion: fälten står redan i `SKILL.md`, och rate limit-fälten står under 429
+- `SKILL.md`: formatstycket i Steg 4 (99 ord) är en mening med pekare (C1). Felpunkterna i Steg 4 är kortade till pekare, och 503 står kvar (C2). Meningen om skiftläge i koder är flyttad till `title`-tabellen, nu mätt hos SCB (C3). «Erbjud nedladdning» pekar på «Till Excel» (C4). Fallback börjar med en pekare till felsökningen och slutar med px@scb.se (C5). `mandantory`-meningen är stramad (C6). Statistikdatabasens export ger bara en GET-URL. 3 277 → 3 143 ord
+- `CLAUDE.md`: de två filerna i Layout med de låsta rubrikerna «Till Excel» och «För många celler», xlsx-kontrollen och vad som görs när SCB har rättat; Innehåll-regeln; «moved to `references/` in 0.12.0»; rättelsen om `TAB`-ID:n och `BefolkningNy`; felskillnaderna mellan SCB och SSB
+- `README.md`: filträdet
+- Medvetet inte överfört från SSB: parquet, publiceringstiderna, KOSTRA och Klass, ändringssidan, SN2007 → SN2025, `agg_KommFylker`, `x-ratelimit-*`-tabellen, Power Query, 403, och formen `/savedqueries/{id}/data`, som inte kan mätas utan POST
+- Noterat, inte ändrat: SCB:s API-sida säger att v1 fungerar till årsskiftet 2026/2027 men tas ur Statistikdatabasen i oktober 2026. RSS (`/feed/statistiknyheter`) och Publiceringskalendern är inte granskade. «SNI 2025» ger 43 träffar och «SNI 2007» 362, så en parallell till SSB:s SN2025-regel kräver en egen runda
+
+**Verifiering:**
+
+- `check_examples.py --quiet --delay 1.0`: 14 exempel, 2 tabell-ID:n, 0 fel (före: 11, 2, 0)
+- Innehåll-listorna stämmer med `## `-rubrikerna i `output-formats.md`, `troubleshooting.md` och `json-stat2.md`
+- Inga tappade fakta: orden på de strukna raderna i C1, C2, C3 och C6 finns i de nya filerna, utom det som planerades bort (TAB1267-loggen, «samma stavfel som hos SSB», xlsx och «API-fråga»)
+- Skillkartan: «Upprepad värdekod ger 500 med tom body», «maxDataCells 150 000 · 30 anrop per 10 s» och «4xx · 5xx · 503» står fortfarande i Steg 4, så den ritas inte om
+
+**Syskonkontroll:**
+
+- `ssb-pxwebapi-v2` 1.6.6: fler titlar med `detail`, `Non-existent table` som 400 från `/data`, valideringsfelens form och HTML-404 (E1–E3), mätt hos SSB samma dagar
+- `generic-pxweb-v2-skill` 0.11.5: samma rättelser (E4) och raden «xlsx data cells» (E5). Lettland omkontrollerat 2026-11-02
+- `generic-pxweb-v1-skill`: gäller inte, eftersom request-sidan inte överförs
+
 ## 0.11.4 — 2026-10-23 (beta)
 
 Från prompt-auditen 2026-10-21 (`/claude-api prompt-audit`), genomförd punkt för punkt 2026-10-23 som syskon till `ssb-pxwebapi-v2` 1.6.5. Baseline-evals kördes samma dag före ändringarna: Sonnet 5.5, en agent per scenario med HEAD-zip:en (0.11.3) uppackad i egen mapp, `curl`, ingen MCP. Scenario 1 och 3 samt «Hur många bor i Gnesta?» klarade sig alla.

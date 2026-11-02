@@ -12,12 +12,12 @@ description: >
   Covers table search, metadata, data queries, codelists, and saved queries.
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.11.4"
+  version: "0.11.5"
 ---
 
 # PxWebApi v2 — Generic Skill
 
-This skill guides you through using PxWebApi v2 to search, explore, and retrieve official statistics. PxWebApi v2 is developed by Statistics Sweden (SCB) and used by several national statistical institutes. Everything below that says *varies by installation* has been verified to vary on the three installations listed under "Known installations".
+This skill guides you through using PxWebApi v2 to search, explore, and retrieve official statistics. PxWebApi v2 is developed by Statistics Sweden (SCB) and used by several national statistical institutes. Everything below that says *varies by installation* has been verified to vary on SSB, SCB and Latvia, the production installations listed under "Known installations".
 
 ## Data integrity — the base rule
 
@@ -45,21 +45,24 @@ Not finding the number is a valid answer. An honest "not found", with suggested 
 | Statistics Norway (SSB) | Norway | `https://data.ssb.no/api/pxwebapi/v2` | no, en |
 | Statistics Sweden (SCB) | Sweden | `https://statistikdatabasen.scb.se/api/v2` | sv, en |
 | Official Statistics Portal of Latvia (CSP) | Latvia | `https://api.stat.gov.lv/api/v2` | lv, en |
+| Statistics Faroe Islands (beta) | Faroe Islands | `https://betaapi.statbank.fo/api/v2` | fo, en |
 
-All three verified live 2026-09-08. They differ more than the shared API shape suggests — the full comparison is in `references/api-details.md`; the four differences that change how you query:
+SSB, SCB and Latvia verified live 2026-09-08, the Faroe beta 2026-11-02. They differ more than the shared API shape suggests — the full comparison is in `references/api-details.md`; the four differences that change how you query:
 
 - **Default data format.** SSB and SCB return json-stat2 when `outputFormat` is omitted; **Latvia returns PX** (`application/octet-stream`). Always set `outputFormat=json-stat2` explicitly.
 - **Cell limit.** `maxDataCells` is 800 000 at SSB, 150 000 at SCB and **10 000** at Latvia — an 80× spread. Read it from `/config` every time.
-- **Variable names.** The metric is `ContentsCode` on all three, but time is `Tid` (SSB, SCB) or `TIME` (Latvia) and geography is `Region` or `AREA`. Read names from `role` and `id`, never assume.
+- **Variable names.** The metric is `ContentsCode` at SSB, SCB and Latvia, but time is `Tid` (SSB, SCB) or `TIME` (Latvia) and geography is `Region` or `AREA`. Read names from `role` and `id`, never assume.
 - **Period codes.** Quarters are `2024K2` at SSB/SCB and `2026Q2` at Latvia; weeks are `2026U35` (SSB), `2026V30` (SCB), `2026W13` (Latvia). Read the codes from metadata before writing a time filter.
 
-These agencies were checked on 2026-08-30 and are **still v1-only** — no v2 endpoint responds at any of the usual URL patterns. Use `generic-pxweb-v1-skill` for them:
+**The Faroe beta:** use Faroe v1 (`generic-pxweb-v1-skill`) until the beta is in production; its table IDs differ from v1's. If a user asks for the beta explicitly: the metric is `CONTENTS` or `measure`, not `ContentsCode`, and about half the tables have no time variable — see `references/api-details.md`.
+
+These agencies have no v2 in production (checked 2026-08-30; the Faroe beta above, 2026-11-02). Use `generic-pxweb-v1-skill` for them:
 
 | Agency | Country | v1 base URL |
 |---|---|---|
 | Statistics Finland | Finland | `https://pxdata.stat.fi/PXWeb/api/v1/{fi\|sv\|en}/StatFin` |
 | Statistics Iceland | Iceland | `https://px.hagstofa.is/pxis/api/v1/is/{database}` |
-| Statistics Faroe Islands | Faroe Islands | `https://statbank.hagstova.fo/api/v1/{fo\|en}/H2` |
+| Statistics Faroe Islands (v2 beta above, use v1) | Faroe Islands | `https://statbank.hagstova.fo/api/v1/{fo\|en}/H2` |
 | Statistics Greenland | Greenland | `https://bank.stat.gl/api/v1/{da\|en\|kl}/Greenland` |
 | Statistics Estonia | Estonia | `https://andmed.stat.ee/api/v1/{et\|en}/stat` |
 
@@ -148,14 +151,14 @@ Metadata is returned in json-stat2 format. Focus on:
 
 - **`id` array** — variable names; `size` gives the number of values per variable
 - **`dimension` object** — per variable: codes (`category.index`), labels (`category.label`), units (`category.unit`), and `extension` with `elimination` and the available `codelists`
-- **`role` object** — **start the analysis here.** `role.metric` is what is measured (`ContentsCode` on all three known installations; read `category.unit` for unit and decimals). `role.time` is the time dimension (`Tid` or `TIME`). **`role.geo` is optional and installation-dependent** — SSB and Latvia set it (`Region`, `AREA`), SCB does not, even on tables with 290 municipalities. Look for a geographic variable in `id` first; only when none exists does the data cover the whole area. Do not ask the user. Remaining variables in `id` are breakdown dimensions
+- **`role` object** — **start the analysis here.** `role.metric` is what is measured (`ContentsCode` at SSB, SCB and Latvia; read `category.unit` for unit and decimals). `role.time` is the time dimension (`Tid` or `TIME`). **`role.geo` is optional and installation-dependent** — SSB and Latvia set it (`Region`, `AREA`), SCB does not, even on tables with 290 municipalities. Look for a geographic variable in `id` first; only when none exists does the data cover the whole area. Do not ask the user. Remaining variables in `id` are breakdown dimensions
 - **`note` array + `extension.noteMandatory`** — table notes, and which of them **must be shown**, keyed by index into `note`. Some installations also flag notes per variable and per value. See Step 5
 - **`extension` (root)** — `noteMandatory`, `contact` and PX metadata under `extension.px`. **`firstPeriod`/`lastPeriod`/`timeUnit` and `discontinued` are not here** — they are on the `/tables` hit and `GET /tables/{id}`
 
 **Key rules:**
 
 - Read `elimination` **from the metadata response only** — in a data response the field describes the extract you received, not the table's contract. Omitting an eliminable variable removes it from the response entirely (from `id` and `dimension`, not as a total row); note it yourself. Metadata does not distinguish a dimension with a predefined total code from one summed on the fly — scan `category.label` for a total, or probe; `eliminationValueCode` appears only in data responses that include the total (verified on SSB, SCB and Latvia). **Which variables are eliminable is a property of the table, not of the variable name**: `Alder` is optional in SCB's TAB638 and mandatory in TAB6471. Details: `references/json-stat2.md`
-- Omitting a variable with `elimination: false` fails with `400 — "Missing selection for mandantory variable"` (the API's own spelling, identical on all three installations; quote it as-is). This is the sharpest v1/v2 difference: **v1 returns all the variable's values instead of failing.**
+- Omitting a variable with `elimination: false` fails with `400 — "Missing selection for mandantory variable"` (the API's own spelling, identical on all four installations; quote it as-is). This is the sharpest v1/v2 difference: **v1 returns all the variable's values instead of failing.**
 
 **Codelists:** group values into higher aggregation levels — `agg_` maps many-to-one, `vs_` is an alternative value set. The codelist's *own* codes are what go in `valueCodes` (read them from `GET /codelists/{id}`), and the response does not record which codelist produced a figure. See `references/codelists-and-filters.md`.
 
@@ -192,7 +195,7 @@ GET {base_url}/tables/{id}/data?valueCodes[Region]=01&valueCodes[ContentsCode]=P
 
 #### Filter expressions in valueCodes
 
-All of these work, verified on all three installations: `top(N)` = last N values, `bottom(N)` = first N, `from(code)` = from and including, `to(code)` = up to and including, `range(from,to)` = closed interval, `top(N,offset)` / `bottom(N,offset)` = N values starting `offset` from the end / start, `*` and `?` wildcards (`2025M*` = one year of months), and explicit lists.
+All of these work, verified on all four installations: `top(N)` = last N values, `bottom(N)` = first N, `from(code)` = from and including, `to(code)` = up to and including, `range(from,to)` = closed interval, `top(N,offset)` / `bottom(N,offset)` = N values starting `offset` from the end / start, `*` and `?` wildcards (`2025M*` = one year of months), and explicit lists.
 
 **In a GET URL, any expression that contains a comma must be wrapped in square brackets** — `valueCodes[Tid]=[range(2024M01,2024M03)]`, `[top(3,2)]` — because a bare comma is the list separator (`valueCodes[Tid]=2024M01,2024M02`). Unwrapped, `range(...)` returns `400 — "Illegal selection expression"` on every installation, which is easy to misread as the function not existing. Single-argument forms (`top(3)`, `from(2024M01)`) work with or without brackets. **In a POST body it is the other way round:** write the bare string (`"valueCodes": ["range(2024M01,2024M03)"]`); a bracketed string is looked up as a code and fails with `Non-existent value`. Expressions can be mixed with explicit codes (`["2015", "top(2)"]`), but two *function* expressions in one array give the *union* — `["from(2024M01)", "to(2024M03)"]` is 319 periods, not the interval. With curl, pass `-g`: the brackets in `valueCodes[Var]` are otherwise parsed by curl itself (`bad range in URL`) — see `references/troubleshooting.md`.
 
@@ -240,7 +243,7 @@ Content-Type: application/json
 }
 ```
 
-Both `outputFormat` and `outputFormatParams` are required in the savedqueries body — pass `outputFormatParams: []` if you don't need any. Include all non-eliminable variables in the selection, otherwise the API returns HTTP 400. The endpoint exists on all three installations.
+Both `outputFormat` and `outputFormatParams` are required in the savedqueries body — pass `outputFormatParams: []` if you don't need any. Include all non-eliminable variables in the selection, otherwise the API returns HTTP 400. The endpoint exists on all four installations.
 
 Useful for reports that are updated regularly — `top(N)` always returns the latest periods.
 

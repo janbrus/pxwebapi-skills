@@ -2,6 +2,20 @@
 
 Standard er `json-stat2`. Velg annet format med `outputFormat`-parameter på `/tables/{id}/data` (og `/savedqueries/{id}/data`).
 
+**Innhold**
+
+1. Formatene: oversikt, `dataFormats` i `/config`
+2. xlsx: anbefalt til Excel
+3. CSV: tegnsett og desimaler
+4. `outputFormatParams`: koder og tekster, tittel, skilletegn
+5. `heading` og `stub`: pivotering, langformat, `placement` i POST
+6. Excel via Power Query: oppdaterbar tilkobling
+7. Parquet (beta): kolonner, `_symbol`-kolonnene, åpne feil
+
+---
+
+## Formatene
+
 | Format     | `outputFormat`-verdi | Bruk                                 |
 | ---------- | -------------------- | ------------------------------------ |
 | json-stat2 | `json-stat2`         | Standard, maskinlesbar, rik metadata |
@@ -10,39 +24,25 @@ Standard er `json-stat2`. Velg annet format med `outputFormat`-parameter på `/t
 | HTML       | `html`               | Tabell for visning                   |
 | PX         | `px`                 | Tradisjonelt PX-format               |
 | JSON-PX    | `json-px`            | JSON-variant av PX                   |
-| Parquet    | `parquet`            | Kolonneformat for dataanalyse (pandas, DuckDB) |
+| Parquet    | `parquet`            | Kolonneformat for dataanalyse (pandas, DuckDB). Beta, se «Parquet» |
 
 Sjekk `dataFormats` i `GET /config` for gjeldende formatliste.
 
-## Parquet
+## xlsx: anbefalt til Excel
 
-Kolonneformat for dataanalyse — les direkte med pandas eller DuckDB. Returneres som `application/octet-stream`, med lang-format: én rad per observasjon, pluss en `timestamp`-kolonne.
+Skal dataene åpnes i Excel, bruk `xlsx`, ikke csv. Tallene er numeriske celler med tallformat (`0.0` for én desimal), så Excel viser desimaltegnet etter sin egen språkinnstilling. Tallene og tallformatet er like for `lang=no` og `lang=en`; bare tekstene skifter språk. Det er ingen tegnsettproblemer. `..` og andre tegn står som tekst i cellen, og tegnforklaringen, tabellnotene, måleenheten, kilden og «Sist endret» følger med under tabellen. Bruk `UseTexts` eller `UseCodesAndTexts`, ellers får du bare koder:
 
-Kolonnenavn avhenger av hvor mange statistikkvariabler uttrekket har:
+```
+https://data.ssb.no/api/pxwebapi/v2/tables/13760/data?valueCodes[Justering]=3MGG&valueCodes[ContentsCode]=ArbledProsArbstyrk&valueCodes[Tid]=top(12)&outputFormat=xlsx&outputFormatParams=UseTexts
+```
 
-| Uttrekk                  | Verdikolonne             | Statuskolonne                   |
-| ------------------------ | ------------------------ | ------------------------------- |
-| Én statistikkvariabel    | `value`                  | `value_symbol`                  |
-| Flere statistikkvariabler | `ContentsCode_{kode}`   | `ContentsCode_{kode}_symbol`    |
+## CSV: tegnsett og desimaler
 
-**`_symbol`-kolonnene bærer `status`-kodene** — les dem, ikke bare verdikolonnen. Manglende, foreløpige og konfidensielle verdier er ellers usynlige i et parquet-uttrekk.
+CSV leveres som `text/csv; charset=iso-8859-1` (Latin-1), ikke UTF-8 — også fra `/savedqueries/{id}/data` (verifisert 2026-09-09). I Python: `pd.read_csv(url, sep=";", encoding="latin-1")`, eller bruk `requests`-responsens `.text`, som leser tegnsettet fra headeren. Desimalskilletegn i csv er alltid punktum, uansett `lang`.
 
-Parquet bruker alltid koder, aldri tekst: `outputFormatParams=UseCodesAndTexts` gir HTTP 400 mot dette formatet.
+## `outputFormatParams`
 
-**Dimensjonskolonnene heter etter variabelens *label* på valgt `lang`, ikke etter koden.** 04475 med `lang=en` gir kolonnene `type of beverage` og `quarter`, og med `lang=no` gir den `type drikkevare` og `kvartal`, ikke `Alkohol` og `Tid`. Verdiene i kolonnene er fortsatt koder (`03`, `2025K1`). Statistikkvariabel-kolonnene bruker koden (`ContentsCode_Areal`). Et skript som leser kolonner ved navn, må altså bruke samme `lang` hver gang.
-
-**`timestamp` er periodens startdato:** `2025K2` → `2025-04-01`, `2025` → `2025-01-01`.
-
-**Formatet er beta hos PxTools** («We may have to change the format»), så kolonnekontrakten over kan endre seg. Åpne feil per 2026-10-02:
-- [PxWebApi #595](https://github.com/PxTools/PxWebApi/issues/595): HTTP 500 på tabeller med egendefinert tidsskala (`timeUnit: Other`, for eksempel den avsluttede 07314). Fall tilbake til `json-stat2` eller `csv`.
-- [#596](https://github.com/PxTools/PxWebApi/issues/596): filen har ingen desimalmetadata. Ta antall desimaler fra `unit.decimals` i metadata.
-- [#597](https://github.com/PxTools/PxWebApi/issues/597): lastes ikke i Onyxia Data Explorer.
-
-Feilen med rekkefølgen ved flere statistikkvariabler ([#511](https://github.com/PxTools/PxWebApi/issues/511)) ble lukket 2026-04-22. 14216 med `Areal,Bosatte` gir nå én rad per år, med riktige tall også når årene er bestilt synkende. Verifisert med pyarrow 2026-10-02.
-
-## OutputFormatParams (kan kombineres)
-
-Gjelder kun `csv`, `html` og `xlsx`. Mot `json-stat2` gir enhver `outputFormatParams` HTTP 400 (verifisert 2026-09-09), og mot `parquet` gir `UseCodesAndTexts` 400 (se over).
+Gjelder kun `csv`, `html` og `xlsx`. Mot `json-stat2` gir enhver `outputFormatParams` HTTP 400 (verifisert 2026-09-09), og mot `parquet` gir `UseCodesAndTexts` 400 (se «Parquet»).
 
 - `UseCodes` — koder (standard)
 - `UseTexts` — tekster
@@ -60,19 +60,7 @@ POST /tables/07221/data?outputFormat=xlsx&outputFormatParams=UseCodesAndTexts&ou
 https://data.ssb.no/api/pxwebapi/v2/tables/03024/data?valueCodes[ContentsCode]=*&valueCodes[Varegrupper2]=*&valueCodes[Tid]=top(3)&outputFormat=csv&outputFormatParams=SeparatorSemicolon,UseCodesAndTexts
 ```
 
-### xlsx: anbefalt til Excel
-
-Skal dataene åpnes i Excel, bruk `xlsx`, ikke csv. Tallene er numeriske celler med tallformat (`0.0` for én desimal), så Excel viser desimaltegnet etter sin egen språkinnstilling. Tallene og tallformatet er like for `lang=no` og `lang=en`; bare tekstene skifter språk. Det er ingen tegnsettproblemer. `..` og andre tegn står som tekst i cellen, og tegnforklaringen, tabellnotene, måleenheten, kilden og «Sist endret» følger med under tabellen. Bruk `UseTexts` eller `UseCodesAndTexts`, ellers får du bare koder:
-
-```
-https://data.ssb.no/api/pxwebapi/v2/tables/13760/data?valueCodes[Justering]=3MGG&valueCodes[ContentsCode]=ArbledProsArbstyrk&valueCodes[Tid]=top(12)&outputFormat=xlsx&outputFormatParams=UseTexts
-```
-
-### CSV: tegnsett og desimaler
-
-CSV leveres som `text/csv; charset=iso-8859-1` (Latin-1), ikke UTF-8 — også fra `/savedqueries/{id}/data` (verifisert 2026-09-09). I Python: `pd.read_csv(url, sep=";", encoding="latin-1")`, eller bruk `requests`-responsens `.text`, som leser tegnsettet fra headeren. Desimalskilletegn i csv er alltid punktum, uansett `lang`.
-
-## heading og stub — pivotering
+## `heading` og `stub`: pivotering
 
 `stub` = variabler i forspalten (rader), `heading` = variabler i tabellhodet (kolonner). Kommaseparert liste av variabelkoder, kun relevant for csv/html/xlsx. Standard er tabellens egen pivotering (`extension.px.heading`/`stub` i metadata), typisk med ContentsCode og Tid i hodet — det gir en bred tabell med én kolonne per periode.
 
@@ -93,6 +81,31 @@ I POST ligger pivoteringen i `placement` ved siden av `selection`:
 }
 ```
 
-### Til Excel via Power Query
+## Excel via Power Query
 
 Skal fila bare åpnes i Excel, er `xlsx` enklest (se over). Power Query gir en tilkobling som oppdateres. SSBs oppskrift (https://www.ssb.no/api/fra-pxwebapi-v2-til-excel): bygg en GET-URL med `outputFormat=csv&outputFormatParams=SeparatorSemicolon,UseTexts` og alle variabler i `stub`; lim den inn i Excel under Data → Fra Internett; bytt desimalpunktum til komma i Power Query; slå på «Oppdater data når filen åpnes». Bruk `top()`/`from()` i URL-en, så følger arbeidsboken nye publiseringer.
+
+## Parquet (beta)
+
+**Formatet er beta hos PxTools** («We may have to change the format»), så kolonnekontrakten under kan endre seg.
+
+Returneres som `application/octet-stream`, med lang-format: én rad per observasjon, pluss en `timestamp`-kolonne.
+
+Kolonnenavn avhenger av hvor mange statistikkvariabler uttrekket har:
+
+| Uttrekk                  | Verdikolonne             | Statuskolonne                   |
+| ------------------------ | ------------------------ | ------------------------------- |
+| Én statistikkvariabel    | `value`                  | `value_symbol`                  |
+| Flere statistikkvariabler | `ContentsCode_{kode}`   | `ContentsCode_{kode}_symbol`    |
+
+**`_symbol`-kolonnene bærer `status`-kodene** — les dem, ikke bare verdikolonnen. Manglende, foreløpige og konfidensielle verdier er ellers usynlige i et parquet-uttrekk.
+
+Parquet bruker alltid koder, aldri tekst: `outputFormatParams=UseCodesAndTexts` gir HTTP 400 mot dette formatet.
+
+**Dimensjonskolonnene heter etter variabelens *label* på valgt `lang`, ikke etter koden.** 04475 med `lang=no` gir kolonnene `type drikkevare` og `kvartal`, ikke `Alkohol` og `Tid`. Verdiene i kolonnene er fortsatt koder (`03`, `2025K1`). Statistikkvariabel-kolonnene bruker koden (`ContentsCode_Areal`). Et skript som leser kolonner ved navn, må altså bruke samme `lang` hver gang.
+
+**`timestamp` er periodens startdato:** `2025K2` → `2025-04-01`, `2025` → `2025-01-01`.
+
+Åpne feil per 2026-10-02:
+- [PxWebApi #595](https://github.com/PxTools/PxWebApi/issues/595): HTTP 500 på tabeller med egendefinert tidsskala (`timeUnit: Other`, for eksempel den avsluttede 07314). Fall tilbake til `json-stat2` eller `csv`.
+- [#596](https://github.com/PxTools/PxWebApi/issues/596): filen har ingen desimalmetadata. Ta antall desimaler fra `unit.decimals` i metadata.

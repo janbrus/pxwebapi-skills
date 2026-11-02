@@ -1,6 +1,12 @@
 # Feilsøking for PxWebApi v2
 
-Vanlige feilscenarier og løsninger. Feilresponsen ligner RFC 7807, men er ikke en full implementasjon: `type` er en ren streng («Parameter error»), ikke en URI, og `detail` settes som regel ikke. **Diagnosefeltet er `title`.**
+Vanlige feilscenarier og løsninger. Feilresponsen ligner RFC 7807, men er ikke en full implementasjon: `type` er en ren streng («Parameter error»), ikke en URI, og `detail` gjentar i beste fall bare `title`. **Diagnosefeltet er `title`.** Unntaket er ugyldige parameterverdier (`outputFormat=nonsense`, `pageSize=abc`): de gir `application/problem+json` med `type` som URI, `title` «One or more validation errors occurred.» og `errors`, som navngir parameteren.
+
+**Innhold**
+
+1. HTTP-feilkoder: 400 (med `title`-tabell), curl «bad range in URL», 403, 404, 429, 500, 503
+2. Vanlige problemer: for mange celler, tomme søkeresultater, avsluttet tabell, manglende kommuner, NULL-verdier og standardtegn, feil enheter, brudd over tid
+3. Sjekk API-konfigurasjon: `/config`, `maxDataCells`, `sourceReferences`
 
 ---
 
@@ -18,8 +24,11 @@ Ugyldig forespørsel. **Diagnostiser fra `title`, ikke fra `detail`** — `detai
 | For mange celler | `… "title":"Too many cells selected","detail":"Too many cells selected"` |
 | Komma-uttrykk i GET uten hakeparenteser | `… "title":"Illegal selection expression" …` |
 | Ukjent kodeliste-ID | `… "title":"Non-existent codelist" …` |
+| `outputFormatParams` med json-stat2 | `… "title":"Unsupported output format","detail":"Unsupported output format"` |
+| Ukjent tabell, fra `/data` | `… "title":"Non-existent table","status":404` — men HTTP **400** (fra `/tables/{id}` og `/metadata`: 404) |
+| Ugyldig parameterverdi | `{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"pageSize":[…]}}` |
 
-`detail` settes kun i «Too many cells»-tilfellet, og gjentar da bare `title`. Formen er identisk hos SCB, så en feilhåndtering skrevet mot SSB virker også der.
+`detail` settes i «Too many cells», «Unsupported output format» og «Saved query not found» (404), og gjentar da bare `title`. Formen er identisk hos SCB, så en feilhåndtering skrevet mot SSB virker også der.
 
 **Vanlige årsaker:**
 
@@ -62,9 +71,9 @@ Ressursen finnes ikke.
 **Vanlige årsaker:**
 
 - Feil tabell-ID (skal være et tall som streng, f.eks. `"07459"`)
-- Tabellen er erstattet og fjernet helt (`Non-existent table`). SSB lar ikke alltid en erstattet tabell stå som `discontinued`, så en tabell-ID du husker eller har fått oppgitt, kan være borte. Slå opp ID-en på [Endringer i statistikkbanktabeller](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller), der arkivet for 2016–2025 er lenket nederst og ny tabell-ID står oppgitt. Søk etter temaet bare hvis den ikke står der. Eksempel: 11038 gir 404, og siden oppgir 14890 (verifisert 2026-10-23)
-- Feil saved query-ID
-- **URL-en er lengre enn ca. 2 100 tegn** — API-et svarer 404, ikke 400. Grensen er målt 2026-09-09 på 07459: 400 distinkte kommunekoder (2 092 tegn) gir 200, 410 koder (2 142 tegn) gir 404. Bytt lange verdilister mot `*`, `?`, `from()`/`to()`/`[range()]` eller en kodeliste, eller bruk POST, som ikke har lengdegrensen
+- Tabellen er erstattet og fjernet helt (`Non-existent table`; fra `/data` kommer samme feil som HTTP 400). SSB lar ikke alltid en erstattet tabell stå som `discontinued`, så en tabell-ID du husker eller har fått oppgitt, kan være borte. Slå opp ID-en på [Endringer i statistikkbanktabeller](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller), der arkivet for 2016–2025 er lenket nederst og ny tabell-ID står oppgitt. Søk etter temaet bare hvis den ikke står der. Eksempel: 11038 gir 404, og siden oppgir 14890 (verifisert 2026-10-23)
+- Feil saved query-ID (`Saved query not found`)
+- **URL-en er lengre enn ca. 2 100 tegn** — API-et svarer 404, ikke 400, og svaret er webserverens HTML-side «404 - File or directory not found», ikke JSON. JSON med `Non-existent table` betyr at tabellen mangler; HTML betyr at URL-en er for lang. Grensen er målt 2026-09-09 på 07459: 400 distinkte kommunekoder (2 092 tegn) gir 200, 410 koder (2 142 tegn) gir 404. Bytt lange verdilister mot `*`, `?`, `from()`/`to()`/`[range()]` eller en kodeliste, eller bruk POST, som ikke har lengdegrensen
 
 **Løsning:** Bruk `GET /tables?query=...` for å finne riktig ID. Er URL-en lang, kort den ned før du konkluderer med at ressursen mangler.
 
@@ -76,7 +85,7 @@ Rate-limiting. Du har sendt for mange forespørsler.
 
 ### 500 Internal Server Error
 
-**Gjentatt verdikode.** Oppgir du samme kode to ganger i samme variabel — `valueCodes[Region]=0301,0301`, eller `["0301", "0301"]` i en POST-body — svarer API-et 500 med **tom body**, ikke 400 med forklaring. To like koder er nok. Verifisert 2026-09-09 hos SSB, og samme oppførsel hos SCB og Latvia.
+**Gjentatt verdikode.** Oppgir du samme kode to ganger i samme variabel — `valueCodes[Region]=0301,0301`, eller `["0301", "0301"]` i en POST-body — svarer API-et 500 med **tom body**, ikke 400 med forklaring. To like koder er nok. Verifisert 2026-09-09 hos SSB. Latvia gir også 500; SCB gir 500 i `Tid` og `ContentsCode`, men fjerner dubletter i `Region` stille (2026-10-28).
 
 Overlapp mellom et uttrykk og en enkeltkode er derimot uproblematisk: `valueCodes[Tid]=2026,top(1)` gir 200 selv når `top(1)` også er 2026 — det er bare bokstavelig like koder som feiler. Bygger du seleksjonen programmatisk (fra en løkke, en fil eller en union av flere kilder), dedupliser lista før du sender den.
 
@@ -118,7 +127,7 @@ Tjenesten er nede eller under oppdatering. Metadata oppdateres kl. 05.00 og 11.3
 
 ### Avsluttet tabell (`discontinued`)
 
-Tabeller avsluttes, og serien fortsetter ofte i en ny tabell. Bruker du en avsluttet tabell, si det og oppgi siste periode. Finn etterfølgeren når den finnes: tabellnoten nevner den av og til (03013 → 14700), ellers slår du opp ID-en på [Endringer i statistikkbanktabeller](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller), som også lister tabeller som er fjernet helt (se 404 over).
+Tabeller avsluttes, og serien fortsetter ofte i en ny tabell. Bruker du en avsluttet tabell, si det og oppgi siste periode. Finn etterfølgeren når den finnes: tabellnoten nevner den av og til (03013 → 14700), ellers slår du opp ID-en på [Endringer i statistikkbanktabeller](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller), som også lister tabeller som er fjernet helt (se 404 over). Endringer fra 2016–2025 står i [arkivet](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller-arkiv), ikke på selve endringssiden.
 
 ### Manglende kommuner
 
@@ -193,6 +202,6 @@ Full respons, verifisert 2026-08-30:
 }
 ```
 
-`sourceReferences` er verdt å kjenne: det er SSBs egen kildehenvisningsstreng per språk («Kilde: Statistisk sentralbyrå» / «Source: Statistics Norway»), ved siden av kortformen skillen bruker i Steg 5 («Kilde: SSB, tabell {id}. Sist oppdatert: {YYYY-MM-DD}.»). Merk også at `parquet` ligger i `dataFormats`.
+`sourceReferences` er verdt å kjenne: det er SSBs egen kildehenvisningsstreng per språk («Kilde: Statistisk sentralbyrå» / «Source: Statistics Norway»), ved siden av kortformen skillen bruker i Steg 5 («Kilde: SSB, tabell {id}. Sist oppdatert: {YYYY-MM-DD}.»).
 
 Verdiene kan endre seg — hardkod dem ikke. NB: `maxCallsPerTimeWindow` og `timeWindow` er nullstilt til `0` og ikke lenger i bruk; rate limit leses fra `x-ratelimit-*`-headerne — se `api-details.md`.

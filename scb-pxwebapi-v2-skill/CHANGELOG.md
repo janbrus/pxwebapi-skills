@@ -4,6 +4,16 @@ Vad som är annorlunda för den som använder skillen, nyast först. Gällande v
 
 Vad som verifierats, var och när, står i underhållarens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/scb-pxwebapi-v2-skill/DEVLOG.md). Den finns i repot, inte i zip:en.
 
+## 0.12.0 — 2026-11-02 (beta)
+
+- Nytt: `references/output-formats.md` och `references/troubleshooting.md`. Felsökningen slår upp ett felsvar efter `title`, med HTTP-kod, orsak och åtgärd.
+- Nytt: «Till Excel» med csv-recept: semikolon och texter, och Latin-1 och punkt som decimaltecken vid importen.
+- **Rättat:** kodlist-ID:n är skiftlägeskänsliga i datafrågan.
+- **Rättat:** Statistikdatabasen ger bara en färdig GET-URL. En POST-body bygger du själv.
+- Nytt: 404 med en HTML-sida betyder att URL:en är för lång. JSON med `Non-existent table` betyder att tabellen saknas. v1-namn som `BefolkningNy` ger `Non-existent table`, och en v1-fråga översätts med pxapiconverter.
+- Nytt: rate limit gäller per IP-adress.
+- Nytt: i CKM-tabellerna används tabellens egna åldersgrupper hellre än egna summor av ettårsklasser.
+
 ## 0.11.4 — 2026-10-23 (beta)
 
 - Rådet «Börja smalt» är borttaget ur Steg 4. Gränsen `maxDataCells` står kvar.

@@ -2,6 +2,13 @@
 
 Praktisk driftsinformasjon for SSBs PxWebApi v2. For json-stat2-formatet (Dataset-struktur, indeksering, status-koder) — se `json-stat2.md`.
 
+**Innhold**
+
+1. Praktisk driftsinformasjon: publiseringstider, KOSTRA-rytme, cellegrense, rate limit, URL-lengde, lisens
+2. Spesifikasjon, veiledning og kontakt: OpenAPI, brukerveiledninger, e-post
+3. Rate limit-headere: `x-ratelimit-*`
+4. RSS-feeds: publiseringskalender, oppdaterte tabeller, «Når kommer neste tall?»
+
 ---
 
 ## Praktisk driftsinformasjon
@@ -46,7 +53,7 @@ Rate limiting annonseres i HTTP-responsheadere. Feltene `maxCallsPerTimeWindow`/
 | `x-ratelimit-remaining` | `39`          | Gjenstående kall i inneværende vindu             |
 | `x-ratelimit-resource`  | `SB_API_1MIN` | Grense-ressursen kallet telles mot               |
 
-Sjekk `x-ratelimit-remaining` før batch-uttrekk med mange kall. Ved `429 Too Many Requests`: vent til vinduet nullstilles (inntil 60 sekunder med gjeldende policy) før nytt forsøk — se `troubleshooting.md`. Verdiene kan endres av SSB — les headerne, hardkod dem ikke.
+Sjekk `x-ratelimit-remaining` før batch-uttrekk med mange kall. Ved 429: se `troubleshooting.md`. Verdiene kan endres av SSB — les headerne, hardkod dem ikke.
 
 ---
 

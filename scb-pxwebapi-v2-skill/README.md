@@ -21,7 +21,9 @@ scb-pxwebapi-v2/
 ├── references/
 │   ├── json-stat2.md         # json-stat2 så som SCB levererar det: sju läsregler först, sedan fälten, obligatoriska noter på tre nivåer, status och länkar
 │   ├── mcp-tools.md          # Mappning till @jarib/pxweb-mcp och verktygens begränsningar mot SCB
-│   └── search-syntax.md      # Lucene-baserad söksyntax för /tables?query=
+│   ├── output-formats.md     # Till Excel (csv-recept), csv:ns teckenkodning, outputFormatParams, heading/stub
+│   ├── search-syntax.md      # Lucene-baserad söksyntax för /tables?query=
+│   └── troubleshooting.md    # Från felsvar till orsak: title-tabell, 404 med HTML-sida, 429, 500, 503, för många celler
 └── docs/                     # Tillägg: följer inte med i zip:en
     ├── skillkarta-arbetsflode.svg              # Diagram över arbetsflödet: Steg 1–6 och API-anropen i varje steg
     ├── skillkarta-kontroll-och-paketering.svg  # Diagram över vad som kontrolleras mot live-API:et och vad som packas
