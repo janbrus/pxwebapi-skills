@@ -4,6 +4,12 @@ Vad som är annorlunda för den som använder skillen, nyast först. Gällande v
 
 Vad som verifierats, var och när, står i underhållarens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/scb-pxwebapi-v2-skill/DEVLOG.md). Den finns i repot, inte i zip:en.
 
+## 0.13.0 — 2026-11-11 (beta)
+
+- Nytt: anrop från en webbsida. JavaScript kan inte läsa `X-Rate-Limit-*`, så gränsen läses från `/config`. En CORS-preflight räknas inte som anrop.
+- Vid många anrop: håll ungefär halva gränsen, 15 anrop per 10 sekunder.
+- **Rättat:** fasta perioder skrivs bara om till `top()`/`from()` när de är de nyaste i tabellen, utan luckor. Annars hämtar URL:en andra perioder.
+
 ## 0.12.0 — 2026-11-02 (beta)
 
 - Nytt: `references/output-formats.md` och `references/troubleshooting.md`. Felsökningen slår upp ett felsvar efter `title`, med HTTP-kod, orsak och åtgärd.

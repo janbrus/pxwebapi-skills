@@ -19,8 +19,8 @@ Det kaller ikke API-et selv. For det trengs et verktøy som kan sende HTTP GET o
 
 | Skill (installert navn)  | Mappe i repoet                                           | Dekker                                                                                                                                   | Språk           | Versjon | Status |
 | ------------------------ | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------- | ------ |
-| `ssb-pxwebapi-v2`        | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/)         | SSBs Statistikkbank via PxWebApi v2. Søk, metadata, kodelister, lagrede spørringer, outputformater, Klass/VarDok, ~90 kuraterte tabeller | norsk, engelsk  | 1.6.6   | stabil |
-| `scb-pxwebapi-v2`        | [scb-pxwebapi-v2-skill/](scb-pxwebapi-v2-skill/)         | SCB:s Statistikdatabas via PxWebApi v2                                                                                                   | svensk, engelsk | 0.12.0  | beta   |
+| `ssb-pxwebapi-v2`        | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/)         | SSBs Statistikkbank via PxWebApi v2. Søk, metadata, kodelister, lagrede spørringer, outputformater, Klass/VarDok, ~90 kuraterte tabeller | norsk, engelsk  | 1.7.0   | stabil |
+| `scb-pxwebapi-v2`        | [scb-pxwebapi-v2-skill/](scb-pxwebapi-v2-skill/)         | SCB:s Statistikdatabas via PxWebApi v2                                                                                                   | svensk, engelsk | 0.13.0  | beta   |
 | `generic-pxweb-v2-skill` | [pxwebapi-v2-generic-skill/](pxwebapi-v2-generic-skill/) | Alle PxWebApi v2-installasjoner. Verifisert mot SSB, SCB og Latvia (CSP), med tabell over hva som varierer mellom dem                    | engelsk         | 0.11.5  | beta   |
 | `generic-pxweb-v1-skill` | [pxwebapi-v1-generic-skill/](pxwebapi-v1-generic-skill/) | Alle PxWebApi v1-installasjoner (den eldre, POST-baserte PxWeb 1.0-API-en). Sju verifisert, 50 kjente                                    | engelsk         | 0.12.4  | beta   |
 | `ssb-chart`              | [ssb-chart-skill/](ssb-chart-skill/)                     | Visualisering av SSB-data i SSBs offisielle stil: palett, typografi, diagramvalg, json-stat2 → chart                                     | norsk           | 1.4     | stabil |
@@ -95,7 +95,7 @@ Fire av skillene har i tillegg `evals/eval-scenarios.md`: typiske brukerspørsm�
 
 ## Kodeeksempler
 
-Disse er i hovedsak laget før jeg begynte å arbeide med skill. I mange tilfeller er det en oppdatering av arbeid jeg gjorde med PxWebApi v1.
+Disse eksemplene for v2 er i hovedsak laget før jeg begynte å arbeide med skill. I mange tilfeller er det en oppdatering av arbeid jeg gjorde med PxWebApi v1.
 
 **Jupyter notebooks** — til en viss grad viser rekkefølgen økende kompleksitet:
 
@@ -108,7 +108,8 @@ Disse er i hovedsak laget før jeg begynte å arbeide med skill. I mange tilfell
 
 **Javascript**
 
-- [kpi_js_v2](kpi_js_v2.html) — Enkel KPI-figur med Highcharts, nytt basisår 2025
+- [kpi_js_v2](kpi_js_v2.html) — Enkel KPI-figur med Highcharts, http GET.
+- [highcharts-ssb-v2-post.html](highcharts-ssb-v2-post.html) - Enkelt http POST eksempel for v2. Figur i Highcharts viser befolkningstilvekst siste 200 år.
 
 **Verktøy**
 
@@ -139,8 +140,8 @@ A *skill* is knowledge only: a `SKILL.md` with workflow and rules, and reference
 
 | Skill (installed name)   | Folder                                                   | Covers                                                                                                                      | Language           | Version | Status |
 | ------------------------ | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------- | ------ |
-| `ssb-pxwebapi-v2`        | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/)         | Statistics Norway's Statbank via PxWebApi v2, incl. search, codelists, saved queries, output formats and ~90 curated tables | Norwegian, English | 1.6.6   | stable |
-| `scb-pxwebapi-v2`        | [scb-pxwebapi-v2-skill/](scb-pxwebapi-v2-skill/)         | Statistics Sweden's Statistikdatabasen via PxWebApi v2                                                                      | Swedish, English   | 0.12.0  | beta   |
+| `ssb-pxwebapi-v2`        | [ssb-pxwebapi-v2-skill/](ssb-pxwebapi-v2-skill/)         | Statistics Norway's Statbank via PxWebApi v2, incl. search, codelists, saved queries, output formats and ~90 curated tables | Norwegian, English | 1.7.0   | stable |
+| `scb-pxwebapi-v2`        | [scb-pxwebapi-v2-skill/](scb-pxwebapi-v2-skill/)         | Statistics Sweden's Statistikdatabasen via PxWebApi v2                                                                      | Swedish, English   | 0.13.0  | beta   |
 | `generic-pxweb-v2-skill` | [pxwebapi-v2-generic-skill/](pxwebapi-v2-generic-skill/) | Any PxWebApi v2 installation; verified against SSB, SCB and Latvia (CSP), with a table of what differs between them         | English            | 0.11.5  | beta   |
 | `generic-pxweb-v1-skill` | [pxwebapi-v1-generic-skill/](pxwebapi-v1-generic-skill/) | Any PxWebApi v1 installation (the older POST-only PxWeb 1.0 API); seven verified, 50 known                                  | English            | 0.12.4  | beta   |
 | `ssb-chart`              | [ssb-chart-skill/](ssb-chart-skill/)                     | Charts in Statistics Norway's official style, from a json-stat2 response                                                    | Norwegian          | 1.4     | stable |

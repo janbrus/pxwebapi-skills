@@ -15,7 +15,7 @@ description: >
   lagrede spørringer og outputformater (json-stat2, csv, xlsx).
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "1.6.6"
+  version: "1.7.0"
   source: https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 ---
 
@@ -29,7 +29,7 @@ https://data.ssb.no/api/pxwebapi/v2
 
 **Skillen vedlikeholdes her:** https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill
 
-Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.6.6.
+Sjekk repoet for nyere versjon, referansefiler og endringslogg. Denne kopien er v1.7.0.
 
 ## Dataintegritet — grunnregelen
 
@@ -79,7 +79,7 @@ PxWebApi v2 har disse endepunktene:
 | `/savedqueries…`                | POST / GET | Lagrede spørringer, se `references/saved-queries.md`                      |
 | `/config`                       | GET        | `maxDataCells`, formater og språk (rate limit står i responsheaderne)     |
 
-SSB-spesifikk driftsinfo — publiseringstider, rate limit-headere, lisens og RSS-feeds for publiseringskalender og nyoppdaterte tabeller: se `references/api-details.md`.
+SSB-spesifikk driftsinfo — publiseringstider, rate limit-headere, kall fra nettleseren, lisens og RSS-feeds for publiseringskalender og nyoppdaterte tabeller: se `references/api-details.md`.
 
 ---
 
@@ -337,7 +337,7 @@ Feilkoder og vanlige problemer (400/403/404/429/500/503, cellegrense, tomme søk
 Hvis API-et ikke er tilgjengelig:
 
 1. **Si tydelig fra at data ikke kunne hentes.** Fyll aldri tomrommet med tall fra hukommelsen — uten API-tilgang leverer du veiledning, ikke statistikk
-2. Henvis til SSBs Statistikkbank: https://www.ssb.no/statbank. Der kan brukeren bygge uttrekket grafisk og trykke «Lagre» for ferdig GET-URL og POST-body — men «Lagre» rammer opp valgte perioder som faste verdier, så skriv om til `top()`/`from()` før deling
+2. Henvis til SSBs Statistikkbank: https://www.ssb.no/statbank. Der kan brukeren bygge uttrekket grafisk og trykke «Lagre» for ferdig GET-URL og POST-body — men «Lagre» rammer opp valgte perioder som faste verdier. Skriv dem om til `top()`/`from()` før deling, men bare når periodene er de nyeste i tabellen, uten hull (se «Relativ eller fast periode» i `references/codelists-and-filters.md`)
 3. Foreslå relevante søkeord basert på spørsmålet
 4. Gi veiledning for manuelt oppslag (tabellnummer, variabler å se etter)
 

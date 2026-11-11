@@ -2,6 +2,19 @@
 
 Underhållarens logg: vad som ändrats, vad som verifierats mot live API, var och när, och utfallet av varje syskonkontroll. Den är repo-intern och ingår inte i zip:en. Användare läser den korta [`CHANGELOG.md`](CHANGELOG.md); varje version står i båda filerna. Fram till 2026-10-05 *var* den här filen `CHANGELOG.md`, så äldre poster säger «denna logg» eller «CHANGELOG» när de menar den här filen.
 
+## 0.13.0 — 2026-11-11 (beta)
+
+Från arbetet med Statistikkportalen 1.5.0, genomfört 2026-11-10 tillsammans med `ssb-pxwebapi-v2` 1.7.0: anrop från en webbläsare, halva gränsen i kontrollskriptet och villkoret för `top()`/`from()`. Alla anrop var läsande.
+
+- **Glidande fönster i `check_examples.py`:** ny `scripts/ratewindow.py`, identisk med SSB-kopian. Varje anrop, även omförsök, tar en plats i ett fönster på 15 per 10 s (halva gränsen, underhållarens regel). `--delay` är borttagen, också i `check-scb-examples.yaml`. Körningen slutar med antal anrop och tätaste fönster. Mätt 2026-11-10: 14 anrop, högst 10 per 10 s, 15 s, 0 fel
+- **Från en webbläsare** (`troubleshooting.md` under 429, och en pekare i `SKILL.md` Steg 4): `Access-Control-Allow-Origin: *`, men ingen `Access-Control-Expose-Headers`, så JavaScript kan inte läsa `X-Rate-Limit-*`; gränsen läses från `/config`. `OPTIONS` (204) räknas **inte**, till skillnad från hos SSB, och 204-svaret har inga `X-Rate-Limit-*`
+  - Mätt 2026-11-10. Prov 2, GET/OPTIONS/GET: 29, –, 29, där den sista hade ny `X-Rate-Limit-Reset`, alltså en annan räknare. Prov 3, GET×3, OPTIONS, GET×2: 29, 28, 27, –, 26, 29 (ny räknare igen)
+  - Det finns alltså **minst två räknare per IP-adress**, troligen en per nod (AspNetCoreRateLimit på IIS; det är en slutsats, inte mätt). Står bara här, inte i skillen (underhållaren)
+- **`top()`/`from()` bara för de nyaste perioderna** (`SKILL.md` Steg 4): att skriva om fasta perioder stämmer bara när de N perioderna är de N sista i `category.index` för `Tid`, räknat i position. En logikregel ovanpå `top(N)`-semantiken, som redan är verifierad hos SCB
+- **`CLAUDE.md`:** Commands utan `--delay`, och regeln om halva gränsen
+- **Syskonkontroll 2026-11-10:** SSB räknar preflighten och har 0 i `/config`, så SSB-texten är en annan (1.7.0). Kandidat, inte gjord: installationstabellen i generic-v2 `references/api-details.md` kan få en rad om preflight räknas
+- Ingen eval för den här versionen
+
 ## 0.12.0 — 2026-11-02 (beta)
 
 Underhållaren frågade 2026-10-27 om något i `ssb-pxwebapi-v2`:s `output-formats.md`, `api-details.md` och `troubleshooting.md` hör hemma här. Planen genomfördes punkt för punkt 2026-10-27/28 och gavs ut 2026-11-02. Varje SSB-fakta mättes mot SCB innan det fördes över. Alla anrop var läsande: GET, plus POST mot `/data`, aldrig `POST /savedqueries`.

@@ -18,6 +18,7 @@
             margin: 10px 0;
             font-family: Cascadia code, monospace;
             font-size: 14px;
+            box-sizing: border-box;
         }
         button {
             padding: 10px 20px;
@@ -30,6 +31,8 @@
             background: #f0f0f0;
             border-radius: 5px;
         }
+        .result .ok { color: #1a6b2f; }
+        .result .note { color: #8a4b00; }
         label {
             font-weight: bold;
             display: block;
@@ -39,62 +42,123 @@
 </head>
 <body>
     <h1>Endre SSB API V2 URL til dynamisk tid</h1>
-    <p>En svakhet i PxWebApi versjon 2 er at den foreslåtte URL'en ikke er dynamisk på tid. Den får da ikke med med nyere tidsperioder. Dette er ofte hensikten med med å bruke API mot Statsikkbanken.</p>
+    <p>En svakhet i PxWebApi versjon 2 er at den foreslåtte URL-en ikke er dynamisk på tid. Den får da ikke med nyere tidsperioder. Dette er ofte hensikten med å bruke API mot Statistikkbanken.</p>
     <p>Lim inn en URL og få en rettet og mye kortere URL tilbake. Funksjonen erstatter opplistingen av den enkelte tidsperiode med:</p>
     <ul>
-        <li><strong>Mange perioder (>2):</strong> Bruker <code>from()</code></li>
-        <li><strong>Få perioder (1-2):</strong> Bruker <code>top()</code></li>
+        <li><strong>Mange perioder (>2):</strong> Bruker <code>from()</code> fra den eldste, så serien vokser med nye perioder</li>
+        <li><strong>Få perioder (1-2):</strong> Bruker <code>top()</code>, så vinduet flytter seg</li>
+        <li><strong>Bare når periodene er de nyeste i tabellen, uten hull.</strong> Ellers ville <code>top()</code> og <code>from()</code> hentet andre perioder enn dem du valgte, og URL-en blir stående som den er, med en forklaring</li>
     </ul>
+    <p>For å se hvilke perioder som er de nyeste, henter hvert klikk metadata for tabellen: ett API-kall. Resten av URL-en endres ikke. Adressen til API-et tas fra URL-en, så også SCB og andre PxWebApi v2-installasjoner virker.</p>
 
     <label for="input">Original URL:</label>
     <textarea id="input" placeholder="Lim inn URL her f.eks.:
 
-     https://data.ssb.no/api/pxwebapi/v2/tables/03013/data?lang=no&valueCodes[Tid]=2024M2025M07,2025M08,2025M09&valueCodes[ContentsCode]=KpiIndMnd,Manedsendring,Tolvmanedersendring&codelist[Konsumgrp]=vs_CoiCop2016niva1"></textarea>
-    
-    <button onclick="optimizeUrl()">Optimaliser</button>
-    
+     https://data.ssb.no/api/pxwebapi/v2/tables/14700/data?lang=no&valueCodes[Tid]=2026M06,2026M07,2026M08,2026M09,2026M10&valueCodes[VareTjenesteGrp]=00&valueCodes[ContentsCode]=KpiIndMnd,Tolvmanedersendring"></textarea>
+
+    <button id="run" onclick="optimizeUrl()">Optimaliser</button>
+
     <div id="result" class="result" style="display: none;">
-        <label>URL med dynamisk tid:</label>
+        <p id="message"></p>
+        <label for="output">URL med dynamisk tid:</label>
         <textarea id="output" readonly></textarea>
     </div>
 
     <script>
         /**
-         * Erstatter tidsperiode i URL med enten from() eller top() utfra antall perioder.
+         * Erstatter listen av perioder i valueCodes for tidsvariabelen med top(N)
+         * eller from(eldste), men bare når de N valgte periodene er de N siste i
+         * tabellen. Samme regel som getTimeShortcut i statistikkportalen-pxwebapi:
+         * N ulike perioder som alle ligger blant de N siste posisjonene i
+         * category.index, er nøyaktig de N nyeste. Posisjoner, ikke datoer.
+         *
+         * @param {string} url - URL-en brukeren limte inn
+         * @param {function} fetchFn - fetch, byttes ut i testen
+         * @returns {Promise<{url: string, message: string, changed: boolean}>}
          */
-        function optimizeTimePeriods(url) {
-            const pattern = /\[Tid\]=([\d\w,]+)&/g;
-            
-            return url.replace(pattern, (match, periodsStr) => {
-                const periods = periodsStr.split(',');
-                const numPeriods = periods.length;
-                const firstPeriod = periods[0];
-                
-                if (numPeriods > 2) {
-                    return `[Tid]=from(${firstPeriod})&`;
-                } else {
-                    return `[Tid]=top(${numPeriods})&`;
-                }
-            });
+        async function simplifyTimeUrl(url, fetchFn = fetch) {
+            const unchanged = reason => ({ url, message: reason + ' URL-en er ikke endret.', changed: false });
+
+            // API-adressen er alt foran /tables/, så SCB og andre installasjoner virker
+            const table = url.match(/^(https?:\/\/[^?#]*?\/tables\/([^/?#]+))\/data(?=[?#]|$)/i);
+            if (!table) return unchanged('Fant ikke …/tables/{id}/data i URL-en.');
+            const lang = url.match(/[?&]lang=([^&#]*)/i);
+            const metaUrl = table[1] + '/metadata' + (lang ? '?lang=' + lang[1] : '');
+
+            let meta;
+            try {
+                const res = await fetchFn(metaUrl);
+                if (!res.ok) return unchanged(`Metadata for tabell ${table[2]} svarte HTTP ${res.status}.`);
+                meta = await res.json();
+            } catch (e) {
+                return unchanged(`Fikk ikke hentet metadata for tabell ${table[2]} (${e.message}).`);
+            }
+
+            const timeVar = meta.role?.time?.[0];
+            const index = meta.dimension?.[timeVar]?.category?.index;
+            if (!index) return unchanged('Fant ingen tidsvariabel i metadata.');
+            // category.index er et objekt (kode → posisjon) eller en liste; codes er periodene, eldste først
+            const codes = Array.isArray(index) ? index : Object.keys(index).sort((a, b) => index[a] - index[b]);
+
+            // valueCodes[Tid]= eller valueCodes%5BTid%5D=, også som siste parameter
+            const name = timeVar.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const param = url.match(new RegExp('[?&]valueCodes(?:\\[|%5B)' + name + '(?:\\]|%5D)=([^&#]*)', 'i'));
+            if (!param) return unchanged(`URL-en har ingen valueCodes[${timeVar}].`);
+            const end = param.index + param[0].length;
+            const start = end - param[1].length;
+
+            let value;
+            try {
+                value = decodeURIComponent(param[1]);
+            } catch (e) {
+                return unchanged(`Verdien av valueCodes[${timeVar}] kan ikke leses.`);
+            }
+            if (/[()*?[\]]/.test(value)) return unchanged(`valueCodes[${timeVar}] har allerede et uttrykk: ${value}.`);
+
+            const picks = [...new Set(value.split(',').filter(Boolean))];
+            if (picks.length === 0) return unchanged(`valueCodes[${timeVar}] er tom.`);
+            const unknown = picks.filter(code => !codes.includes(code));
+            if (unknown.length) return unchanged(`${unknown.join(', ')} finnes ikke i ${timeVar} i tabell ${table[2]}.`);
+
+            // N ulike perioder som alle er blant de N siste, er nøyaktig de N nyeste
+            const n = picks.length;
+            const newestN = codes.slice(-n);
+            if (!picks.every(code => newestN.includes(code))) {
+                const what = n > 1 ? `Periodene er ikke de ${n} nyeste i tabellen (${newestN[0]}–${newestN[n - 1]})`
+                    : `Perioden er ikke den nyeste i tabellen (${newestN[0]})`;
+                return unchanged(`${what}, så top() og from() ville hentet andre perioder.`);
+            }
+
+            const expr = n > 2 ? `from(${newestN[0]})` : `top(${n})`;
+            return { url: url.slice(0, start) + expr + url.slice(end), message: `${value} → ${expr}`, changed: true };
         }
 
-        function optimizeUrl() {
+        async function optimizeUrl() {
+            const button = document.getElementById('run');
+            if (button.disabled) return;   // ett kall om gangen, også med Ctrl+Enter
             const input = document.getElementById('input').value.trim();
-            
+
             if (!input) {
                 alert('Du må lime inn en URL');
                 return;
             }
-            
-            const optimized = optimizeTimePeriods(input);
-            
-            document.getElementById('output').value = optimized;
-            document.getElementById('result').style.display = 'block';
+
+            button.disabled = true;
+            try {
+                const result = await simplifyTimeUrl(input);
+                const message = document.getElementById('message');
+                message.textContent = result.message;
+                message.className = result.changed ? 'ok' : 'note';
+                document.getElementById('output').value = result.url;
+                document.getElementById('result').style.display = 'block';
+            } finally {
+                button.disabled = false;
+            }
         }
 
-        // Tillat Enter-tast for å kjøre optimalisering
+        // Ctrl+Enter kjører optimaliseringen; en holdt tast gjentar ikke kallet
         document.getElementById('input').addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') {
+            if (e.ctrlKey && e.key === 'Enter' && !e.repeat) {
                 optimizeUrl();
             }
         });

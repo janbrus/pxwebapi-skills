@@ -36,7 +36,7 @@ ssb-pxwebapi-v2/
 │   └── mcp-tools.md                      # Mapping til @jarib/pxweb-mcp. Informasjon om MCP-verktøy
 └── docs/                                 # Tillegg: følger ikke med i zip
     ├── brukerveiledning.md               # Brukerveiledning for Claude: forutsetninger, eksempelspørsmål, feilsøking, MCP-oppsett
-    ├── instruks-kort.md                  # Kompakt instruks for plattformer uten skill-støtte, f.eks. gratisversjoner. Lim instruks inn i prompt 
+    ├── instruks-kort.md                  # Kort instruks for gratisversjoner og andre plattformer uten skills: en kjerne på under 1 500 tegn og en utvidelse
     ├── skillkart-arbeidsflyt.svg         # Diagram over arbeidsflyten: Steg 1–6, API-kall per steg, ruting til andre skills
     ├── skillkart-sjekk-og-pakking.svg    # Diagram over hva som sjekkes mot live API og hva som pakkes i zip
     ├── skillkart.html                    # Begge diagrammene med forklaring. Åpnes i nettleser fra en klonet mappe
@@ -101,7 +101,7 @@ Deepseek Harness ser ut til å være likt ChatGPT/Codex med `.agents/skills/`. F
 
 ## Uten skill-støtte: kompakt instruks
 
-Plattformer som ikke leser skills kan likevel få det meste: [`docs/instruks-kort.md`](docs/instruks-kort.md) er SKILL.md kokt ned til én side. Lim den inn i Claude Project-instruksjoner eller ChatGPTs egendefinerte instruksjoner. Du kan også bruke denne som systemprompt via API. Den er kondensert — referansefilene er ikke med, så ved tvil er `SKILL.md` og `references/` fasit.
+Gratisversjoner og andre plattformer som ikke leser skills kan likevel få det viktigste: [`docs/instruks-kort.md`](docs/instruks-kort.md) har en kjerne på under 1 500 tegn, som passer i ChatGPTs egendefinerte instruksjoner, og en utvidelse for større felt som prosjektinstruksjoner i Claude og ChatGPT eller en Gem i Gemini. Får ikke assistenten hentet tallene selv, ber den deg velge verdier i Statistikkbanken, trykke «Lagre» og lime inn svaret fra adressen under «GET URL». Kortet forutsetter GET. Kaller du API-et fra kode, er `SKILL.md` og `references/` fasit.
 
 [`docs/brukerveiledning.md`](docs/brukerveiledning.md) er litt mindre teknisk. Hva som må være på plass, hvilke spørsmål som fungerer, hva svarene skal inneholde, og hva du gjør når noe ikke virker.
 

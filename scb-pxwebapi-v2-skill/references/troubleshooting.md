@@ -44,7 +44,9 @@ Gränsen är 30 anrop per 10 sekunder i skrivande stund, och den gäller **per I
 | `X-Rate-Limit-Remaining` | Anrop kvar i fönstret |
 | `X-Rate-Limit-Reset` | När fönstret nollställs, ISO 8601 i UTC |
 
-Vänta till `X-Rate-Limit-Reset` och kör sedan anropen ett i taget — vänta på svaret innan nästa skickas.
+Vänta till `X-Rate-Limit-Reset` och kör sedan anropen ett i taget — vänta på svaret innan nästa skickas. Vid många anrop: håll dig till ungefär halva gränsen, 15 anrop per 10 sekunder, eftersom kvoten delas per IP-adress.
+
+**Från en webbläsare.** API:et svarar `Access-Control-Allow-Origin: *`, men exponerar inte `X-Rate-Limit-*` (ingen `Access-Control-Expose-Headers`), så JavaScript kan inte läsa headrarna. Läs gränsen från `/config`. En preflight (`OPTIONS`, svar 204) räknas **inte**, till skillnad från hos SSB (uppmätt 2026-11-10). `Access-Control-Max-Age` saknas, men det kostar alltså inga extra anrop.
 
 ### 500 med tom body
 

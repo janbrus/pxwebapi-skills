@@ -28,9 +28,12 @@ Skipped on purpose:
 JSON bodies are extracted by brace-counting and must not contain braces inside
 string values. Identical checks are deduplicated.
 
+Every request, retries included, takes a slot in a sliding window of half
+SCB's limit (scripts/ratewindow.py).
+
 Exit code: 0 if no errors, 1 otherwise.
 
-Usage:  python3 scripts/check_examples.py [--quiet] [--delay SECONDS]
+Usage:  python3 scripts/check_examples.py [--quiet]
 """
 from __future__ import annotations
 
@@ -46,7 +49,10 @@ import urllib.request
 from collections.abc import Iterator
 from pathlib import Path
 
+from ratewindow import RateWindow
+
 BASE = "https://statistikdatabasen.scb.se/api/v2"
+WINDOW = RateWindow(30, 10)  # SCB: 30 calls per 10 s (/config)
 FULL_URL_RE = re.compile(r"https://statistikdatabasen\.scb\.se/api/v2/\S+")
 VERB_RE = re.compile(r"^\s*(?:\d+\.\s*)?(GET|POST)\s+(/\S+)\s*$")
 TABLE_ID_RE = re.compile(r"/tables/(TAB\d+|\d{4,6})\b")
@@ -111,6 +117,7 @@ def http(url: str, method: str = "GET", body: str | None = None,
                                  method=method)
     delay = 5.0
     for attempt in range(retries):
+        WINDOW.take()
         try:
             with urllib.request.urlopen(req, timeout=60) as r:
                 return r.status, r.read()
@@ -194,8 +201,6 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     here = Path(__file__).resolve().parent.parent
     ap.add_argument("--quiet", action="store_true", help="suppress OK lines")
-    ap.add_argument("--delay", type=float, default=0.5,
-                    help="seconds to sleep between requests")
     args = ap.parse_args()
 
     files = [here / "SKILL.md"] + sorted((here / "references").glob("*.md"))
@@ -241,8 +246,6 @@ def main() -> int:
             errors += 1
         elif not args.quiet:
             print(f"[OK]  {where}  {method} {url}")
-        if args.delay:
-            time.sleep(args.delay)
 
     for tid, (fname, lineno) in sorted(table_ids.items()):
         status, payload = http(f"{BASE}/tables/{tid}?lang=sv")
@@ -263,10 +266,9 @@ def main() -> int:
                 errors += 1
             elif not args.quiet:
                 print(f"[OK]  table {tid} current (lastPeriod {info.get('lastPeriod')})")
-        if args.delay:
-            time.sleep(args.delay)
 
     print(f"\nChecked {len(checks)} example(s) and {len(table_ids)} table id(s) — {errors} error(s).")
+    print(WINDOW.summary())
     return 1 if errors else 0
 
 

@@ -7,7 +7,8 @@ Praktisk driftsinformasjon for SSBs PxWebApi v2. For json-stat2-formatet (Datase
 1. Praktisk driftsinformasjon: publiseringstider, KOSTRA-rytme, cellegrense, rate limit, URL-lengde, lisens
 2. Spesifikasjon, veiledning og kontakt: OpenAPI, brukerveiledninger, e-post
 3. Rate limit-headere: `x-ratelimit-*`
-4. RSS-feeds: publiseringskalender, oppdaterte tabeller, «Når kommer neste tall?»
+4. Kall fra nettleseren (CORS): preflight teller, headerne kan ikke leses, GET framfor POST
+5. RSS-feeds: publiseringskalender, oppdaterte tabeller, «Når kommer neste tall?»
 
 ---
 
@@ -53,7 +54,18 @@ Rate limiting annonseres i HTTP-responsheadere. Feltene `maxCallsPerTimeWindow`/
 | `x-ratelimit-remaining` | `39`          | Gjenstående kall i inneværende vindu             |
 | `x-ratelimit-resource`  | `SB_API_1MIN` | Grense-ressursen kallet telles mot               |
 
-Sjekk `x-ratelimit-remaining` før batch-uttrekk med mange kall. Ved 429: se `troubleshooting.md`. Verdiene kan endres av SSB — les headerne, hardkod dem ikke.
+Les `x-ratelimit-remaining` fra svarene du likevel får, og send aldri kall bare for å sjekke den. Ved mange kall: hold deg til omtrent halve grensen med et vindu som teller hvert kall, ikke en fast pause mellom kallene. Ved 429: se `troubleshooting.md`. Verdiene kan endres av SSB — les headerne, hardkod dem ikke (fra en nettleser går ikke det, se under).
+
+---
+
+## Kall fra nettleseren (CORS)
+
+API-et svarer `access-control-allow-origin: *`, så en nettside kan kalle det direkte. Men nettleseren gjør regnestykket annerledes:
+
+- **Grensen kan ikke leses.** SSB sender ingen `access-control-expose-headers`, så JavaScript ser ikke `x-ratelimit-*`, og `/config` har 0. Hardkod 40 kall per 60 s (per 2026-11-10) og tell kallene selv.
+- **Preflighten teller.** En JSON-POST sender først en `OPTIONS`-preflight, og den telles som et kall (`x-ratelimit-remaining` 39 → 38 → 37 over GET, OPTIONS, GET; målt 2026-11-09 og 2026-11-10). SSB sender ingen `access-control-max-age`, så nettleseren gjenbruker preflighten i høyst 5 sekunder og bare for samme URL. I praksis koster en JSON-POST 2 kall. En GET med bare `Accept`-header sender ingen preflight og koster 1.
+
+Fra nettleseren: bruk GET så lenge URL-en holder seg under ca. 2 100 tegn, og POST først når den blir for lang.
 
 ---
 

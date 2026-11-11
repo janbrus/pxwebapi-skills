@@ -2,7 +2,7 @@
 
 Denne veiledningen forklarer hvordan du bruker Claude-skillen for SSBs Statistikkbank.
 
-Skillen vedlikeholdes på <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>; denne veiledningen ligger i `docs/` der. Denne veiledningen dekker **v1.6.6**. Sjekk repoet for nyere versjon og endringslogg.
+Skillen vedlikeholdes på <https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill>; denne veiledningen ligger i `docs/` der. Denne veiledningen dekker **v1.7.0**. Sjekk repoet for nyere versjon og endringslogg.
 
 ## Forutsetninger
 
@@ -197,7 +197,7 @@ Skillen filtrerer alltid på tid, men du får mer relevante resultater ved å si
 
 Si «lag en delbar URL for denne spørringen». Be samtidig om relative tidsfiltre: en URL med `top(12)` eller `from(2020)` henter automatisk nye perioder, mens faste årstall blir utdaterte.
 
-Bygger du uttrekket selv i Statistikkbanken og trykker «Lagre», rammes de valgte periodene opp som faste verdier. Verktøyet <https://github.com/janbrus/pxwebapi-skills/blob/main/forenkle_url.html> skriver dem om til relative filtre.
+Bygger du uttrekket selv i Statistikkbanken og trykker «Lagre», rammes de valgte periodene opp som faste verdier. Verktøyet <https://nesa.no/ssb/forenkle_url.html> skriver dem om til relative filtre når periodene er de nyeste i tabellen, uten hull. Ellers lar det URL-en stå og forklarer hvorfor, for da ville `top()` og `from()` hentet andre perioder.
 
 ### Spør om metadata
 
@@ -267,7 +267,7 @@ De vanligste:
 
 - **Skillen gir ikke sanntidsdata.** SSBs data oppdateres på faste tidspunkter
 - **Grense på 800 000 celler per uttrekk.** Tomme celler teller med
-- **40 spørringer per minutt.** Gjeldende grense står i `x-ratelimit-*`-responsheaderne. Feltene `maxCallsPerTimeWindow` og `timeWindow` i `/config` er nullstilt til 0 og ikke lenger i bruk
+- **40 spørringer per minutt**, og fra en nettleser teller en JSON-POST dobbelt, fordi CORS-preflighten også telles. Gjeldende grense står i `x-ratelimit-*`-responsheaderne. Feltene `maxCallsPerTimeWindow` og `timeWindow` i `/config` er nullstilt til 0 og ikke lenger i bruk
 - **Nye tall publiseres kl. 08.00.** Data under revisjon kan vise 0 eller prikk mellom kl. 05 og 08. Metadata oppdateres kl. 05.00 og 11.30, og tabellene er utilgjengelige imens
 - **Kommunekoder er ikke stabile over tid.** Bruk kodelister for konsistente tidsserier
 - **Tabell-ID-er kan også forsvinne.** En avsluttet tabell står vanligvis igjen med `discontinued`, men en erstattet tabell kan bli fjernet helt. SSB lister begge på [Endringer i statistikkbanktabeller](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller)
@@ -368,7 +368,7 @@ Koble til med:
 Skills krever betalt Claude-plan. Domenekunnskapen er likevel ikke låst til Claude:
 
 - **MCP er ikke Claude-spesifikt.** `@jarib/pxweb-mcp` fungerer mot enhver MCP-klient — VS Code med Copilot, Cursor, Windsurf og andre
-- **Arbeidsflyten kan limes inn.** En kondensert versjon av `SKILL.md` fungerer som systemprompt eller prosjektinstruksjon i de fleste chatgrensesnitt
+- **Arbeidsflyten kan limes inn.** [`instruks-kort.md`](instruks-kort.md) har en kjerne på under 1 500 tegn for gratisversjoner og en utvidelse for prosjektinstruksjoner. Kan ikke assistenten hente tallene selv, ber den deg velge verdier i Statistikkbanken, trykke «Lagre» og lime inn svaret fra adressen under «GET URL»
 - **Statistikkbanken har en grafisk spørringsbygger.** Velg tabell og verdier på <https://www.ssb.no/statbank>, trykk «Lagre», og du får ferdig GET-URL og POST-body uten å skrive dem selv. Du kan også benytte det alternativet grensesnittet statistikkportalen.no.
 
 ## Rapportere feil

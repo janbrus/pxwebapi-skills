@@ -15,7 +15,7 @@ description: >
   sparade frågor och outputformat (json-stat2, csv, xlsx).
 license: MIT. LICENSE has complete terms
 metadata:
-  version: "0.12.0"
+  version: "0.13.0"
 ---
 
 # SCB PxWebApi v2 — Komplett guide
@@ -218,12 +218,12 @@ Standard är `json-stat2`. Övriga: `csv`, `xlsx`, `html`, `px`, `json-px` — `
 
 Viktigaste mönster: `top(N)` = senaste N värdena, `bottom(N)` = äldsta N, `from(värde)` = från och med, `to(värde)` = till och med, `*` = alla värden. Wildcards `*` och `?` för mönstermatchning (t.ex. `01*` = alla kommuner i Stockholms län), explicita listor (`2024M01,2024M02` i GET), och `range(från,till)` = slutet intervall. **I en GET-URL måste uttryck med komma stå inom hakparenteser** — `valueCodes[Tid]=[range(2024M01,2024M03)]`, `[top(3,2)]` — eftersom komma annars är listavgränsare; utan hakparenteser svarar API:et `400 "Illegal selection expression"`. I en POST-body skrivs uttrycket utan hakparenteser (`"range(2024M01,2024M03)"`). Uttryck och enskilda koder kan blandas i samma `valueCodes` — `2015,top(2)` ger 2015 plus de två senaste åren (TAB1267). Allt verifierat 2026-09-09.
 
-**För tidsdimensionen: föredra `top(N)`/`from(värde)` framför explicita perioder.** Relativa filter fångar upp nya perioder automatiskt, så delbara URL:er och sparade frågor fortsätter ge aktuella siffror i stället för att frysa på de perioder som råkade vara senast när frågan skrevs. Detta gäller särskilt `/savedqueries`, vars hela syfte är att köras om senare.
+**För tidsdimensionen: föredra `top(N)`/`from(värde)` framför explicita perioder.** Relativa filter fångar upp nya perioder automatiskt, så delbara URL:er och sparade frågor fortsätter ge aktuella siffror i stället för att frysa på de perioder som råkade vara senast när frågan skrevs. Detta gäller särskilt `/savedqueries`, vars hela syfte är att köras om senare. Att skriva om fasta perioder till `top(N)`/`from(äldsta)` stämmer bara när de N perioderna är de N sista i metadatans `category.index` för `Tid`, räknat i position och inte i datum; annars hämtar URL:en andra perioder, så behåll då listan eller `range()`.
 
 **Viktiga begränsningar:**
 
 - API:et har en övre gräns för antal celler per query. Kontrollera `/config` för `maxDataCells`; för stora uttag, se «För många celler» i `references/troubleshooting.md`.
-- Rate limiting: 30 anrop per 10 sekunder i skrivande stund — läs `/config` och `X-Rate-Limit-*`-headrarna, inte denna text. Kör stora frågor sekventiellt, vänta på svaret innan nästa skickas. Vid 429: se `references/troubleshooting.md`.
+- Rate limiting: 30 anrop per 10 sekunder i skrivande stund — läs `/config` och `X-Rate-Limit-*`-headrarna (från en webbläsare bara `/config`), inte denna text. Kör stora frågor sekventiellt, vänta på svaret innan nästa skickas. Vid 429 och för anrop från en webbläsare: se `references/troubleshooting.md`.
 - Två fel förklarar sig inte själva: en GET-URL över ca 2 100 tecken ger **404** med en HTML-sida (använd POST), och en upprepad värdekod kan ge **500** med tom body (deduplicera listan). Se `references/troubleshooting.md`.
 - 503 betyder att tjänsten är nere eller laddar om. Vänta och försök igen; kommer den inte tillbaka gäller Fallback — säg att data inte kunde hämtas.
 

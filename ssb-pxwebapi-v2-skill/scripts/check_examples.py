@@ -25,9 +25,13 @@ Skipped on purpose:
 JSON bodies are extracted by brace-counting and must not contain braces inside
 string values. Identical checks are deduplicated.
 
+Every request, retries and Klass included, takes a slot in a sliding window of
+half SSB's limit (scripts/ratewindow.py). The x-ratelimit-policy header of the
+responses is compared with the limit the window assumes, at no extra call.
+
 Exit code: 0 if no errors, 1 otherwise.
 
-Usage:  python3 scripts/check_examples.py [--quiet] [--delay SECONDS]
+Usage:  python3 scripts/check_examples.py [--quiet]
 """
 from __future__ import annotations
 
@@ -41,7 +45,12 @@ import urllib.error
 from collections.abc import Iterator
 from pathlib import Path
 
+from ratewindow import RateWindow
+
 BASE = "https://data.ssb.no/api/pxwebapi/v2"
+POLICY = "40;w=60s"  # SSB's x-ratelimit-policy, the limit WINDOW is built from
+WINDOW = RateWindow(40, 60)
+policies: set[str] = set()  # x-ratelimit-policy values seen in responses
 FULL_URL_RE = re.compile(r"https://data\.ssb\.no/api/(?:pxwebapi/v2|klass/v1)/\S+")
 VERB_RE = re.compile(r"^\s*(?:\d+\.\s*)?(GET|POST)\s+(/\S+)\s*$")
 TABLE_ID_RE = re.compile(r"/tables/(\d{4,6})\b")
@@ -71,8 +80,11 @@ def http(url: str, method: str = "GET", body: str | None = None,
                                  method=method)
     delay = 5.0
     for attempt in range(retries):
+        WINDOW.take()
         try:
             with urllib.request.urlopen(req, timeout=60) as r:
+                if r.headers.get("x-ratelimit-policy"):
+                    policies.add(r.headers["x-ratelimit-policy"])
                 return r.status, r.read()
         except urllib.error.HTTPError as e:
             if e.code in (429, 503) and attempt < retries - 1:
@@ -154,8 +166,6 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     here = Path(__file__).resolve().parent.parent
     ap.add_argument("--quiet", action="store_true", help="suppress OK lines")
-    ap.add_argument("--delay", type=float, default=0.5,
-                    help="seconds to sleep between requests")
     args = ap.parse_args()
 
     files = ([here / "SKILL.md"]
@@ -204,8 +214,6 @@ def main() -> int:
             errors += 1
         elif not args.quiet:
             print(f"[OK]  {where}  {method} {url}")
-        if args.delay:
-            time.sleep(args.delay)
 
     for tid, (fname, lineno) in sorted(table_ids.items()):
         status, payload = http(f"{BASE}/tables/{tid}?lang=no")
@@ -218,10 +226,13 @@ def main() -> int:
             errors += 1
         elif not args.quiet:
             print(f"[OK]  table {tid} exists, not discontinued")
-        if args.delay:
-            time.sleep(args.delay)
 
     print(f"\nChecked {len(checks)} example(s) and {len(table_ids)} table id(s) — {errors} error(s).")
+    print(WINDOW.summary())
+    if policies != {POLICY}:
+        seen = ", ".join(sorted(policies)) or "missing"
+        print(f"warning: x-ratelimit-policy is {seen}, expected {POLICY}: "
+              "update RateWindow and references/api-details.md")
     return 1 if errors else 0
 
 

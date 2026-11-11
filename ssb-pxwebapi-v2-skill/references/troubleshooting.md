@@ -83,6 +83,8 @@ Rate-limiting. Du har sendt for mange forespørsler.
 
 **Løsning:** Vent til tidsvinduet nullstilles og prøv igjen. Kjør store spørringer sekvensielt — vent på svaret før neste sendes, ikke parallelt. Grensen står i `x-ratelimit-*`-responsheaderne (ikke lenger i `/config`): `x-ratelimit-policy: 40;w=60s` betyr 40 kall per 60 sekunder, og `x-ratelimit-remaining` viser gjenstående kall i inneværende vindu. Se `api-details.md` for full headeroversikt.
 
+Fra en nettleser koster en JSON-POST 2 kall, fordi CORS-preflighten også telles: se «Kall fra nettleseren (CORS)» i `api-details.md`.
+
 ### 500 Internal Server Error
 
 **Gjentatt verdikode.** Oppgir du samme kode to ganger i samme variabel — `valueCodes[Region]=0301,0301`, eller `["0301", "0301"]` i en POST-body — svarer API-et 500 med **tom body**, ikke 400 med forklaring. To like koder er nok. Verifisert 2026-09-09 hos SSB. Latvia gir også 500; SCB gir 500 i `Tid` og `ContentsCode`, men fjerner dubletter i `Region` stille (2026-10-28).

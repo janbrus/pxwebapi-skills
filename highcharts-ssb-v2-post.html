@@ -1,0 +1,95 @@
+<!-- Mal for Highcharts - SSB PxWebApi v2: Lag egne datasett (POST) -->
+<!DOCTYPE html>
+<html lang="no">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>SSB API mot Statistikkbanken - POST / Highcharts eksempel</title>
+
+        <!-- 1. JavaScript-biblioteker -->
+        <!-- JSON-stat JavaScript Toolkit (JJT) -->
+        <script src="https://cdn.jsdelivr.net/npm/jsonstat-toolkit@2.2.2/iife.js"></script>
+        <!-- Highcharts -->
+        <script src="https://cdn.jsdelivr.net/npm/highcharts@13.1.1/highcharts.js"></script>
+        <!-- Tilgjengelighet: skjermleser og tastaturnavigering i figuren -->
+        <script src="https://cdn.jsdelivr.net/npm/highcharts@13.1.1/modules/accessibility.js"></script>
+    </head>
+
+    <body>
+        <p>SSB API mot Statistikkbanken - http POST-spørring / JSON-stat med Highcharts eksempel<br>Bruk «Vis kilde»</p>
+
+        <!-- 2. Beholderen figuren tegnes i -->
+        <div id="container"></div>
+
+        <!-- 3. Skriptet står etter beholderen, så den finnes når koden kjører -->
+        <script>
+
+        /* url som spørringen postes mot (svaret kommer som JSON-stat 2.0, som er standard) */
+        const url = "https://data.ssb.no/api/pxwebapi/v2/tables/05803/data?lang=no";
+
+        /* API-spørring - kan kopieres fra Statistikkbanken («Lagre»).
+           Bytt ut faste år med top(), så kommer nye år med automatisk. */
+        const query = {
+            "selection": [
+                { "variableCode": "ContentsCode", "valueCodes": ["Tilvekst"] },
+                { "variableCode": "Tid",          "valueCodes": ["top(200)"] }
+            ]
+        };
+        /* slutt API-spørring */
+
+        function main(obj) {
+            const ds = JSONstat(obj);
+
+            /* Highcharts-kode */
+            Highcharts.chart('container', {
+
+                chart: {
+                    type: 'spline'
+                },
+
+                title: {
+                    text: 'Årlig befolkningsvekst i prosent, siste 200 år'
+                },
+
+                xAxis: {
+                    /* Henter årene fra datasettet */
+                    categories: ds.Dimension("Tid").id,
+                    tickInterval: 10
+                },
+
+                yAxis: {
+                    title: {
+                        text: 'Prosent'
+                    }
+                },
+
+                series: [
+                    {
+                        name: 'Vekst i %',
+                        /* Siden det kun er én serie i datasettet, kan en bruke ds.value.
+                           Siste år er tomt (..): tilveksten kan først regnes ut
+                           når folketallet 1. januar året etter er klart. */
+                        data: ds.value
+                    }
+                ],
+
+                credits: {
+                    text: 'Kilde: SSB, tabell 05803',
+                    href: 'https://www.ssb.no/statbank/table/05803'
+                }
+            });
+            /* slutt Highcharts-kode */
+        }
+
+        /* POST spørringen mot url, og send svaret videre til main() */
+        fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(query)
+        })
+            .then(svar => svar.json())
+            .then(main);
+
+        </script>
+    </body>
+</html>

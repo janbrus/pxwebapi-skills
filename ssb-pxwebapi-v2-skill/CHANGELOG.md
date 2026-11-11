@@ -4,6 +4,12 @@ Hva som er annerledes for deg som bruker skillen, nyeste først. Gjeldende versj
 
 Hva som er verifisert, hvor og når, står i vedlikeholderens logg, [`DEVLOG.md`](https://github.com/janbrus/pxwebapi-skills/blob/main/ssb-pxwebapi-v2-skill/DEVLOG.md). Den ligger i repoet, ikke i zip-en.
 
+## 1.7.0 — 2026-11-11
+
+- Nytt: kall fra en nettside. En JSON-POST koster 2 kall, fordi CORS-preflighten telles, og JavaScript kan ikke lese `x-ratelimit-*`. Bruk GET så lenge URL-en er kort nok.
+- Ved mange kall: hold omtrent halve grensen, og les `x-ratelimit-remaining` fra svarene du likevel får.
+- **Rettet:** en «Lagre»-URL fra Statistikkbanken skrives bare om til `top()`/`from()` når periodene er de nyeste i tabellen, uten hull. Ellers ville URL-en hentet andre perioder.
+
 ## 1.6.6 — 2026-11-02
 
 - Etterfølgeren til en avsluttet tabell slås opp på SSBs endringsside og i arkivet for 2016–2025, også for KOSTRA-tabeller.

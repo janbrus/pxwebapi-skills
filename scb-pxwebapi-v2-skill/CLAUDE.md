@@ -15,7 +15,6 @@ Requires Python 3.12+ (stdlib only) and `zip`/`unzip`.
 ```bash
 # Verify every example URL, GET/POST query and table ID in SKILL.md + references/
 python3 scripts/check_examples.py            # add --quiet to hide OK lines
-python3 scripts/check_examples.py --delay 1.0   # SCB allows 30 calls per 10 s; CI uses this
 
 # Rebuild the distribution zip (required before committing content changes)
 scripts/build_zip.sh                  # writes ./scb-pxwebapi-v2-skill.zip
@@ -24,7 +23,9 @@ scripts/build_zip.sh /tmp/fresh.zip   # write elsewhere, e.g. to diff against th
 
 `.github/workflows/check-scb-examples.yaml` (repo root — GitHub Actions only reads workflows there) runs two jobs, `check` (the Python script) and `zip-sync` (rebuilds the zip and `diff -r`s it against the committed one), on push/PR touching `SKILL.md`, `README.md`, `CHANGELOG.md`, `references/**`, `scripts/**` or the zip, and by hand via `workflow_dispatch` (Actions tab → *Run workflow*). There is **no scheduled run**: the Monday cron was removed on 2026-10-13 (maintainer's call), so SCB-side drift with no local change surfaces only on the next push or manual run. Run the checker locally before a release.
 
-`check_examples.py` is a port of the SSB skill's checker; only the base URL, the table-ID pattern (`TAB638`-style) and the language differ. It asserts HTTP 200 — **not** that a search example finds the table the example then uses. That has to be checked by hand: `?query=folkmängd` returns 200 with TAB638 on page 3 (position 47 of 117, default `pageSize` 20). It also skips any `GET` line whose path contains a space, so write multi-word searches with `+` if you want them checked at all; the English example (`title:population AND title:month`) cannot be, and was verified by hand. **Write å, ä and ö percent-encoded in examples** (`?query=folkm%C3%A4ngden+per+m%C3%A5nad`): the checker encodes URLs itself and so passes a raw `ä`, but an agent that copies the line into `curl -g` gets 200 with 0 hits and no error (found by the 0.11.2 eval, 2026-10-14). `%` is in the checker's safe set, so an encoded line is not encoded twice.
+**At most half the rate limit, for tests too (maintainer's rule).** Every request, retries included, takes a slot in `scripts/ratewindow.py`'s sliding window: 15 per 10 s (SCB's `/config` says 30), a slot held 11 s. The file is identical to the SSB copy; keep it so. It replaced `--delay` in 0.13.0. The run ends with «N kall, høyst K per 10 s (budsjett 15)».
+
+`check_examples.py` is a port of the SSB skill's checker; only the base URL, the table-ID pattern (`TAB638`-style), the language, the rate window and the `lastPeriod` staleness check differ. It asserts HTTP 200 — **not** that a search example finds the table the example then uses. That has to be checked by hand: `?query=folkmängd` returns 200 with TAB638 on page 3 (position 47 of 117, default `pageSize` 20). It also skips any `GET` line whose path contains a space, so write multi-word searches with `+` if you want them checked at all; the English example (`title:population AND title:month`) cannot be, and was verified by hand. **Write å, ä and ö percent-encoded in examples** (`?query=folkm%C3%A4ngden+per+m%C3%A5nad`): the checker encodes URLs itself and so passes a raw `ä`, but an agent that copies the line into `curl -g` gets 200 with 0 hits and no error (found by the 0.11.2 eval, 2026-10-14). `%` is in the checker's safe set, so an encoded line is not encoded twice.
 
 ### The `/savedqueries` safety rule
 

@@ -43,9 +43,11 @@ jobs:
         with:
           python-version: '3.12'
       - name: Validate common-tables.md against SSB PxWebApi v2
-        run: python3 scripts/check_common_tables.py --quiet --delay 1.0
+        run: python3 scripts/check_common_tables.py --quiet
+      # Each checker keeps its own window of half SSB's limit; two processes
+      # don't share one, so let the first window run out before the second.
       - name: Validate example URLs and queries
-        run: python3 scripts/check_examples.py --quiet --delay 1.0
+        run: sleep 61 && python3 scripts/check_examples.py --quiet
 
   zip-sync:
     runs-on: ubuntu-latest

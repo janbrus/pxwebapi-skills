@@ -41,7 +41,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Validate example URLs and queries
-        run: python3 scripts/check_examples.py --quiet --delay 1.0
+        run: python3 scripts/check_examples.py --quiet
 
   zip-sync:
     runs-on: ubuntu-latest

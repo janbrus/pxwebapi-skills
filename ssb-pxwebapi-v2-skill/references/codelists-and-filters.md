@@ -100,6 +100,8 @@ Formatet må matche tabellens `timeUnit`, og bokstavene er norske uansett `lang`
 
 For `Tid` er `top()` og `from()` førstevalget (SKILL.md Steg 4): de fanger opp nye perioder, så delbare URL-er holder seg oppdaterte. Faste vinduer — `range()`, `2024*` og enkeltperioder — er riktige når brukeren ber om et bestemt år eller intervall, eller om noen spredte år (folketellingsår).
 
+**Å skrive om faste perioder til relative** — en «Lagre»-URL fra Statistikkbanken, en URL brukeren limer inn — er riktig bare når de N valgte periodene er de N siste i `category.index` for `Tid` i metadata. Da gir `top(N)` et vindu som flytter seg, og `from(<eldste>)` en serie som vokser. Ellers henter URL-en andre perioder: i 07459 (1986–2026) blir `1986,1987` til `top(2)`, og det gir 2025 og 2026. Behold da lista eller `range()`. Tell posisjoner, ikke årstall: en tabell med bare 2000, 2005 og 2010 har ingen hull mellom dem.
+
 ### Verifiserte eksempler
 
 - `https://data.ssb.no/api/pxwebapi/v2/tables/07459/data?valueCodes[Region]=0301&valueCodes[ContentsCode]=Personer1&valueCodes[Tid]=[range(2020,2022)]` — tre år, hakeparenteser i GET

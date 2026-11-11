@@ -16,9 +16,12 @@ thing, so we don't equate them. timeUnit drives the staleness check; the only us
 of "Frekvens" is a multi-year cadence ("Minst hvert 5. år"), which widens the
 allowed lag for annual tables to the cycle plus two years.
 
+Every request, retries included, takes a slot in a sliding window of half
+SSB's limit (scripts/ratewindow.py), shared by the --workers threads.
+
 Exit code: 0 if no errors, 1 otherwise. Warnings do not fail CI.
 
-Usage:  python3 scripts/check_common_tables.py [--md PATH] [--quiet]
+Usage:  python3 scripts/check_common_tables.py [--md PATH] [--quiet] [--workers N]
 """
 from __future__ import annotations
 
@@ -34,7 +37,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
+from ratewindow import RateWindow
+
 API = "https://data.ssb.no/api/pxwebapi/v2/tables/{id}?lang=no"
+WINDOW = RateWindow(40, 60)  # SSB: 40 calls per 60 s (x-ratelimit-policy)
 
 # Rows look like: | 07459 | Title ... | Årlig | ... |
 ROW_RE = re.compile(r"^\|\s*(\d{4,6})\s*\|\s*(.+?)\s*\|\s*([^|]+?)\s*\|")
@@ -60,6 +66,7 @@ def fetch(tid: str, retries: int = 4) -> dict[str, Any]:
     )
     delay = 5.0
     for attempt in range(retries):
+        WINDOW.take()
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
                 data: dict[str, Any] = json.load(r)
@@ -156,9 +163,8 @@ def main() -> int:
     here = Path(__file__).resolve().parent.parent
     ap.add_argument("--md", default=str(here / "references" / "common-tables.md"))
     ap.add_argument("--quiet", action="store_true", help="suppress OK lines")
-    ap.add_argument("--workers", type=int, default=1)
-    ap.add_argument("--delay", type=float, default=0.5,
-                    help="seconds to sleep between sequential requests")
+    ap.add_argument("--workers", type=int, default=1,
+                    help="parallel requests; they share one rate window")
     args = ap.parse_args()
 
     md_path = Path(args.md)
@@ -173,8 +179,6 @@ def main() -> int:
     if args.workers <= 1:
         for r in rows:
             results.append(check_row(*r))
-            if args.delay:
-                time.sleep(args.delay)
     else:
         with ThreadPoolExecutor(max_workers=args.workers) as ex:
             futures = [ex.submit(check_row, *r) for r in rows]
@@ -200,6 +204,7 @@ def main() -> int:
         f"\nChecked {len(rows)} tables — {total_errors} error(s), "
         f"{total_warnings} warning(s)."
     )
+    print(WINDOW.summary())
     return 1 if total_errors else 0
 
 
