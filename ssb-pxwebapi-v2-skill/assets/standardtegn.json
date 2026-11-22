@@ -1,0 +1,15 @@
+{
+  "kilde": {
+    "no": "https://www.ssb.no/diverse/standardtegn-i-tabeller",
+    "en": "https://www.ssb.no/en/diverse/standardtegn-i-tabeller",
+    "hentet": "2026-11-19"
+  },
+  "tegn": {
+    ".":   { "no": "Ikke mulig å oppgi tall", "en": "Category not applicable" },
+    "..":  { "no": "Tallgrunnlag mangler", "en": "Data not available" },
+    ":":   { "no": "Vises ikke av hensyn til konfidensialitet", "en": "Confidential" },
+    "...": { "no": "Oppgave mangler foreløpig", "en": "Data not yet available", "eldre": true },
+    "-":   { "no": "Null", "en": "Nil", "eldre": true },
+    "*":   { "no": "Foreløpig tall", "en": "Provisional or preliminary figure", "eldre": true }
+  }
+}
