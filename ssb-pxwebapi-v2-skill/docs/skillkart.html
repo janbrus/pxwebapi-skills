@@ -63,7 +63,7 @@ footer a { color: var(--accent); }
 <body>
 <main class="page">
   <header>
-    <div class="eyebrow">ssb-pxwebapi-v2 · v1.6.2 · tegnet 3. oktober 2026, oppdatert 11. oktober 2026</div>
+    <div class="eyebrow">ssb-pxwebapi-v2 · v1.7.0 · tegnet 3. oktober 2026, oppdatert 18. november 2026</div>
     <h1>ssb-pxwebapi-v2</h1>
     <p class="prose">Skillen styrer hvordan Claude finner, henter og presenterer tall fra Statistikkbanken via PxWebApi v2. Det første diagrammet viser arbeidsflyten i en samtale. Det andre viser hvordan pakken sjekkes mot det levende API-et og bygges til zip.</p>
   </header>
@@ -88,13 +88,13 @@ footer a { color: var(--accent); }
     <h2>Slik sjekkes og pakkes skillen</h2>
     <figure>
       <div class="scroll">
-        <img src="skillkart-sjekk-og-pakking.svg" width="1040" height="356" alt="docs, SKILL.md og references sjekkes mot det levende SSB-API-et av check_examples.py og check_common_tables.py, ved push og manuelt. SKILL.md, references, README, CHANGELOG og LICENSE pakkes av build_zip.sh til zip-filen. docs følger ikke med i zip. CLAUDE.md, DEVLOG.md, evals, scripts og .github er interne.">
+        <img src="skillkart-sjekk-og-pakking.svg" width="1040" height="404" alt="docs, SKILL.md, references og kodemalen i assets sjekkes mot det levende SSB-API-et av check_examples.py og check_common_tables.py, ved push og manuelt. SKILL.md, references, assets, README, CHANGELOG og LICENSE pakkes av build_zip.sh til zip-filen. docs følger ikke med i zip. CLAUDE.md, DEVLOG.md, evals, scripts og .github er interne.">
       </div>
-      <figcaption>Prosaen er testdataene. Hver eksempel-URL, POST-body og tabell-ID i <code>SKILL.md</code>, <code>references/</code> og <code>docs/</code> kalles mot det levende API-et, så endringer hos SSB får bygget til å feile. Zip-en får bare brukerfilene. <code>docs/</code> sjekkes, men følger ikke med.</figcaption>
+      <figcaption>Prosaen er testdataene. Hver eksempel-URL, POST-body og tabell-ID i <code>SKILL.md</code>, <code>references/</code> og <code>docs/</code> kalles mot det levende API-et, og kodemalen i <code>assets/code/</code> kjøres med standardutvalget sitt, så endringer hos SSB får bygget til å feile. Zip-en får bare brukerfilene. <code>docs/</code> sjekkes, men følger ikke med.</figcaption>
     </figure>
   </section>
 
-  <footer class="prose">Tegnet fra <code>SKILL.md</code> v1.6.2, <code>CLAUDE.md</code> og <code>README.md</code>. Endres arbeidsflyten, må diagrammet oppdateres for hånd. Skillen er uoffisiell; SSB står ikke bak. Kilde: <a href="https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill">github.com/janbrus/pxwebapi-skills</a>.</footer>
+  <footer class="prose">Tegnet fra <code>SKILL.md</code> v1.7.0, <code>CLAUDE.md</code> og <code>README.md</code>. Endres arbeidsflyten, må diagrammet oppdateres for hånd. Skillen er uoffisiell; SSB står ikke bak. Kilde: <a href="https://github.com/janbrus/pxwebapi-skills/tree/main/ssb-pxwebapi-v2-skill">github.com/janbrus/pxwebapi-skills</a>.</footer>
 </main>
 </body>
 </html>

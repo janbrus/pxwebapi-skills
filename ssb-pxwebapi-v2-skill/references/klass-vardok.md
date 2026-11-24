@@ -127,13 +127,10 @@ Hvilke eldre koder dagens kommuner er satt sammen av, står i `valueMap` til `ag
 
 Stiene virker for alle klassifikasjoner. Kildehenvisning: «Kilde: SSB, Klass, klassifikasjon 131.»
 
-KOSTRA-kommunegruppene (`EKG01`–`EKG17`, brukt som regionkoder i KOSTRA-tabellene) er klassifikasjon 112 «Kodeliste for KOSTRA - kommunegruppering», versjon 1450 = 2020-grupperingen (eldre: 423 for 2004-06–2019, 1288 for 2019). Hvilken gruppe en kommune tilhører leses fra korrespondansetabellen gruppering → kommuneinndeling for riktig år — gjeldende er 2840 (2026; Bergen 4601 → `EKG12`, Oslo 0301 → `EKG13`), eldre 1358 (2024), 1483 (2023), 1482 (2022), 978 (2020). Fylkeskommunegruppene (`EAFK01`–`EAFK06`) er klassifikasjon 152, korrespondanse 1310. Verifisert 2026-09-20:
+KOSTRA-kommunegruppene (`EKG01`–`EKG17`, brukt som regionkoder i KOSTRA-tabellene) er klassifikasjon 112 «Kodeliste for KOSTRA - kommunegruppering», versjon 1450 = 2020-grupperingen. Hvilken gruppe en kommune tilhører, gir `correspondsAt` fra 131 til 112 over (Bergen 4601 → `EKG12`, Oslo 0301 → `EKG13`). Fylkeskommunegruppene (`EAFK01`–`EAFK06`) er klassifikasjon 152, korrespondanse 1310. Verifisert 2026-09-20:
 
 - `https://data.ssb.no/api/klass/v1/classifications/112`
-- `https://data.ssb.no/api/klass/v1/correspondencetables/2840`
 - `https://data.ssb.no/api/klass/v1/classifications/152`
-
-Uten tabell-ID: `correspondsAt` fra 131 til 112 gir tilordningen som gjaldt på datoen, den samme som tabellene over for sine år (sjekket mot alle fem 2026-10-24).
 
 Hva gruppene er og hvordan de brukes i spørringer: se `kostra.md`.
 

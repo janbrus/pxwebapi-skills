@@ -22,8 +22,8 @@ json-stat2 er et åpent format for statistiske datasett (https://json-stat.org/)
 3. **Les `value` og `status` hver for seg.** Er cellen `null`, vis symbolet, aldri 0. Har den et tall, vis tallet med flagget. (SKILL.md Steg 5, og `status`)
 4. **Vis obligatoriske noter.** `extension.noteMandatory` sier hvilke. (SKILL.md Dataintegritet, og `note`)
 5. **Les `elimination` bare fra metadata.** Totalkoden finner du via `category.label`, eller som `eliminationValueCode` i en data-respons. (Se `elimination`)
-6. **Står `aggregallowed: false`, skal tallene verken summeres eller gjennomsnittes.** Gjør du det likevel, merk det. Feltet stopper ingen spørring. (Se `extension.px`)
-7. **Oppgi selv kodelisten, de utelatte dimensjonene og `timeUnit`**, og send `timeUnit` videre til `ssb-chart`. (SKILL.md Steg 5, og «Det json-stat2 ikke bærer»)
+6. **Står `aggregallowed: false`, si fra hvis du summerer tallene eller tar gjennomsnitt.** Feltet stopper ingen spørring. (Se `extension.px`)
+7. **Oppgi selv kodelisten og de utelatte dimensjonene.** (SKILL.md Steg 5, og «Det json-stat2 ikke bærer»)
 
 ---
 
@@ -127,11 +127,10 @@ Rot-`extension` har `contact` (kontaktpersonene) og `px`, og `noteMandatory` (`N
 | `contents` | Kort tittel, f.eks. `"07459: Befolkning,"`. Grunnlaget for tittelen i Steg 5 |
 | `heading`, `stub` | Standardpivoteringen: variablene i kolonnehodet og i forspalten |
 | `decimals` | Antall desimaler i tabellen |
-| `aggregallowed` | `false` for tall som ikke kan summeres, som indekser og gjennomsnitt (14700, 14710, 03013, 07221). Et tolkningssignal, ingen sperre: kodelistene svarer 200 likevel |
+| `aggregallowed` | `false` for tall som ikke kan summeres, som indekser og gjennomsnitt (14700, 14710, 03013, 07221). Merket gjelder hele tabellen, også antallene: 09817 har både antall og prosent, og `false`. Et tolkningssignal, ingen sperre: kodelistene svarer 200 likevel |
 | `tableid`, `matrix` | Tabellnummeret |
 | `subject-code`, `subject-area` | Emnet, f.eks. `be` og «Befolkning» |
 | `language` | Språket, som følger `lang` |
-| `official-statistics`, `copyright`, `descriptiondefault`, `infofile` | Like i alle SSB-tabeller, også KOSTRA: `true`, `false`, `false` og `"None"` |
 
 ---
 

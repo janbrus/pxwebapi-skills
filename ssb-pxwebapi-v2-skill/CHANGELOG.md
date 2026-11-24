@@ -9,6 +9,20 @@ Hva som er verifisert, hvor og når, står i vedlikeholderens logg, [`DEVLOG.md`
 - Nytt: kall fra en nettside. En JSON-POST koster 2 kall, fordi CORS-preflighten telles, og JavaScript kan ikke lese `x-ratelimit-*`. Bruk GET så lenge URL-en er kort nok.
 - Ved mange kall: hold omtrent halve grensen, og les `x-ratelimit-remaining` fra svarene du likevel får.
 - **Rettet:** en «Lagre»-URL fra Statistikkbanken skrives bare om til `top()`/`from()` når periodene er de nyeste i tabellen, uten hull. Ellers ville URL-en hentet andre perioder.
+- Oppgir du tabellnummer eller lenke til tabellen, går Claude rett til tabellen uten å søke først.
+- Noen tabeller er på nynorsk. Claude søker derfor også med nynorskformen, f.eks. «hushald» for husholdninger.
+- Har en serie mange 0, sier Claude fra: tall som skal revideres, står som 0 fra kl. 05.00, og bør hentes på nytt etter kl. 08.00.
+- Trenger du et uttrekk over cellegrensen, deles det i flere kall: på tid først, eller på en variabel med bare to verdier, ellers på region.
+- Når API-et ikke svarer, lenker Claude rett til tabellen i Statistikkbanken hvis tabellnummeret er kjent.
+- KOSTRA-gruppen til en kommune slås opp i Klass på datoen tallene ble publisert, uten en tabell-ID som byttes hvert år.
+- KPI-eksempelet henter 13 måneder, så årsendringen kommer med.
+- Nytt: ber du om Python-kode, starter Claude fra en ferdig mal (`assets/code/hent_uttrekk.py`, requests og pandas). Du får én rad per tall med både kode og tekst og `status`-tegn. Skriptet skriver selv ut tabellnotene, kildehenvisningen og en advarsel når SSB har merket tallene som ikke summerbare. Det holder seg under halve kallgrensen, så det tåler å kjøres i løkke, og det venter og prøver igjen hvis API-et svarer 429.
+- Nytt: svar med tall følger en fast mal (`assets/svarmal.no.md`, på engelsk `svarmal.en.md`). Først et kort svar, så tabellen og en fotnote for statustegnene, SSBs obligatoriske noter og kildehenvisningen med sist oppdatert, der tabellnummeret lenker til tabellen i Statistikkbanken. Til slutt «Slik ble tallene hentet»: utvalget, kodelisten, egne beregninger og spørringen. Tekstene for statustegnene står på norsk og engelsk i `assets/standardtegn.json`.
+- Har SSB merket tallene i en tabell som ikke summerbare, sier Claude fra hvis svaret likevel summerer dem eller tar gjennomsnitt.
+- **Rettet:** for en indeks oppgir Claude basisperioden (f.eks. 2025=100). Skillen sa «referanseperioden», som i SSBs metadata er noe annet, f.eks. «Måned» for KPI.
+- **Rettet:** oppslaget for 403 oppga to årsaker som ikke finnes. SSB har ikke sperrete tabeller, med mindre de inneholder feil.
+- **Rettet:** feilsøkingen sa at du må søke «konsumprisindeks», ikke «KPI». `KPI` finner også tabellene.
+- **Rettet:** `ContentsCode` er ID-en på både norsk og engelsk. Bare navnet følger språket.
 
 ## 1.6.6 — 2026-11-02
 

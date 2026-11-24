@@ -129,6 +129,8 @@ Gjelder spørsmålet kommunenes eller fylkeskommunenes tjenester og økonomi —
 
 ### Steg 2: Søk etter tabell
 
+Har brukeren oppgitt tabellnummer eller lenke til tabellen i Statistikkbanken, hopp over søket: hent `GET /tables/{id}` (`lastPeriod`, `timeUnit`, `discontinued`) og gå til Steg 3.
+
 Bruk `GET /tables` med `query`-parameter.
 
 **Søkeparametre:**
@@ -143,7 +145,7 @@ Bruk `GET /tables` med `query`-parameter.
 
 **Tips for gode søk:**
 
-- Søk med SSBs fagtermer, ikke hverdagsord: `konsumprisindeks`, ikke `inflasjon` (0 treff), og `brukte boliger`, ikke `boligpriser`. Indeksen følger `lang`: med `lang=en` søker du `consumer price index`
+- Søk med SSBs fagtermer, ikke hverdagsord: `konsumprisindeks`, ikke `inflasjon` (0 treff), og `brukte boliger`, ikke `boligpriser`. Indeksen følger `lang`: med `lang=en` søker du `consumer price index`. Noen tabeller er på nynorsk, uten at det er merket: søk også med nynorskformen (`hushald`, ikke bare `husholdninger`)
 - Søket er case-insensitivt og leter i tabelltitler, variabler og variabelverdier, ikke i emnenavnene i `paths` (`forbruksundersøkelse*` gir 0 treff)
 - Bruk `pageSize=50`: de fleste søk har færre treff, så hele lista kommer i ett kall, mens standard 20 kutter brede søk. Sjekk `page.totalElements` før du konkluderer at tabellen ikke finnes. Har søket hundrevis av treff, snevre det inn i stedet for å bla
 - Trunkering med `*` (f.eks. `anlegg*`) og feltbegrensning med `title:` er ofte nok
@@ -168,7 +170,7 @@ Metadata returneres i json-stat2-format (Dataset-schema). Full formatreferanse, 
 
 - **`id`-array** — Variabelnavnene (f.eks. `["Region", "Kjonn", "Alder", "ContentsCode", "Tid"]`); `size`-arrayet gir antall verdier per variabel
 - **`dimension`-objekt** — Per variabel: koder (`category.index`), lesbare navn (`category.label`), enhet og desimaler (`category.unit`, på ContentsCode), noter per verdi (`category.note`), samt `extension` med `elimination` og `codelists` (tilgjengelige kodelister)
-- **`role`-objekt** — **Start analysen her:** `role.metric` viser hva som måles (antall, prosent, NOK, indeks) — hos SSB heter variabelen "statistikkvariabel" på norsk og `ContentsCode` på engelsk; sjekk `category.unit` for enhet og desimaler. `role.time` er tidsdimensjonen, `role.geo` er geografi — **hvis `role.geo` mangler, anta at dataene gjelder hele Norge**, ikke spør brukeren. Øvrige variabler i `id` er nedbrytningsdimensjoner (kjønn, alder, næring osv.)
+- **`role`-objekt** — **Start analysen her:** `role.metric` viser hva som måles (antall, prosent, NOK, indeks) — hos SSB har variabelen ID-en `ContentsCode` på begge språk, med navnet "statistikkvariabel" på norsk og "contents" på engelsk; sjekk `category.unit` for enhet og desimaler. `role.time` er tidsdimensjonen, `role.geo` er geografi — **hvis `role.geo` mangler, anta at dataene gjelder hele Norge**, ikke spør brukeren. Øvrige variabler i `id` er nedbrytningsdimensjoner (kjønn, alder, næring osv.)
 - **`note`-array + `extension.noteMandatory` (rot)** — tabellnoter, og hvilke av dem som **skal vises**; `noteMandatory` er nøklet på note-indeks. Se Dataintegritet og `references/json-stat2.md`
 - **`extension`-objekt (rot)** — `contact`, `noteMandatory` og PX-metadata under `extension.px` (bl.a. `contents`, den korte tabelltittelen du bygger tittel fra i Steg 5)
 - **`link`-objekter (rot og per variabel)** — `link.describedby` gir URN-er til Klass og VarDok; `link.related` gir ferdige menneskelesbare lenker til statistikksiden, «Om statistikken» og definisjonssidene. Se `references/klass-vardok.md`
@@ -243,16 +245,18 @@ Viktigste mønstre: `top(N)` = siste N verdier, `from(verdi)` = fra og med, `ran
 
 ### Steg 5: Presenter resultatene
 
-- Vis dataene i en ryddig markdown-tabell
+Les `assets/svarmal.no.md` (engelsk: `assets/svarmal.en.md`) før du skriver et svar med tall.
+
 - Bygg tittel fra `extension.px.contents` (kort tabelltittel) og utvid med valgte variabler og tidsperiode fra uttrekket — f.eks. "Befolkning i Oslo, 2020–2025" basert på `contents: "07459: Befolkning,"` + valgt region og tidsfilter
 - Inkluder **alltid** kildehenvisning med **samtlige tabell-ID-er** som er brukt — er flere tabeller kombinert, list opp alle, ikke utelat noen. Henvisnings- og tallformat: se «Språk»
 - Forklar hva tallene betyr i kontekst — på brukerens språk. Kommenter **kun** tallene som er hentet i uttrekket; trenger brukeren tall fra andre kilder, henvis videre i stedet (se «Ruting»). Har tabellen standardfeil eller feilmargin som statistikkvariabel, hent den med og se på den før du kaller en forskjell reell
-- Presenter enheter tydelig (antall/count, prosent/percent, indeks/index, NOK). For indekser: oppgi referanseperioden (f.eks. 2015=100)
-- **Skill hentede tall fra egne beregninger.** Kildehenvisningen dekker tallene fra API-et. Regner du ut vekst, andeler eller differanser, marker det — f.eks. «Endring i prosent er beregnet fra indeksverdiene over»
-- **Gjør uttrekket etterprøvbart.** Vis GET-URL-en eller POST-bodyen. **Oppgi eksplisitt hvilke koder et vagt begrep ble til (f.eks. «mat»), hvilke dimensjoner du utelot og hvilken kodeliste du brukte** — responsen registrerer ingen av delene, og `agg_KommFylker` og `agg_KommSummer` gir tall som ser like ut og ikke er det
-- **Vis `status`-merkede verdier som de er.** Bruk SSBs standardtegn i tabellen og forklar dem i en fotnote — ikke erstatt dem med tall, nuller eller tomme celler. Har cellen et tall (f.eks. `*` = foreløpig tall), vis tallet *med* tegnet
-- Tilby å visualisere dataene — bruk `ssb-chart` hvis den er tilgjengelig i miljøet
-- Tilby å laste ned i annet format — `xlsx` når dataene skal i Excel, `csv` til skript. Se `references/output-formats.md`
+- Oppgi enheten fra `category.unit`, og for indekser basisperioden (`basePeriod`, f.eks. 2025=100)
+- **Skill hentede tall fra egne beregninger.** Kildehenvisningen dekker tallene fra API-et. Regner du ut vekst, andeler eller differanser, marker det — f.eks. «Endring i prosent er beregnet fra indeksverdiene over». Står `extension.px.aggregallowed` som `false`, har SSB merket tallene som ikke summerbare: si fra hvis du likevel summerer dem eller tar gjennomsnitt
+- **Gjør uttrekket etterprøvbart.** Vis GET-URL-en, også når verktøyet ikke gir deg en. Bruk POST-body bare når URL-en blir for lang. **Oppgi eksplisitt hvilke koder et vagt begrep ble til (f.eks. «mat»), hvilke dimensjoner du utelot og hvilken kodeliste du brukte** — responsen registrerer ingen av delene, og `agg_KommFylker` og `agg_KommSummer` gir tall som ser like ut og ikke er det
+- **Vis `status`-merkede verdier som de er.** Bruk SSBs standardtegn i tabellen og forklar dem i en fotnote, med tekstene i `assets/standardtegn.json` — ikke erstatt dem med tall, nuller eller tomme celler. Har cellen et tall (f.eks. `*` = foreløpig tall), vis tallet *med* tegnet
+- **Vurder serier med mange 0.** Tall som skal revideres, står som 0 uten `status` fra kl. 05.00. Si fra, med tips om å hente på nytt etter kl. 08.00
+- Tilby diagram med `ssb-chart` hvis den er tilgjengelig i miljøet, og nedlasting i annet format: `xlsx` når dataene skal i Excel, `csv` til skript (se `references/output-formats.md`)
+- Ber brukeren om Python-kode, start fra `assets/code/hent_uttrekk.py` (requests og pandas). Fyll inn tabell-ID, verdikoder og kodelister fra metadata, og behold det malen tar med: `status`, notene, kildehenvisningen og kallvinduet
 
 ### Steg 6: Lagrede spørringer (valgfritt)
 
@@ -290,7 +294,7 @@ Integritetsreglene øverst gjelder alltid — i tillegg:
 → "Per 1. januar {år} hadde Oslo {N} innbyggere." Kilde: SSB, tabell 07459. Sist oppdatert: {YYYY-MM-DD}.
 ```
 
-### "KPI siste 5 år, månedlig"
+### "KPI siste år, månedlig"
 
 ```
 1. GET /tables?query=konsumprisindeks
@@ -300,9 +304,9 @@ Integritetsreglene øverst gjelder alltid — i tillegg:
    { "selection": [
        { "variableCode": "VareTjenesteGrp", "valueCodes": ["00"] },
        { "variableCode": "ContentsCode", "valueCodes": ["KpiIndMnd"] },
-       { "variableCode": "Tid", "valueCodes": ["top(61)"] }
+       { "variableCode": "Tid", "valueCodes": ["top(13)"] }
    ]}
-→ Tabell med månedlig KPI i alt (2025=100), med kilde. NB: Både 03013 og 03014 er avsluttet — bruk 14700 (månedlig) eller 14701 (årsgjennomsnitt). Kontrakter som viser til KPI og andre indekser, bruker vanligvis tolvmånedersendring, f.eks. desember–desember i 14700.
+→ Tabell med månedlig KPI i alt (2025=100), med kilde. top(13) er 12 måneder pluss samme måned året før, så årsendringen kommer med. NB: Både 03013 og 03014 er avsluttet — bruk 14700 (månedlig) eller 14701 (årsgjennomsnitt). Kontrakter som viser til KPI og andre indekser, bruker vanligvis tolvmånedersendring, f.eks. desember–desember i 14700.
 ```
 
 ### "Sammenlign befolkning i alle fylker"
@@ -337,7 +341,7 @@ Feilkoder og vanlige problemer (400/403/404/429/500/503, cellegrense, tomme søk
 Hvis API-et ikke er tilgjengelig:
 
 1. **Si tydelig fra at data ikke kunne hentes.** Fyll aldri tomrommet med tall fra hukommelsen — uten API-tilgang leverer du veiledning, ikke statistikk
-2. Henvis til SSBs Statistikkbank: https://www.ssb.no/statbank. Der kan brukeren bygge uttrekket grafisk og trykke «Lagre» for ferdig GET-URL og POST-body — men «Lagre» rammer opp valgte perioder som faste verdier. Skriv dem om til `top()`/`from()` før deling, men bare når periodene er de nyeste i tabellen, uten hull (se «Relativ eller fast periode» i `references/codelists-and-filters.md`)
+2. Henvis til SSBs Statistikkbank: https://www.ssb.no/statbank, eller rett til tabellen når ID-en er kjent: `https://www.ssb.no/statbank/table/{id}`. Der kan brukeren bygge uttrekket grafisk og trykke «Lagre» for ferdig GET-URL og POST-body — men «Lagre» rammer opp valgte perioder som faste verdier. Skriv dem om til `top()`/`from()` før deling, men bare når periodene er de nyeste i tabellen, uten hull (se «Relativ eller fast periode» i `references/codelists-and-filters.md`)
 3. Foreslå relevante søkeord basert på spørsmålet
 4. Gi veiledning for manuelt oppslag (tabellnummer, variabler å se etter)
 

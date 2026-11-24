@@ -101,7 +101,7 @@ før du antar at skillen er problemet.
 ## 16. «Netto driftsresultat i prosent for Bergen siste 5 år, sammenlignet med KOSTRA-gruppen og landet»
 
 - **Forventet tabell:** 12134 (Utvalgte nøkkeltall for kommuneregnskap, kommunekonsern (K)) — kjennes igjen på `kostrahoved` i `paths`; ikke 07459-logikk med `Region`
-- **Sekvens:** (`GET /tables?query=kostra kommuneregnskap` hvis ID ukjent) → `GET /tables/12134/metadata` → Klass-oppslag av Bergens gruppe (`correspondencetables/2840`: 4601 → `EKG12`, ikke gjettet) → data
+- **Sekvens:** (`GET /tables?query=kostra kommuneregnskap` hvis ID ukjent) → `GET /tables/12134/metadata` → Klass-oppslag av Bergens gruppe (`classifications/131/correspondsAt?targetClassificationId=112&date=…` med datoen tallene ble publisert: 4601 → `EKG12`, ikke gjettet) → data
 - **Nøkkelvalg:** `valueCodes[KOKkommuneregion0000]=4601,EKG12,EAKUO` (landet *uten* Oslo for økonominøkkeltall), `ContentsCode` valgt etter label «netto driftsresultat i prosent …» fra metadata (`KOSAGD230000` per 2026-09-20 — leses, ikke huskes), `Tid=top(5)`; ingen dimensjon utelatt
 - **Suksess:** fem årsverdier med enhet prosent og desimaler fra `category.unit.decimals`; den obligatoriske noten om brudd i KOSTRA-gruppene 2019/2020 vist; svaret sier at tallene er reviderte (juni-utgave) ut fra `updated`, at gruppe- og landstall er SSBs egne veide gjennomsnitt (ikke egen sum), og «Kilde: SSB, tabell 12134. Sist oppdatert: {dato}.». Brukes en `KOS…`-kode uten forutgående metadata-kall i samme samtale, er scenarioet feilet
 

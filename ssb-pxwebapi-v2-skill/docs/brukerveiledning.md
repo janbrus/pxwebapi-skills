@@ -150,9 +150,9 @@ Claude tilpasser automatisk språk i API-kall (`lang=no` eller `lang=en`), tallf
 
 Skillen presenterer data på en fast måte. Noen av elementene er lette å overse:
 
-**Kilde med tabellnummer og dato.** «Kilde: SSB, tabell 07459. Sist oppdatert: 2026-02-25.» Datoen er når SSB sist oppdaterte tabellen. Er flere tabeller brukt, listes alle.
+**Kilde med tabellnummer og dato.** «Kilde: SSB, tabell 07459. Sist oppdatert: 2026-02-25.» Tabellnummeret er en lenke til tabellen i Statistikkbanken. Datoen er når SSB sist oppdaterte tabellen. Er flere tabeller brukt, listes alle.
 
-**Enhet.** Antall, prosent, indeks eller kroner. For indekser oppgis referanseperioden, f.eks. 2025=100.
+**Enhet.** Antall, prosent, indeks eller kroner. For indekser oppgis basisperioden, f.eks. 2025=100.
 
 **Standardtegn i stedet for tall.** SSB bruker tre symboler, og skillen viser dem som de er i stedet for å skjule dem eller sette inn null:
 

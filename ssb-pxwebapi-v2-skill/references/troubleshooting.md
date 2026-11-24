@@ -57,12 +57,7 @@ Bruk `curl -g` (`--globoff`), eller URL-kod hakeparentesene som `%5B`/`%5D` — 
 
 ### 403 Forbidden
 
-Forespørselen er forstått men nektet.
-
-**Vanlige årsaker:**
-
-- Tabellen er merket som ikke tilgjengelig via API
-- Lagret spørring tilhører en annen bruker/sesjon
+SSB har ikke sperrete tabeller, med mindre de inneholder feil.
 
 ### 404 Not Found
 
@@ -117,12 +112,14 @@ Tjenesten er nede eller under oppdatering. Metadata oppdateres kl. 05.00 og 11.3
 4. Filtrer på ContentsCode: velg kun den måleenheten du trenger
 5. Utelat variabler med `elimination: true`
 
+**Trenger du hele uttrekket:** del det i flere kall og sett svarene sammen. Del på tid først, eller på en variabel med bare to verdier (f.eks. kjønn), ellers på region. Hold omtrent halve rate limit (se `api-details.md`).
+
 **Tips:** Hent defaultselection først — den er designet for å holde seg innenfor cellegrensen.
 
 ### Tomme eller uventede søkeresultater
 
 - Prøv andre søkeord eller synonymer ("folkemengde" vs "befolkning" vs "innbyggere")
-- SSB bruker fagtermer: "konsumprisindeks" ikke "KPI", "sysselsatte" ikke "ansatte"
+- SSB bruker fagtermer, ikke hverdagsord: se søketipsene i Steg 2 i `SKILL.md`
 - Bruk `includeDiscontinued=true` hvis du trenger historiske serier
 - Bruk `pastDays=30` for å finne nylig oppdaterte tabeller
 - Paginering: sjekk `page.totalPages` — det kan finnes flere resultatsider

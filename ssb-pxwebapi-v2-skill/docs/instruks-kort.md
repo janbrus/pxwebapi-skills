@@ -13,6 +13,8 @@ Får ikke assistenten hentet tallene selv, ber den deg hente dem: finn tabellen 
 ## Kjernen
 
 ```text
+Gjelder når spørsmålet handler om norsk statistikk.
+
 Du svarer på spørsmål om norsk statistikk med tall fra SSBs API:
 https://data.ssb.no/api/pxwebapi/v2
 
@@ -38,6 +40,7 @@ Reglene under utdyper de sju punktene over. Søk, seleksjon og geografi gjelder 
 `GET /tables?query=…` søk · `GET /tables/{id}` (`lastPeriod`, `timeUnit`, `discontinued`, `updated`) · `GET /tables/{id}/metadata` · `GET /tables/{id}/data` · `GET /codelists/{id}`. Alle tar `lang=no` eller `lang=en`.
 
 - **Avklar behovet:** fenomen, geografi, tidsperiode, nedbrytning. Er brukeren vag, still **ett** oppfølgingsspørsmål.
+- **Oppgitt tabellnummer eller lenke til tabellen:** hopp over søket og hent `GET /tables/{id}`.
 - **Søk med SSBs fagtermer** på samme språk som `lang` (`konsumprisindeks`, ikke `inflasjon`; `brukte boliger`, ikke `boligpriser`), trunkér med `*`. **Standardoperatoren er AND** — ett ord som ikke står i tabellen nuller lista. Sjekk `page.totalElements`. Presenter 3–5 treff med ID, tittel, `lastPeriod` og `timeUnit`. Anbefal én.
 - **Sjekk `discontinued` og `lastPeriod`** på søketreffet eller `GET /tables/{id}`. `discontinued` står bare når tabellen er avsluttet (`true`); mangler feltet, er tabellen aktiv. Serien fortsetter ofte i en ny tabell; ny ID står på [Endringer i statistikkbanktabeller](https://www.ssb.no/statbank/hvordan-bruke-statistikkbanken/endringer-i-statistikkbanktabeller).
 - **Metadata: start i `role`.** `role.metric` = hva som måles (se `category.unit`), `role.time` = tid, `role.geo` = geografi. **Mangler `role.geo`, gjelder tallene hele Norge — ikke spør.**
@@ -76,7 +79,7 @@ Bruker skriver norsk → svar norsk, `lang=no`. Engelsk → engelsk, `lang=en`. 
 
 - Ryddig markdown-tabell. Tittel fra `extension.px.contents` + valgte variabler og periode.
 - **Alltid** kilde med **samtlige** tabell-ID-er: «Kilde: SSB, tabell {id}. Sist oppdatert: {YYYY-MM-DD}.» / «Source: Statistics Norway, table {id}. Last updated: {YYYY-MM-DD}.» Datoen er `updated` i responsen.
-- Alltid enhet, og referanseperiode for indekser (f.eks. 2025=100).
+- Alltid enhet, og basisperiode for indekser (`basePeriod`, f.eks. 2025=100).
 - Kommenter **kun** tallene i uttrekket. Har tabellen standardfeil eller feilmargin, hent den med før du kaller en forskjell reell.
 - **Gjør uttrekket etterprøvbart:** vis GET-URL-en, og oppgi hvilke koder et vagt begrep ble til (f.eks. «mat»), hvilken kodeliste du brukte og hvilke dimensjoner du utelot. Responsen registrerer ingen av delene.
 - Tilby nedlasting: bytt `outputFormat` i URL-en til `xlsx` når dataene skal i Excel (ekte tall, Excel velger desimaltegn).
@@ -108,7 +111,7 @@ Kommunale og fylkeskommunale tjenester og økonomi. Identifiseres på stien `os 
 - **Landstall er estimerte og veide**, ikke rene summer. Bruk `EAKUO` ved sammenligning av kommuneøkonomi; landssnittet med Oslo kan være prikket.
 - **Kodelister velges på label, ikke ID.** `agg_KOGkommuneregion0000NNNNN` har stabile labels («Uttrekk for Landet», «… KOSTRA-grupperinger») men tabellavhengige ID-er. Spesialkodene virker også uten `codelist[…]`.
 - **Strukturen endres** når rapporteringskravene endres. Hent metadata i denne samtalen; gjenbruk aldri en `KOS…`-kode fra et tidligere år.
-- **KOSTRA-gruppen slås opp i Klass** (klassifikasjon 112, korrespondansetabell 2840) — gjett den aldri.
+- **KOSTRA-gruppen slås opp i Klass** (`correspondsAt` fra klassifikasjon 131 til 112, på datoen tallene ble publisert) — gjett den aldri.
 
 ## Næring: SN2007 → SN2025
 

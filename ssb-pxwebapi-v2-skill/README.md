@@ -34,6 +34,12 @@ ssb-pxwebapi-v2/
 │   ├── common-tables.md                  # Vedlikeholdt liste over vanlige tabeller
 │   ├── troubleshooting.md                # Feilsøking og standardtegn
 │   └── mcp-tools.md                      # Mapping til @jarib/pxweb-mcp. Informasjon om MCP-verktøy
+├── assets/
+│   ├── svarmal.no.md                     # Svarmal: tabell, fotnote for statustegn, noter, kilde med sist oppdatert, «Slik ble tallene hentet»
+│   ├── svarmal.en.md                     # Samme svarmal på engelsk
+│   ├── standardtegn.json                 # SSBs statustegn med fotnotetekst på norsk og engelsk
+│   └── code/
+│       └── hent_uttrekk.py               # Python-mal (requests + pandas): ett uttrekk til DataFrame med status, noter, kilde og kallvindu
 └── docs/                                 # Tillegg: følger ikke med i zip
     ├── brukerveiledning.md               # Brukerveiledning for Claude: forutsetninger, eksempelspørsmål, feilsøking, MCP-oppsett
     ├── instruks-kort.md                  # Kort instruks for gratisversjoner og andre plattformer uten skills: en kjerne på under 1 500 tegn og en utvidelse

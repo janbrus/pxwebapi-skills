@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Bygg ssb-pxwebapi-v2-skill.zip — distribusjonspakken med toppmappe ssb-pxwebapi-v2/.
 #
-# Kun brukervendte filer pakkes: SKILL.md, README.md, CHANGELOG.md, references/
-# og LICENSE. LICENSE (MIT) ligger i repo-roten og gjelder hele repoet; MIT krever
+# Kun brukervendte filer pakkes: SKILL.md, README.md, CHANGELOG.md, references/,
+# assets/ (svarmaler, standardtegn og kodemaler, uten __pycache__) og LICENSE. LICENSE (MIT) ligger i repo-roten og gjelder hele repoet; MIT krever
 # at lisensteksten følger med i kopier, og zip-en er kopien som deles ut.
 # CLAUDE.md, DEVLOG.md, scripts/, .github/, PLAN.md og evals/ er repo-interne og holdes utenfor.
 # docs/ er brukervendt, men holdes også utenfor: brukerveiledningen er for mennesker,
@@ -22,6 +22,11 @@ files=(README.md SKILL.md CHANGELOG.md)
 for f in "$root"/references/*.md; do
   files+=("${f#"$root"/}")
 done
+# assets/ hentes også dynamisk. __pycache__ kommer av å importere en mal lokalt,
+# finnes ikke i CI-utsjekken og ville gitt en zip som avviker fra CI-bygget.
+while IFS= read -r -d '' f; do
+  files+=("${f#"$root"/}")
+done < <(find "$root/assets" -type f ! -path '*/__pycache__/*' -print0 | sort -z)
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
@@ -35,7 +40,7 @@ files+=(LICENSE)
 # Normaliser linjeslutt til LF. Filene kopieres fra disken, ikke fra git, og en
 # fil lagret med CRLF (f.eks. fra en Windows-editor) ville ellers gi en zip som
 # avviker fra CI-bygget — CI sjekker ut med LF (.gitattributes eol=lf).
-find "$tmp" -type f \( -name '*.md' -o -name LICENSE \) -exec sed -i 's/\r$//' {} +
+find "$tmp" -type f \( -name '*.md' -o -name '*.py' -o -name '*.json' -o -name LICENSE \) -exec sed -i 's/\r$//' {} +
 
 rm -f "$out"
 (cd "$tmp" && zip -X -q -r "$out" ssb-pxwebapi-v2)

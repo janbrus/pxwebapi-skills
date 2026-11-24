@@ -2,7 +2,7 @@
 
 KOSTRA (KOmmune-STat-RApportering) er SSBs informasjonssystem om kommunal og fylkeskommunal virksomhet: økonomi, skoler, helse, kultur, miljø, sosiale tjenester, boliger, tekniske tjenester og samferdsel. 
 
-Kommunene rapporterer elektronisk til SSB (prosjekt fra 1995, alle kommuner med fra 2001, tall publisert fra 1999), og SSB kobler rapporteringen med registre (NAV, BASIL, GSI, VIGO, KPR, Husbanken, NVDB m.fl.) og annen SSB-statistikk. Tabellene avviker fra resten av Statistikkbanken på nesten alle punkter som betyr noe for en spørring — variabel-ID-er, regionkoder, kodelister, eliminering, publiseringsrytme og stabilitet. Verifisert mot live API og SSBs dokumentasjonsside 2026-09-20.
+Kommunene rapporterer elektronisk til SSB, og SSB kobler rapporteringen med registre (NAV, BASIL, GSI, VIGO, KPR, Husbanken, NVDB m.fl.) og annen SSB-statistikk. Tabellene avviker fra resten av Statistikkbanken på nesten alle punkter som betyr noe for en spørring — variabel-ID-er, regionkoder, kodelister, eliminering, publiseringsrytme og stabilitet. Verifisert mot live API og SSBs dokumentasjonsside 2026-09-20.
 
 Dokumentasjon: https://www.ssb.no/offentlig-sektor/kostra/statistikk/kostra-kommune-stat-rapportering/om-kostra/dokumentasjon-av-kostra
 
@@ -54,7 +54,7 @@ SSB publiserer KOSTRA i to omganger for året før: **ureviderte (foreløpige) t
 
 - **API-et flagger ikke ureviderte tall.** `status` er tomt for slike verdier, og tidsetiketten er bare årstallet. Det som skiller utgavene er `updated` på `/tables/{id}`: ligger den mellom 15. mars og 15. juni, har du ureviderte tall for siste år; etter 15. juni, reviderte. Verifisert 2026-09-20: 321 av 385 aktive tabeller har `updated` i juni 2026 (12134: `2026-06-15T06:00:00Z`), 44 i mars, 12 i juli–august.
 - **Si det i svaret:** «Tallene for {år} er ureviderte/reviderte (publisert {dato fra updated})». Dataintegritet-regelen «Flagg foreløpige tall» i `SKILL.md` gjelder.
-- Kommende publiseringer: `https://www.ssb.no/rss/statkal` og `/tables?pastDays=…` (se `api-details.md`). Feeden `https://www.ssb.no/rss/statbank/kostrahoved` svarer 200, men var tom 2026-09-20 (97 dager etter juni-publiseringen, utenfor 90-dagersvinduet) — om den bærer items i mars/juni er ikke verifisert.
+- Kommende publiseringer: `https://www.ssb.no/rss/statkal` og `/tables?pastDays=…` (se `api-details.md`).
 
 ## Variabel-ID-er: `KOK…` og `KOS…`
 
@@ -93,7 +93,7 @@ SSB publiserer KOSTRA i to omganger for året før: **ureviderte (foreløpige) t
 
 **`extension.px.aggregallowed` er `false`** på 382 av 385 KOSTRA-tabeller (unntak: 09311 avløp og to folkeavstemningstabeller). Nøkkeltall er forholdstall og skal ikke summeres på tvers av kommuner eller grupper — bruk `EAK`, `EKGnn` eller fylkeskodene for SSBs egne aggregater. Beløp i kroner kan du summere, men da er summen din (Dataintegritet: merk egne beregninger).
 
-**KOSTRA-gruppene** deler kommunene i 17 grupper etter folkemengde, bundne kostnader per innbygger og frie disponible inntekter per innbygger, slik at kommuner sammenlignes med kommuner som ligner (Oslo og de åtte rikeste kommunene i egne grupper). Grupperingen oppdateres om lag hvert femte år; data fra og med 2020 bruker 2020-grupperingen, og tabellene bærer noten «brudd i tidsserien for KOSTRA-gruppene mellom 2019 og 2020» — på 12134 er den `noteMandatory` (`{"1": true}`) og skal vises. Hvilken gruppe en kommune tilhører står i Klass: klassifikasjon 112, korrespondansetabell gruppering → kommuneinndeling (gjeldende 2840 for 2026: Bergen 4601 → `EKG12`, Oslo 0301 → `EKG13`). Fylkeskommunegruppene er klassifikasjon 152 (korrespondanse 1310). Se `klass-vardok.md`. Gjett aldri gruppen — slå den opp, eller spør brukeren.
+**KOSTRA-gruppene** deler kommunene i 17 grupper etter folkemengde, bundne kostnader per innbygger og frie disponible inntekter per innbygger, slik at kommuner sammenlignes med kommuner som ligner (Oslo og de åtte rikeste kommunene i egne grupper). Grupperingen oppdateres om lag hvert femte år; data fra og med 2020 bruker 2020-grupperingen, og tabellene bærer noten «brudd i tidsserien for KOSTRA-gruppene mellom 2019 og 2020» — på 12134 er den `noteMandatory` (`{"1": true}`) og skal vises. Hvilken gruppe en kommune tilhører står i Klass: `correspondsAt` fra kommune (131) til gruppe (112) på en dato (Bergen 4601 → `EKG12`, Oslo 0301 → `EKG13`). Bruk datoen tallene ble publisert, ikke dagens: publiserte tall følger klassifikasjonen de ble publisert med, også når den senere endres. Fylkeskommunegruppene er klassifikasjon 152 (korrespondanse 1310). Se `klass-vardok.md`. Gjett aldri gruppen — slå den opp, eller spør brukeren.
 
 Sammenslåtte kommuner: de historiske kodene ligger i samme dimensjon som de gjeldende, og det finnes ingen `agg_KommSummer`-ekvivalent — velg gammel og ny kode og vis dem hver for seg.
 
@@ -134,7 +134,7 @@ Regnskapstall publiseres for **kommunekonsern** (kommunen + kommunale foretak, i
 
 **Årlige.** 381 av 385 har `timeUnit: Annual` (de fire om lokale folkeavstemninger har periodeintervaller som `1970-2024`). 317 av 385 starter i 2015 (omleggingen av KOSTRA-tabellene) — eldre serier ligger i avsluttede tabeller (`includeDiscontinued=true`). 372 har `lastPeriod` 2025; tre har inneværende år (14674 eiendomsskatt, 12842/12303 gebyrsatser per 1.1.). Noen få er i praksis døde uten `discontinued`-merke (12404, 12149: sist oppdatert 2018–2019, `lastPeriod` 2016) — sjekk `lastPeriod` og `updated`, ikke bare flagget.
 
-KOSTRA-tabellene er mindre stabile enn resten av Statistikkbanken: hva kommunene skal rapportere på endres (skjema, indikatorsett, lovkrav), og da endres tabellene. Statistikkvariabler kommer til og faller bort, og hele tabeller avsluttes og erstattes av nye med nytt ID. Verifisert 2026-09-20: 24 avsluttede KOSTRA-tabeller — 17 fra strukturen før 2015 (behovsprofil, «utvalgte nøkkeltall nivå 1», sysselsetting; avsluttet 2016) og hele sosialtjeneste-settet 12210, 13138, 12203, 12213, 12266, 12204, 12201 «(avslutta serie) 2015–2021», erstattet av 14019 m.fl. fra 2022 — og 61 aktive tabeller startet *etter* 2015-omleggingen (26 i 2020, 10 i 2021, 9 i 2022, 3 i 2024). SSBs egen dokumentasjon: «en god del endringer i statistikkopplegget, noe som har medført en del brudd i tidsserier».
+KOSTRA-tabellene er mindre stabile enn resten av Statistikkbanken: hva kommunene skal rapportere på endres (skjema, indikatorsett, lovkrav), og da endres tabellene. Statistikkvariabler kommer til og faller bort, og hele tabeller avsluttes og erstattes av nye med nytt ID. SSBs egen dokumentasjon: «en god del endringer i statistikkopplegget, noe som har medført en del brudd i tidsserier».
 
 Konsekvenser:
 
@@ -148,6 +148,6 @@ Konsekvenser:
 
 - `https://data.ssb.no/api/pxwebapi/v2/tables/13526/data?lang=no&valueCodes[KOKkommuneregion0000]=EAK,EAKUO,EKG12,0301&valueCodes[ContentsCode]=KOSbygsokrestrik0000&valueCodes[Tid]=top(1)` — andel innvilgede byggesøknader i restriksjonsområder, siste år, i prosent med 1 desimal fra `category.unit`; Oslo har `status` `..` og skal vises som manglende, ikke droppes
 - `https://data.ssb.no/api/pxwebapi/v2/tables/12134/data?lang=no&valueCodes[KOKkommuneregion0000]=4601,EKG12,EAKUO&valueCodes[ContentsCode]=KOSAGD230000&valueCodes[Tid]=top(3)` — netto driftsresultat i prosent av brutto driftsinntekter, siste tre år, for Bergen, KOSTRA-gruppe 12 og landet uten Oslo. Responsen har `noteMandatory` på bruddnoten
-- `https://data.ssb.no/api/klass/v1/correspondencetables/2840` — gruppetilhørighet per kommune, 2026-inndelingen (357 rader)
+- `https://data.ssb.no/api/klass/v1/classifications/131/correspondsAt?targetClassificationId=112&date=2026-06-15` — gruppe per kommune for tallene publisert 15. juni 2026 (357 rader)
 
 Utelates `valueCodes[KOKkommuneregion0000]` fra den første URL-en, svarer API-et 400 `Missing selection for mandantory variable`.

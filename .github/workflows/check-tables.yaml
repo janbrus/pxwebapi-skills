@@ -12,6 +12,7 @@ on:
       - 'ssb-pxwebapi-v2-skill/README.md'
       - 'ssb-pxwebapi-v2-skill/CHANGELOG.md'
       - 'ssb-pxwebapi-v2-skill/references/**'
+      - 'ssb-pxwebapi-v2-skill/assets/**'
       - 'ssb-pxwebapi-v2-skill/docs/**'
       - 'ssb-pxwebapi-v2-skill/scripts/**'
       - 'ssb-pxwebapi-v2-skill/ssb-pxwebapi-v2-skill.zip'
@@ -23,6 +24,7 @@ on:
       - 'ssb-pxwebapi-v2-skill/README.md'
       - 'ssb-pxwebapi-v2-skill/CHANGELOG.md'
       - 'ssb-pxwebapi-v2-skill/references/**'
+      - 'ssb-pxwebapi-v2-skill/assets/**'
       - 'ssb-pxwebapi-v2-skill/docs/**'
       - 'ssb-pxwebapi-v2-skill/scripts/**'
       - 'ssb-pxwebapi-v2-skill/ssb-pxwebapi-v2-skill.zip'
@@ -42,11 +44,16 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
+      # The checkers are stdlib only. requests and pandas are for the code
+      # template in assets/code/, which check_examples.py imports and runs;
+      # with CI set, a missing package is an error there, not a skipped check.
+      - name: Install what the code template needs
+        run: python3 -m pip install requests pandas
       - name: Validate common-tables.md against SSB PxWebApi v2
         run: python3 scripts/check_common_tables.py --quiet
       # Each checker keeps its own window of half SSB's limit; two processes
       # don't share one, so let the first window run out before the second.
-      - name: Validate example URLs and queries
+      - name: Validate example URLs, queries and the code template
         run: sleep 61 && python3 scripts/check_examples.py --quiet
 
   zip-sync:
